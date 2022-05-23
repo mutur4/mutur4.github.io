@@ -15,7 +15,7 @@
       
       <guid>https://mutur4.github.io/posts/binary-exploitation/srop/</guid>
       <description>This is a yet another binary exploitation attack that is somewhat similar to return-oriented-programming (ROP) and to understand how this works, we first need to understand how C signals work.
-Signals in C Each signal has a current disposition and this is used to determine how the processess behaves when it is delivered a signal. The following is used to specify the default disposition for each signal.
+Signals in C Each signal has a current disposition and this is used to determine how a process behaves when it is delivered a signal. The following is used to specify the default disposition for each signal.
 - Term : The default action is to terminate the process - Ign: The default action is to ignore the process	- Core: This is used to ignore the process and dump core (core dump file): Some of the signals, their default actions is to terminate and produce a core dump file.</description>
     </item>
     
@@ -34,8 +34,8 @@ Signals in C Each signal has a current disposition and this is used to determine
       <pubDate>Tue, 01 Feb 2022 22:36:46 +0300</pubDate>
       
       <guid>https://mutur4.github.io/posts/exploit-development/pwnkit/</guid>
-      <description>CVE-2021-4034 (PWNKIT - Linux Privilege Escalation) This is a local linux privillege escalation in polkit&amp;rsquo;s pkexec that affects almost every linux distribution. That means that any user can become root when they exploit this vulnerability. Today we are going to look at the effects of OOB (out-of-bounds) read and write and how they can be critical.This was a vulnerablity that was discovered by the security company Qualys.
-Recap  What is an OOB vulneraility?</description>
+      <description>CVE-2021-4034 (PWNKIT - Linux Privilege Escalation) This is a local linux privilege escalation in polkit&amp;rsquo;s pkexec that affects almost every linux distribution. That means that any user can become root when they exploit this vulnerability. Today we are going to look at the effects of OOB (out-of-bounds) read and write and how they can be critical.This was a vulnerablity that was discovered by the security company Qualys.
+ Recap What is an OOB vulneraility?</description>
     </item>
     
   </channel>
