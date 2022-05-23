@@ -1,0 +1,40 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Posts on THE 1NF05EC BL0G</title>
+        <link>https://mutur4.github.io/posts/</link>
+        <description>Recent content in Posts on THE 1NF05EC BL0G</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <copyright>sas</copyright>
+        <lastBuildDate>Sun, 06 Mar 2022 20:41:56 +0300</lastBuildDate>
+        <atom:link href="https://mutur4.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+        
+        <item>
+            <title>Exploit Development</title>
+            <link>https://mutur4.github.io/posts/exploit-development/</link>
+            <pubDate>Sun, 06 Mar 2022 20:41:56 +0300</pubDate>
+            
+            <guid>https://mutur4.github.io/posts/exploit-development/</guid>
+            <description>Exploit Development This is the process of developing scripts or programs that take advantage of vulnerabilities in software and make them do what they were not intended to do.</description>
+            <content type="html"><![CDATA[<p><code>Exploit Development</code> This is the process of developing scripts or programs
+that take advantage of vulnerabilities in software and make them do what
+they were not intended to do.</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>Binary Exploitation</title>
+            <link>https://mutur4.github.io/posts/binary-exploitation/</link>
+            <pubDate>Sun, 06 Mar 2022 20:10:21 +0300</pubDate>
+            
+            <guid>https://mutur4.github.io/posts/binary-exploitation/</guid>
+            <description>Binary Exploitation - This is a topic in cybersec that comes down to finding a vulnerability in a program and exploiting it to gain control of a shell or to modify the programs functions. It majorly involves memory corruption.</description>
+            <content type="html"><![CDATA[<p><code>Binary Exploitation</code> - This is a topic in  cybersec that comes down to
+finding a vulnerability in a program and exploiting it to gain control of
+a shell or to modify the programs functions. It majorly involves memory
+corruption.</p>
+]]></content>
+        </item>
+        
+    </channel>
+</rss>
