@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>CTF on </title>
+    <link>https://mutur4.github.io/tags/ctf/</link>
+    <description>Recent content in CTF on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 05 Mar 2023 22:26:00 -0500</lastBuildDate><atom:link href="https://mutur4.github.io/tags/ctf/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>HackTM CTF Quals 2023: (CS2100)</title>
+      <link>https://mutur4.github.io/ctfs/hacktm-ctf-2023/</link>
+      <pubDate>Sun, 05 Mar 2023 22:26:00 -0500</pubDate>
+      
+      <guid>https://mutur4.github.io/ctfs/hacktm-ctf-2023/</guid>
+      <description>CS2100 - Introduction #  This was an interesting CTF that took place between 18th and 19th Feb, 2023.</description>
+    </item>
+    
+  </channel>
+</rss>

