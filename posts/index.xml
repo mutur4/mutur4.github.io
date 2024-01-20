@@ -7,5 +7,59 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Sun, 05 Mar 2023 03:00:53 -0500</lastBuildDate><atom:link href="https://mutur4.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Linux Remote Process Injection - Injecting into a firefox process</title>
+      <link>https://mutur4.github.io/posts/remote-process-injection/</link>
+      <pubDate>Wed, 04 Oct 2023 13:50:30 -0400</pubDate>
+      
+      <guid>https://mutur4.github.io/posts/remote-process-injection/</guid>
+      <description>Introduction #   When it comes to Linux/Unix we aren&amp;rsquo;t provided with a bunch of sweet documented APIs as with Windows but instead are handed over a couple of system calls.</description>
+    </item>
+    
+    <item>
+      <title>Linux Malware: Defense Evasion Techniques</title>
+      <link>https://mutur4.github.io/posts/defense-evasion/</link>
+      <pubDate>Sat, 15 Jul 2023 06:35:51 -0400</pubDate>
+      
+      <guid>https://mutur4.github.io/posts/defense-evasion/</guid>
+      <description>Introduction #   This post will cover some of the different techniques that can be employed to avoid malware detection in a Linux/Unix host.</description>
+    </item>
+    
+    <item>
+      <title>The Anatomy of the Linux Kernel Stack</title>
+      <link>https://mutur4.github.io/posts/kernel-stack/</link>
+      <pubDate>Sun, 28 May 2023 03:55:04 -0400</pubDate>
+      
+      <guid>https://mutur4.github.io/posts/kernel-stack/</guid>
+      <description>An introduction to Linux Kernel Exploitation (Stack Overflows)</description>
+    </item>
+    
+    <item>
+      <title>Linux Process Injection - (Simple ptrace injection)</title>
+      <link>https://mutur4.github.io/posts/process-injection/</link>
+      <pubDate>Sun, 21 Aug 2022 04:02:29 -0400</pubDate>
+      
+      <guid>https://mutur4.github.io/posts/process-injection/</guid>
+      <description>Process Injection is a defense evasion technique that is often employed within malware and entails a method of executing arbitrary code in the address space of a separate live process, therefore, allowing access to the process&amp;rsquo;s memory, system resources and possibly network resources.</description>
+    </item>
+    
+    <item>
+      <title>Sig-Return Oriented Programming Attack - (SROP)</title>
+      <link>https://mutur4.github.io/posts/sig-return-oriented-programming/</link>
+      <pubDate>Sun, 06 Mar 2022 20:12:00 +0300</pubDate>
+      
+      <guid>https://mutur4.github.io/posts/sig-return-oriented-programming/</guid>
+      <description>This is a yet another binary exploitation attack that is somewhat similar to return-oriented-programming (ROP) and to understand how this works, we first need to understand how C signals work.</description>
+    </item>
+    
+    <item>
+      <title>Pwnkit: Linux Privilege Escalation (CVE-2021-4034)</title>
+      <link>https://mutur4.github.io/posts/pwnkit/</link>
+      <pubDate>Tue, 01 Feb 2022 22:36:46 +0300</pubDate>
+      
+      <guid>https://mutur4.github.io/posts/pwnkit/</guid>
+      <description>This was a Linux Priviledge Escalation (LPE) vulnerability in polkit&amp;rsquo;s pkexec that affected almost every linux distribution.</description>
+    </item>
+    
   </channel>
 </rss>

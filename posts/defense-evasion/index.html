@@ -19,7 +19,6 @@
   
   <link rel="canonical" href="https://mutur4.github.io/posts/defense-evasion/" />
   
-  <link rel="alternate" type="application/rss+xml" href="/posts/defense-evasion/index.xml" title="" />
   
   
   
@@ -31,9 +30,8 @@
   
   
   
-  
-  <link type="text/css" rel="stylesheet" href="/css/main.bundle.min.fcb6b8f47fcf9d08dccf3e85cedee48f9dd6c0a0178e95c67a74e69f9f0588e77e10dd8d49c8f6d925fe24eb977a3c36f555f882737ae3f73d21fc10c8402b52.css"
-    integrity="sha512-/La49H/PnQjczz6Fzt7kj53WwKAXjpXGenTmn58FiOd&#43;EN2NScj22SX&#43;JOuXejw29VX4gnN64/c9IfwQyEArUg==" />
+  <link type="text/css" rel="stylesheet" href="/css/main.bundle.min.f587ec5880888f327ab22498fc00acc8f48927ec5de6ccc85fe605b27bb9828ecbbcbdb3d383363a5d19cd29f8a8f6a1ec25be7bc3c1171f9cedf72ad3613c0f.css"
+    integrity="sha512-9YfsWICIjzJ6siSY/ACsyPSJJ&#43;xd5szIX&#43;YFsnu5go7LvL2z04M2Ol0ZzSn4qPah7CW&#43;e8PBFx&#43;c7fcq02E8Dw==" />
   
   
   <script type="text/javascript" src="/js/appearance.min.d9c603046c077ebf0e88cb0cc75a77d795076c4f973750e71410c9e530eed5bd3b48204bb18b980da897cb9feb8371ec5cecb0056a738ddf4ab9ed2ac4b331bb.js"
@@ -68,18 +66,47 @@
   
   
   <meta property="og:title" content="Linux Malware: Defense Evasion Techniques" />
-<meta property="og:description" content="An awesome infosec blog :)" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://mutur4.github.io/posts/defense-evasion/" /><meta property="og:image" content="https://mutur4.github.io/posts/defense-evasion/featured.png"/>
+<meta property="og:description" content="Introduction #   This post will cover some of the different techniques that can be employed to avoid malware detection in a Linux/Unix host." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://mutur4.github.io/posts/defense-evasion/" /><meta property="og:image" content="https://mutur4.github.io/posts/defense-evasion/featured.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-07-15T06:35:51-04:00" />
+<meta property="article:modified_time" content="2023-07-15T06:35:51-04:00" />
 
 
   <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="https://mutur4.github.io/posts/defense-evasion/featured.png"/>
 <meta name="twitter:title" content="Linux Malware: Defense Evasion Techniques"/>
-<meta name="twitter:description" content="An awesome infosec blog :)"/>
+<meta name="twitter:description" content="Introduction #   This post will cover some of the different techniques that can be employed to avoid malware detection in a Linux/Unix host."/>
 
   
-  
+  <script type="application/ld+json">
+  [{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "articleSection": "Blog Posts",
+    "name": "Linux Malware: Defense Evasion Techniques",
+    "headline": "Linux Malware: Defense Evasion Techniques",
+    
+    "abstract": "Introduction #   This post will cover some of the different techniques that can be employed to avoid malware detection in a Linux\/Unix host.",
+    "inLanguage": "en",
+    "url" : "https:\/\/mutur4.github.io\/posts\/defense-evasion\/",
+    "author" : {
+      "@type": "Person",
+      "name": "BinaryChunk"
+    },
+    "copyrightYear": "2023",
+    "dateCreated": "2023-07-15T06:35:51-04:00",
+    "datePublished": "2023-07-15T06:35:51-04:00",
+    
+    "dateModified": "2023-07-15T06:35:51-04:00",
+    
+    "keywords": ["Linux Malware","Defense Evasion"],
+    
+    "mainEntityOfPage": "true",
+    "wordCount": "2216"
+  }]
+  </script>
+
 
   
   
@@ -416,6 +443,16 @@
 
 
 
+<script>
+    (function () {
+        var $mainmenu = $('.main-menu');
+        var path = window.location.pathname;
+        $mainmenu.find('a[href="' + path + '"]').each(function (i, e) {
+            $(e).children('p').addClass('active');
+        });
+    })();
+</script>
+
 
   </div>
 </div>
@@ -433,10 +470,13 @@
       
 
 
-
-
-
-
+<article>
+  
+    
+     
+    
+    
+      
 
 
 <div id="hero" class="h-[150px] md:h-[200px]"></div>
@@ -464,9 +504,12 @@
     });
 </script>
 
- <header>
+    
   
-  <ol class="text-sm text-neutral-500 dark:text-neutral-400 print:hidden">
+  
+  <header id="single_header" class="mt-5 max-w-prose">
+    
+    <ol class="text-sm text-neutral-500 dark:text-neutral-400 print:hidden">
   
   
     
@@ -502,10 +545,27 @@
 </ol>
 
 
-  
-  <h1 class="mt-5 text-4xl font-extrabold text-neutral-900 dark:text-neutral">Linux Malware: Defense Evasion Techniques</h1>
-  <div class="mt-1 mb-2 text-base text-neutral-500 dark:text-neutral-400 print:hidden">
     
+    <h1 class="mt-0 text-4xl font-extrabold text-neutral-900 dark:text-neutral">
+      Linux Malware: Defense Evasion Techniques
+    </h1>
+    <div class="mt-1 mb-6 text-base text-neutral-500 dark:text-neutral-400 print:hidden">
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -530,15 +590,79 @@
 <div class="flex flex-row flex-wrap items-center">
   
   
+  <time datetime="2023-07-15 06:35:51 -0400 EDT">15 July 2023</time><span class="px-2 text-primary-500">&middot;</span><span>2216 words</span><span class="px-2 text-primary-500">&middot;</span><span title="Reading time">11 mins</span>
+  
+
+  
+  
 </div>
 
 
-  </div>
+<div class="flex flex-row flex-wrap items-center">
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+</div>
+
+
+
+
+<div class="flex flex-row flex-wrap items-center">
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <span style="margin-top:0.5rem" class="mr-2" onclick="window.open(&#34;/tags/linux-malware/&#34;,'_self');">
+    <span class="flex">
+  <span
+    class="rounded-md border border-primary-400 px-1 py-[1px] text-xs font-normal text-primary-700 dark:border-primary-600 dark:text-primary-400"
+  >
+    Linux Malware
+  </span>
+</span>
+
+  </span>
+  
+  <span style="margin-top:0.5rem" class="mr-2" onclick="window.open(&#34;/tags/defense-evasion/&#34;,'_self');">
+    <span class="flex">
+  <span
+    class="rounded-md border border-primary-400 px-1 py-[1px] text-xs font-normal text-primary-700 dark:border-primary-600 dark:text-primary-400"
+  >
+    Defense Evasion
+  </span>
+</span>
+
+  </span>
+  
+  
+  
+  
+</div>
+
+
+
+    </div>
   </header>
-  <section class="mt-12 prose flex max-w-full flex-col dark:prose-invert lg:flex-row">
-    
-    <div class="order-first px-0 lg:order-last lg:max-w-xs ltr:lg:pl-8 rtl:lg:pr-8">
-      <div class="toc ltr:pl-5 rtl:pr-5 lg:sticky lg:top-10">
+  <section class="flex flex-col max-w-full mt-0 prose dark:prose-invert lg:flex-row">
+     
+    <div class="order-first sm:max-w-prose lg:ml-auto px-0 lg:order-last lg:max-w-xs ltr:lg:pl-8 rtl:lg:pr-8">
+      <div class="toc ltr:pl-5 rtl:pr-5 print:hidden lg:sticky  lg:top-10 ">
         <details open class="mt-0 overflow-hidden rounded-lg ltr:-ml-5 ltr:pl-5 rtl:-mr-5 rtl:pr-5 hidden lg:block">
   <summary
     class="block py-1 text-lg font-semibold cursor-pointer bg-neutral-100 text-neutral-800 ltr:-ml-5 ltr:pl-5 rtl:-mr-5 rtl:pr-5 dark:bg-neutral-700 dark:text-neutral-100 lg:hidden">
@@ -551,7 +675,7 @@
     <li><a href="#introduction">Introduction</a>
       <ul>
         <li><a href="#time-stomping">Time Stomping</a></li>
-        <li><a href="#process-name-masquerading-pid-spoofing">Process Name Masquerading (PID Spoofing)</a></li>
+        <li><a href="#process-name-masquerading-pid-spoofing">Process Name Masquerading <em>(PID-Spoofing)</em></a></li>
       </ul>
     </li>
     <li><a href="#analysis-evasion">Analysis Evasion</a>
@@ -586,7 +710,7 @@
     <li><a href="#introduction">Introduction</a>
       <ul>
         <li><a href="#time-stomping">Time Stomping</a></li>
-        <li><a href="#process-name-masquerading-pid-spoofing">Process Name Masquerading (PID Spoofing)</a></li>
+        <li><a href="#process-name-masquerading-pid-spoofing">Process Name Masquerading <em>(PID-Spoofing)</em></a></li>
       </ul>
     </li>
     <li><a href="#analysis-evasion">Analysis Evasion</a>
@@ -631,8 +755,8 @@
         if (active.length == 1 && active.eq(0).attr('href') == '#' + id) return true;
 
         active.each(function (i, e) {
-           
-            $(e).removeClass('active').siblings('ul').hide();
+          
+            $(e).removeClass('active');
           
         });
         $toc.find('a[href="#' + id + '"]').addClass('active')
@@ -643,8 +767,6 @@
 
       $window.on('scroll', onScroll);
       $(document).ready(function () {
-         
-          $toc.find('a').parent('li').find('ul').hide();
         
         onScroll();
       });
@@ -653,10 +775,12 @@
 </script>
 
       </div>
-    </div>
-    
-    <div class="min-w-0 min-h-0 max-w-prose">
-      <div id="introduction" class="anchor"></div>
+      </div>
+      
+      <div class="min-w-0 min-h-0 max-w-prose">
+        
+
+        <div id="introduction" class="anchor"></div>
 <h2 class="relative group">Introduction 
     <span
         class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
@@ -664,8 +788,9 @@
             style="text-decoration-line: none !important;" href="#introduction" aria-label="Anchor">#</a></span>        
     
 </h2>
+<hr>
 <p>This post will cover some of the different techniques that can be employed to avoid malware detection in a Linux/Unix host.</p>
-<p>On a successful compromise of a host in a network, an <strong>implant/agent</strong> which is obviously a malicious software is installed to provided a way back in (<em>backdoor</em>). A malware author needs to make sure that their malware remains stealthy leaving little to no IOCs that could cause detection. This blog will therefore look at some of the different techniques that can be employed for this purpose ;).</p>
+<p>On a successful compromise of a host in a network, an <strong>implant/agent</strong> which is obviously a malicious software is installed to provided <strong><em>backdoor access</em></strong> or for <strong><em>data exfil</em></strong>. A malware author needs to make sure that their malware remains stealthy leaving little to no <code>IOCs</code> that could cause detection. This blog will therefore look at some of the different techniques that can be employed for this purpose.</p>
 <p>The following source code snippet, is the skeleton of the example <code>C</code> code that will be used to showcase an implementation of the techniques.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="cp">#define _GNU_SOURCE
 </span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
@@ -723,7 +848,7 @@
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></div><p>The <code>utimes</code> function will take two <code>time_val</code> structures where one will be the <code>actime</code> used to change the action time and the <code>modtime</code> used to change the Modification time.</p>
 <div id="process-name-masquerading-pid-spoofing" class="anchor"></div>
-<h3 class="relative group">Process Name Masquerading (PID Spoofing) 
+<h3 class="relative group">Process Name Masquerading <em>(PID-Spoofing)</em> 
     <span
         class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
         <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
@@ -760,6 +885,7 @@
             style="text-decoration-line: none !important;" href="#analysis-evasion" aria-label="Anchor">#</a></span>        
     
 </h2>
+<hr>
 <p>When a <code>malware</code> is detected in a host or network, it will tend to be dissected and Reverse Engineere&rsquo;d with the aim of understanding how the malware works and the impact it has or may have caused to an organization. Malware Authors will therefore implement techniques to prevent <code>static</code> and <code>dynamic</code> analysis of the malware incase the malware is caught (a fail-safe).</p>
 <div id="static-analysis" class="anchor"></div>
 <h3 class="relative group">Static Analysis 
@@ -788,7 +914,7 @@
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="k">const</span> <span class="kt">char</span> <span class="n">xor_key</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="sc">&#39;m&#39;</span><span class="p">,</span> <span class="sc">&#39;a&#39;</span><span class="p">,</span> <span class="sc">&#39;l&#39;</span><span class="p">,</span> <span class="sc">&#39;w&#39;</span><span class="p">,</span> <span class="sc">&#39;a&#39;</span><span class="p">,</span> <span class="sc">&#39;r&#39;</span><span class="p">,</span> <span class="sc">&#39;e&#39;</span><span class="p">};</span> <span class="c1">//not stacked
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">const</span> <span class="kt">char</span> <span class="n">xor_key</span><span class="p">[]</span> <span class="o">=</span> <span class="s">&#34;malware&#34;</span><span class="p">;</span> <span class="c1">//stacked
 </span></span></span></code></pre></div><ul>
-<li>Encryption i.e <code>RC4</code>, <code>AES</code>, <code>XOR</code> can also be used to encrypt strings used in the malware.</li>
+<li><code>Encryption</code> i.e <code>RC4</code>, <code>AES</code>, <code>XOR</code> can also be used to encrypt strings used in the malware.</li>
 <li>The last option is to completely avoid the use of strings where necessary, for example suppose an implant connects to a specific <code>IP</code>, this can be represented as follows:</li>
 </ul>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">ip_addr</span> <span class="o">=</span> <span class="s">&#34;127.0.0.1&#34;</span><span class="p">;</span> <span class="c1">//This is easily detectable via static analysis
@@ -1119,31 +1245,109 @@ The above function will get the pagesize dynamically; change the protection of t
             style="text-decoration-line: none !important;" href="#references" aria-label="Anchor">#</a></span>        
     
 </h2>
+<hr>
 <ol>
 <li><a href="https://attack.mitre.org/tactics/TA0005/"   target="_blank">
     https://attack.mitre.org/tactics/TA0005/</a></li>
 </ol>
 
+        </br></br>
+        
+
+      </div>
+      <script>
+        var oid = "views_posts\/defense-evasion\/index.md"
+        var oid_likes = "likes_posts\/defense-evasion\/index.md"
+      </script>
+      
+      
+      <script type="text/javascript" src="/js/page.min.0e49973b4ad0a382c7c6012d8bff8226316642daabc4f8a20477bd08674f3da6e2fa993bc20ad4f51e7c5bb68e6f913a207a7c4fe37ea0e7b806894afce0a64e.js" integrity="sha512-DkmXO0rQo4LHxgEti/&#43;CJjFmQtqrxPiiBHe9CGdPPabi&#43;pk7wgrU9R58W7aOb5E6IHp8T&#43;N&#43;oOe4BolK/OCmTg=="></script>
+  </section>
+  <footer class="pt-8 max-w-prose print:hidden">
+
+    
+
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    
+  
+    
+    
+    
+      
+      
+    
+    <div class="pt-8">
+      <hr class="border-dotted border-neutral-300 dark:border-neutral-600" />
+      <div class="flex justify-between pt-3">
+        <span>
+          
+            <a class="flex group mr-3" href="/posts/remote-process-injection/">
+              <span
+                class="mr-3 text-neutral-700 group-hover:text-primary-600 ltr:inline rtl:hidden dark:text-neutral dark:group-hover:text-primary-400"
+                >&larr;</span
+              >
+              <span
+                class="ml-3 text-neutral-700 group-hover:text-primary-600 ltr:hidden rtl:inline dark:text-neutral dark:group-hover:text-primary-400"
+                >&rarr;</span
+              >
+              <span class="flex flex-col">
+                <span
+                  class="mt-[0.1rem] leading-6 group-hover:underline group-hover:decoration-primary-500"
+                  >Linux Remote Process Injection - Injecting into a firefox process</span
+                >
+                <span class="mt-[0.1rem] text-xs text-neutral-500 dark:text-neutral-400">
+                  
+                    <time datetime="2023-10-04 13:50:30 -0400 EDT">4 October 2023</time>
+                  
+                </span>
+              </span>
+            </a>
+          
+        </span>
+        <span>
+          
+            <a class="flex text-right group ml-3" href="/posts/kernel-stack/">
+              <span class="flex flex-col">
+                <span
+                  class="mt-[0.1rem] leading-6 group-hover:underline group-hover:decoration-primary-500"
+                  >The Anatomy of the Linux Kernel Stack</span
+                >
+                <span class="mt-[0.1rem] text-xs text-neutral-500 dark:text-neutral-400">
+                  
+                    <time datetime="2023-05-28 03:55:04 -0400 EDT">28 May 2023</time>
+                  
+                </span>
+              </span>
+              <span
+                class="ml-3 text-neutral-700 group-hover:text-primary-600 ltr:inline rtl:hidden dark:text-neutral dark:group-hover:text-primary-400"
+                >&rarr;</span
+              >
+              <span
+                class="mr-3 text-neutral-700 group-hover:text-primary-600 ltr:hidden rtl:inline dark:text-neutral dark:group-hover:text-primary-400"
+                >&larr;</span
+              >
+            </a>
+          
+        </span>
+      </div>
     </div>
-    <script>
-      var oid = "views_posts\/defense-evasion\/_index.md"
-      var oid_likes = "likes_posts\/defense-evasion\/_index.md"
-    </script>
-    
-    
-    <script type="text/javascript" src="/js/page.min.0e49973b4ad0a382c7c6012d8bff8226316642daabc4f8a20477bd08674f3da6e2fa993bc20ad4f51e7c5bb68e6f913a207a7c4fe37ea0e7b806894afce0a64e.js" integrity="sha512-DkmXO0rQo4LHxgEti/&#43;CJjFmQtqrxPiiBHe9CGdPPabi&#43;pk7wgrU9R58W7aOb5E6IHp8T&#43;N&#43;oOe4BolK/OCmTg=="></script>
-  </section>
-  
-  <section class="mt-10 prose dark:prose-invert">
-    <p class="py-8 border-t">
-      <em>There's no articles to list here yet.</em>
-    </p>
-  </section>
   
 
-    
 
-  
+    
+  </footer>
+</article>
+
       <div class="pointer-events-none absolute top-[100vh] bottom-0 w-12 ltr:right-0 rtl:left-0">
   <a href="#the-top"
     class="pointer-events-auto sticky top-[calc(100vh-5.5rem)] flex h-12 w-12 mb-16 items-center justify-center rounded-full bg-neutral/50 text-xl text-neutral-700 backdrop-blur hover:text-primary-600 dark:bg-neutral-800/50 dark:text-neutral dark:hover:text-primary-400"
@@ -1173,7 +1377,7 @@ The above function will get the pagesize dynamically; change the protection of t
     
     <p class="text-sm text-neutral-500 dark:text-neutral-400">
       &copy;
-      2023
+      2024
       BinaryChunk
     </p>
     
@@ -1259,9 +1463,5 @@ The above function will get the pagesize dynamically; change the protection of t
 
   </div>
 </body>
-
-<script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js"
-  data-id="https://buymeacoffee.com/binarychunk" data-description="Support me on Buy me a coffee!" data-message=""
-  data-color="#FFDD00" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
 
 </html>

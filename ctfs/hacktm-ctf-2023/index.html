@@ -19,7 +19,6 @@
   
   <link rel="canonical" href="https://mutur4.github.io/ctfs/hacktm-ctf-2023/" />
   
-  <link rel="alternate" type="application/rss+xml" href="/ctfs/hacktm-ctf-2023/index.xml" title="" />
   
   
   
@@ -31,9 +30,8 @@
   
   
   
-  
-  <link type="text/css" rel="stylesheet" href="/css/main.bundle.min.fcb6b8f47fcf9d08dccf3e85cedee48f9dd6c0a0178e95c67a74e69f9f0588e77e10dd8d49c8f6d925fe24eb977a3c36f555f882737ae3f73d21fc10c8402b52.css"
-    integrity="sha512-/La49H/PnQjczz6Fzt7kj53WwKAXjpXGenTmn58FiOd&#43;EN2NScj22SX&#43;JOuXejw29VX4gnN64/c9IfwQyEArUg==" />
+  <link type="text/css" rel="stylesheet" href="/css/main.bundle.min.f587ec5880888f327ab22498fc00acc8f48927ec5de6ccc85fe605b27bb9828ecbbcbdb3d383363a5d19cd29f8a8f6a1ec25be7bc3c1171f9cedf72ad3613c0f.css"
+    integrity="sha512-9YfsWICIjzJ6siSY/ACsyPSJJ&#43;xd5szIX&#43;YFsnu5go7LvL2z04M2Ol0ZzSn4qPah7CW&#43;e8PBFx&#43;c7fcq02E8Dw==" />
   
   
   <script type="text/javascript" src="/js/appearance.min.d9c603046c077ebf0e88cb0cc75a77d795076c4f973750e71410c9e530eed5bd3b48204bb18b980da897cb9feb8371ec5cecb0056a738ddf4ab9ed2ac4b331bb.js"
@@ -68,18 +66,47 @@
   
   
   <meta property="og:title" content="HackTM CTF Quals 2023: (CS2100)" />
-<meta property="og:description" content="An awesome infosec blog :)" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://mutur4.github.io/ctfs/hacktm-ctf-2023/" /><meta property="og:image" content="https://mutur4.github.io/ctfs/hacktm-ctf-2023/featured.png"/>
+<meta property="og:description" content="Overview #  This was an interesting CTF that took place between 18th and 19th Feb, 2023." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://mutur4.github.io/ctfs/hacktm-ctf-2023/" /><meta property="og:image" content="https://mutur4.github.io/ctfs/hacktm-ctf-2023/featured.png"/><meta property="article:section" content="ctfs" />
+<meta property="article:published_time" content="2023-03-05T22:26:00-05:00" />
+<meta property="article:modified_time" content="2023-03-05T22:26:00-05:00" />
 
 
   <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="https://mutur4.github.io/ctfs/hacktm-ctf-2023/featured.png"/>
 <meta name="twitter:title" content="HackTM CTF Quals 2023: (CS2100)"/>
-<meta name="twitter:description" content="An awesome infosec blog :)"/>
+<meta name="twitter:description" content="Overview #  This was an interesting CTF that took place between 18th and 19th Feb, 2023."/>
 
   
-  
+  <script type="application/ld+json">
+  [{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "articleSection": "CTFs",
+    "name": "HackTM CTF Quals 2023: (CS2100)",
+    "headline": "HackTM CTF Quals 2023: (CS2100)",
+    
+    "abstract": "Overview #  This was an interesting CTF that took place between 18th and 19th Feb, 2023.",
+    "inLanguage": "en",
+    "url" : "https:\/\/mutur4.github.io\/ctfs\/hacktm-ctf-2023\/",
+    "author" : {
+      "@type": "Person",
+      "name": "BinaryChunk"
+    },
+    "copyrightYear": "2023",
+    "dateCreated": "2023-03-05T22:26:00-05:00",
+    "datePublished": "2023-03-05T22:26:00-05:00",
+    
+    "dateModified": "2023-03-05T22:26:00-05:00",
+    
+    "keywords": ["VM","Exploitation","CTF"],
+    
+    "mainEntityOfPage": "true",
+    "wordCount": "2405"
+  }]
+  </script>
+
 
   
   
@@ -416,6 +443,16 @@
 
 
 
+<script>
+    (function () {
+        var $mainmenu = $('.main-menu');
+        var path = window.location.pathname;
+        $mainmenu.find('a[href="' + path + '"]').each(function (i, e) {
+            $(e).children('p').addClass('active');
+        });
+    })();
+</script>
+
 
   </div>
 </div>
@@ -433,10 +470,13 @@
       
 
 
-
-
-
-
+<article>
+  
+    
+     
+    
+    
+      
 
 
 <div id="hero" class="h-[150px] md:h-[200px]"></div>
@@ -464,9 +504,12 @@
     });
 </script>
 
- <header>
+    
   
-  <ol class="text-sm text-neutral-500 dark:text-neutral-400 print:hidden">
+  
+  <header id="single_header" class="mt-5 max-w-prose">
+    
+    <ol class="text-sm text-neutral-500 dark:text-neutral-400 print:hidden">
   
   
     
@@ -502,10 +545,27 @@
 </ol>
 
 
-  
-  <h1 class="mt-5 text-4xl font-extrabold text-neutral-900 dark:text-neutral">HackTM CTF Quals 2023: (CS2100)</h1>
-  <div class="mt-1 mb-2 text-base text-neutral-500 dark:text-neutral-400 print:hidden">
     
+    <h1 class="mt-0 text-4xl font-extrabold text-neutral-900 dark:text-neutral">
+      HackTM CTF Quals 2023: (CS2100)
+    </h1>
+    <div class="mt-1 mb-6 text-base text-neutral-500 dark:text-neutral-400 print:hidden">
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -530,15 +590,90 @@
 <div class="flex flex-row flex-wrap items-center">
   
   
+  <time datetime="2023-03-05 22:26:00 -0500 EST">5 March 2023</time><span class="px-2 text-primary-500">&middot;</span><span>2405 words</span><span class="px-2 text-primary-500">&middot;</span><span title="Reading time">12 mins</span>
+  
+
+  
+  
 </div>
 
 
-  </div>
+<div class="flex flex-row flex-wrap items-center">
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+</div>
+
+
+
+
+<div class="flex flex-row flex-wrap items-center">
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <span style="margin-top:0.5rem" class="mr-2" onclick="window.open(&#34;/tags/vm/&#34;,'_self');">
+    <span class="flex">
+  <span
+    class="rounded-md border border-primary-400 px-1 py-[1px] text-xs font-normal text-primary-700 dark:border-primary-600 dark:text-primary-400"
+  >
+    VM
+  </span>
+</span>
+
+  </span>
+  
+  <span style="margin-top:0.5rem" class="mr-2" onclick="window.open(&#34;/tags/exploitation/&#34;,'_self');">
+    <span class="flex">
+  <span
+    class="rounded-md border border-primary-400 px-1 py-[1px] text-xs font-normal text-primary-700 dark:border-primary-600 dark:text-primary-400"
+  >
+    Exploitation
+  </span>
+</span>
+
+  </span>
+  
+  <span style="margin-top:0.5rem" class="mr-2" onclick="window.open(&#34;/tags/ctf/&#34;,'_self');">
+    <span class="flex">
+  <span
+    class="rounded-md border border-primary-400 px-1 py-[1px] text-xs font-normal text-primary-700 dark:border-primary-600 dark:text-primary-400"
+  >
+    CTF
+  </span>
+</span>
+
+  </span>
+  
+  
+  
+  
+</div>
+
+
+
+    </div>
   </header>
-  <section class="mt-12 prose flex max-w-full flex-col dark:prose-invert lg:flex-row">
-    
-    <div class="order-first px-0 lg:order-last lg:max-w-xs ltr:lg:pl-8 rtl:lg:pr-8">
-      <div class="toc ltr:pl-5 rtl:pr-5 lg:sticky lg:top-10">
+  <section class="flex flex-col max-w-full mt-0 prose dark:prose-invert lg:flex-row">
+     
+    <div class="order-first sm:max-w-prose lg:ml-auto px-0 lg:order-last lg:max-w-xs ltr:lg:pl-8 rtl:lg:pr-8">
+      <div class="toc ltr:pl-5 rtl:pr-5 print:hidden lg:sticky  lg:top-10 ">
         <details open class="mt-0 overflow-hidden rounded-lg ltr:-ml-5 ltr:pl-5 rtl:-mr-5 rtl:pr-5 hidden lg:block">
   <summary
     class="block py-1 text-lg font-semibold cursor-pointer bg-neutral-100 text-neutral-800 ltr:-ml-5 ltr:pl-5 rtl:-mr-5 rtl:pr-5 dark:bg-neutral-700 dark:text-neutral-100 lg:hidden">
@@ -550,16 +685,16 @@
   <ul>
     <li>
       <ul>
-        <li><a href="#cs2100---introduction">CS2100 - Introduction</a></li>
+        <li><a href="#overview">Overview</a></li>
         <li><a href="#initial-analysis">Initial Analysis</a></li>
         <li><a href="#source-code-review">Source Code Review</a></li>
         <li><a href="#exploitation-strategy">Exploitation Strategy</a></li>
         <li><a href="#weaponization">Weaponization</a>
           <ul>
-            <li><a href="#leaking-addresses">Leaking addresses</a></li>
+            <li><a href="#leaking-addresses">Leaking Addresses</a></li>
           </ul>
         </li>
-        <li><a href="#rop-attack">Rop Attack</a></li>
+        <li><a href="#return-oriented-programming-attack">Return-Oriented-Programming Attack</a></li>
         <li><a href="#conclusion">Conclusion</a></li>
       </ul>
     </li>
@@ -578,16 +713,16 @@
   <ul>
     <li>
       <ul>
-        <li><a href="#cs2100---introduction">CS2100 - Introduction</a></li>
+        <li><a href="#overview">Overview</a></li>
         <li><a href="#initial-analysis">Initial Analysis</a></li>
         <li><a href="#source-code-review">Source Code Review</a></li>
         <li><a href="#exploitation-strategy">Exploitation Strategy</a></li>
         <li><a href="#weaponization">Weaponization</a>
           <ul>
-            <li><a href="#leaking-addresses">Leaking addresses</a></li>
+            <li><a href="#leaking-addresses">Leaking Addresses</a></li>
           </ul>
         </li>
-        <li><a href="#rop-attack">Rop Attack</a></li>
+        <li><a href="#return-oriented-programming-attack">Return-Oriented-Programming Attack</a></li>
         <li><a href="#conclusion">Conclusion</a></li>
       </ul>
     </li>
@@ -617,8 +752,8 @@
         if (active.length == 1 && active.eq(0).attr('href') == '#' + id) return true;
 
         active.each(function (i, e) {
-           
-            $(e).removeClass('active').siblings('ul').hide();
+          
+            $(e).removeClass('active');
           
         });
         $toc.find('a[href="#' + id + '"]').addClass('active')
@@ -629,8 +764,6 @@
 
       $window.on('scroll', onScroll);
       $(document).ready(function () {
-         
-          $toc.find('a').parent('li').find('ul').hide();
         
         onScroll();
       });
@@ -639,15 +772,17 @@
 </script>
 
       </div>
-    </div>
-    
-    <div class="min-w-0 min-h-0 max-w-prose">
-      <div id="cs2100---introduction" class="anchor"></div>
-<h3 class="relative group">CS2100 - Introduction 
+      </div>
+      
+      <div class="min-w-0 min-h-0 max-w-prose">
+        
+
+        <div id="overview" class="anchor"></div>
+<h3 class="relative group">Overview 
     <span
         class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
         <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
-            style="text-decoration-line: none !important;" href="#cs2100---introduction" aria-label="Anchor">#</a></span>        
+            style="text-decoration-line: none !important;" href="#overview" aria-label="Anchor">#</a></span>        
     
 </h3>
 <p>This was an interesting CTF that took place between 18th and 19th Feb, 2023. I actually solved the challenge way after the CTF was over, therefore (tl;dr) the following are the steps that I would have taken during the CTF to solve the challenge.</p>
@@ -896,7 +1031,7 @@
 <p><strong>NOTE</strong>: <em>Since RISC-V uses a load and store architecture, these address will therefore need to be written to specific &lsquo;registers&rsquo; before being written into memory</em>.</p>
 </blockquote>
 <div id="leaking-addresses" class="anchor"></div>
-<h4 class="relative group">Leaking addresses 
+<h4 class="relative group">Leaking Addresses 
     <span
         class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
         <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
@@ -941,12 +1076,12 @@
   </figure>
 
 </p>
-<div id="rop-attack" class="anchor"></div>
-<h3 class="relative group">Rop Attack 
+<div id="return-oriented-programming-attack" class="anchor"></div>
+<h3 class="relative group">Return-Oriented-Programming Attack 
     <span
         class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
         <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
-            style="text-decoration-line: none !important;" href="#rop-attack" aria-label="Anchor">#</a></span>        
+            style="text-decoration-line: none !important;" href="#return-oriented-programming-attack" aria-label="Anchor">#</a></span>        
     
 </h3>
 <p>With the base address of libc, a rop attack can be chained for code execution. From the current libc of my machine the address of <code>libc.sym['system']</code> was <code>0x4c330</code>. This address was written to a chosen register in this case the <code>A3</code> register using the following source code snippet.</p>
@@ -1034,26 +1169,41 @@
 </h3>
 <p>On the instance that was hosting the challenge, it prevented the spawning of a remote shell to read the a flag by redirecting <code>stdin</code> to <em>/dev/null</em>.  This therefore required reading the flag directly, using <code>/bin/cat flag</code>, that could either be written to memory in one of the RISC-V registers and passed to <em>system()</em> or <em>execve()</em>.</p>
 
-    </div>
-    <script>
-      var oid = "views_ctfs\/hacktm-ctf-2023\/_index.md"
-      var oid_likes = "likes_ctfs\/hacktm-ctf-2023\/_index.md"
-    </script>
-    
-    
-    <script type="text/javascript" src="/js/page.min.0e49973b4ad0a382c7c6012d8bff8226316642daabc4f8a20477bd08674f3da6e2fa993bc20ad4f51e7c5bb68e6f913a207a7c4fe37ea0e7b806894afce0a64e.js" integrity="sha512-DkmXO0rQo4LHxgEti/&#43;CJjFmQtqrxPiiBHe9CGdPPabi&#43;pk7wgrU9R58W7aOb5E6IHp8T&#43;N&#43;oOe4BolK/OCmTg=="></script>
+        </br></br>
+        
+
+      </div>
+      <script>
+        var oid = "views_ctfs\/hacktm-ctf-2023\/index.md"
+        var oid_likes = "likes_ctfs\/hacktm-ctf-2023\/index.md"
+      </script>
+      
+      
+      <script type="text/javascript" src="/js/page.min.0e49973b4ad0a382c7c6012d8bff8226316642daabc4f8a20477bd08674f3da6e2fa993bc20ad4f51e7c5bb68e6f913a207a7c4fe37ea0e7b806894afce0a64e.js" integrity="sha512-DkmXO0rQo4LHxgEti/&#43;CJjFmQtqrxPiiBHe9CGdPPabi&#43;pk7wgrU9R58W7aOb5E6IHp8T&#43;N&#43;oOe4BolK/OCmTg=="></script>
   </section>
-  
-  <section class="mt-10 prose dark:prose-invert">
-    <p class="py-8 border-t">
-      <em>There's no articles to list here yet.</em>
-    </p>
-  </section>
-  
+  <footer class="pt-8 max-w-prose print:hidden">
 
     
 
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    
   
+
+
+    
+  </footer>
+</article>
+
       <div class="pointer-events-none absolute top-[100vh] bottom-0 w-12 ltr:right-0 rtl:left-0">
   <a href="#the-top"
     class="pointer-events-auto sticky top-[calc(100vh-5.5rem)] flex h-12 w-12 mb-16 items-center justify-center rounded-full bg-neutral/50 text-xl text-neutral-700 backdrop-blur hover:text-primary-600 dark:bg-neutral-800/50 dark:text-neutral dark:hover:text-primary-400"
@@ -1083,7 +1233,7 @@
     
     <p class="text-sm text-neutral-500 dark:text-neutral-400">
       &copy;
-      2023
+      2024
       BinaryChunk
     </p>
     
@@ -1169,9 +1319,5 @@
 
   </div>
 </body>
-
-<script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js"
-  data-id="https://buymeacoffee.com/binarychunk" data-description="Support me on Buy me a coffee!" data-message=""
-  data-color="#FFDD00" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
 
 </html>

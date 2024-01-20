@@ -14,12 +14,11 @@
   <meta name="title" content="Pwnkit: Linux Privilege Escalation (CVE-2021-4034) &middot; " />
   
   <meta name="description" content="An awesome infosec blog :)" />
-  <meta name="keywords" content="Exploitation, N-Day, CVE-2021-4034, " />
+  
   
   
   <link rel="canonical" href="https://mutur4.github.io/posts/pwnkit/" />
   
-  <link rel="alternate" type="application/rss+xml" href="/posts/pwnkit/index.xml" title="" />
   
   
   
@@ -31,9 +30,8 @@
   
   
   
-  
-  <link type="text/css" rel="stylesheet" href="/css/main.bundle.min.fcb6b8f47fcf9d08dccf3e85cedee48f9dd6c0a0178e95c67a74e69f9f0588e77e10dd8d49c8f6d925fe24eb977a3c36f555f882737ae3f73d21fc10c8402b52.css"
-    integrity="sha512-/La49H/PnQjczz6Fzt7kj53WwKAXjpXGenTmn58FiOd&#43;EN2NScj22SX&#43;JOuXejw29VX4gnN64/c9IfwQyEArUg==" />
+  <link type="text/css" rel="stylesheet" href="/css/main.bundle.min.f587ec5880888f327ab22498fc00acc8f48927ec5de6ccc85fe605b27bb9828ecbbcbdb3d383363a5d19cd29f8a8f6a1ec25be7bc3c1171f9cedf72ad3613c0f.css"
+    integrity="sha512-9YfsWICIjzJ6siSY/ACsyPSJJ&#43;xd5szIX&#43;YFsnu5go7LvL2z04M2Ol0ZzSn4qPah7CW&#43;e8PBFx&#43;c7fcq02E8Dw==" />
   
   
   <script type="text/javascript" src="/js/appearance.min.d9c603046c077ebf0e88cb0cc75a77d795076c4f973750e71410c9e530eed5bd3b48204bb18b980da897cb9feb8371ec5cecb0056a738ddf4ab9ed2ac4b331bb.js"
@@ -68,18 +66,47 @@
   
   
   <meta property="og:title" content="Pwnkit: Linux Privilege Escalation (CVE-2021-4034)" />
-<meta property="og:description" content="An awesome infosec blog :)" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://mutur4.github.io/posts/pwnkit/" /><meta property="og:image" content="https://mutur4.github.io/posts/pwnkit/featured.png"/>
+<meta property="og:description" content="This was a Linux Priviledge Escalation (LPE) vulnerability in polkit&rsquo;s pkexec that affected almost every linux distribution." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://mutur4.github.io/posts/pwnkit/" /><meta property="og:image" content="https://mutur4.github.io/posts/pwnkit/featured.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-02-01T22:36:46+03:00" />
+<meta property="article:modified_time" content="2022-02-01T22:36:46+03:00" />
 
 
   <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="https://mutur4.github.io/posts/pwnkit/featured.png"/>
 <meta name="twitter:title" content="Pwnkit: Linux Privilege Escalation (CVE-2021-4034)"/>
-<meta name="twitter:description" content="An awesome infosec blog :)"/>
+<meta name="twitter:description" content="This was a Linux Priviledge Escalation (LPE) vulnerability in polkit&rsquo;s pkexec that affected almost every linux distribution."/>
 
   
-  
+  <script type="application/ld+json">
+  [{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "articleSection": "Blog Posts",
+    "name": "Pwnkit: Linux Privilege Escalation (CVE-2021-4034)",
+    "headline": "Pwnkit: Linux Privilege Escalation (CVE-2021-4034)",
+    
+    "abstract": "This was a Linux Priviledge Escalation (LPE) vulnerability in polkit\u0026rsquo;s pkexec that affected almost every linux distribution.",
+    "inLanguage": "en",
+    "url" : "https:\/\/mutur4.github.io\/posts\/pwnkit\/",
+    "author" : {
+      "@type": "Person",
+      "name": "BinaryChunk"
+    },
+    "copyrightYear": "2022",
+    "dateCreated": "2022-02-01T22:36:46\u002b03:00",
+    "datePublished": "2022-02-01T22:36:46\u002b03:00",
+    
+    "dateModified": "2022-02-01T22:36:46\u002b03:00",
+    
+    
+    
+    "mainEntityOfPage": "true",
+    "wordCount": "1362"
+  }]
+  </script>
+
 
   
   
@@ -416,6 +443,16 @@
 
 
 
+<script>
+    (function () {
+        var $mainmenu = $('.main-menu');
+        var path = window.location.pathname;
+        $mainmenu.find('a[href="' + path + '"]').each(function (i, e) {
+            $(e).children('p').addClass('active');
+        });
+    })();
+</script>
+
 
   </div>
 </div>
@@ -433,10 +470,13 @@
       
 
 
-
-
-
-
+<article>
+  
+    
+     
+    
+    
+      
 
 
 <div id="hero" class="h-[150px] md:h-[200px]"></div>
@@ -464,9 +504,12 @@
     });
 </script>
 
- <header>
+    
   
-  <ol class="text-sm text-neutral-500 dark:text-neutral-400 print:hidden">
+  
+  <header id="single_header" class="mt-5 max-w-prose">
+    
+    <ol class="text-sm text-neutral-500 dark:text-neutral-400 print:hidden">
   
   
     
@@ -502,10 +545,27 @@
 </ol>
 
 
-  
-  <h1 class="mt-5 text-4xl font-extrabold text-neutral-900 dark:text-neutral">Pwnkit: Linux Privilege Escalation (CVE-2021-4034)</h1>
-  <div class="mt-1 mb-2 text-base text-neutral-500 dark:text-neutral-400 print:hidden">
     
+    <h1 class="mt-0 text-4xl font-extrabold text-neutral-900 dark:text-neutral">
+      Pwnkit: Linux Privilege Escalation (CVE-2021-4034)
+    </h1>
+    <div class="mt-1 mb-6 text-base text-neutral-500 dark:text-neutral-400 print:hidden">
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -530,15 +590,55 @@
 <div class="flex flex-row flex-wrap items-center">
   
   
+  <time datetime="2022-02-01 22:36:46 &#43;0300 &#43;0300">1 February 2022</time><span class="px-2 text-primary-500">&middot;</span><span>1362 words</span><span class="px-2 text-primary-500">&middot;</span><span title="Reading time">7 mins</span>
+  
+
+  
+  
 </div>
 
 
-  </div>
+<div class="flex flex-row flex-wrap items-center">
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+</div>
+
+
+
+
+<div class="flex flex-row flex-wrap items-center">
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+</div>
+
+
+
+    </div>
   </header>
-  <section class="mt-12 prose flex max-w-full flex-col dark:prose-invert lg:flex-row">
-    
-    <div class="order-first px-0 lg:order-last lg:max-w-xs ltr:lg:pl-8 rtl:lg:pr-8">
-      <div class="toc ltr:pl-5 rtl:pr-5 lg:sticky lg:top-10">
+  <section class="flex flex-col max-w-full mt-0 prose dark:prose-invert lg:flex-row">
+     
+    <div class="order-first sm:max-w-prose lg:ml-auto px-0 lg:order-last lg:max-w-xs ltr:lg:pl-8 rtl:lg:pr-8">
+      <div class="toc ltr:pl-5 rtl:pr-5 print:hidden lg:sticky  lg:top-10 ">
         <details open class="mt-0 overflow-hidden rounded-lg ltr:-ml-5 ltr:pl-5 rtl:-mr-5 rtl:pr-5 hidden lg:block">
   <summary
     class="block py-1 text-lg font-semibold cursor-pointer bg-neutral-100 text-neutral-800 ltr:-ml-5 ltr:pl-5 rtl:-mr-5 rtl:pr-5 dark:bg-neutral-700 dark:text-neutral-100 lg:hidden">
@@ -550,9 +650,8 @@
   <ul>
     <li>
       <ul>
-        <li><a href="#cve-2021-4034-pwnkit---linux-privilege-escalation">CVE-2021-4034 (PWNKIT - Linux Privilege Escalation)</a></li>
-        <li><a href="#recap">Recap</a></li>
-        <li><a href="#vulnerability">Vulnerability</a></li>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#root-cause-analysis-rca">Root Cause Analysis (RCA)</a></li>
       </ul>
     </li>
     <li><a href="#exploitation">Exploitation</a></li>
@@ -561,9 +660,9 @@
         <li>
           <ul>
             <li><a href="#mitigations">Mitigations</a></li>
-            <li><a href="#references">References</a></li>
           </ul>
         </li>
+        <li><a href="#references">References</a></li>
       </ul>
     </li>
   </ul>
@@ -581,9 +680,8 @@
   <ul>
     <li>
       <ul>
-        <li><a href="#cve-2021-4034-pwnkit---linux-privilege-escalation">CVE-2021-4034 (PWNKIT - Linux Privilege Escalation)</a></li>
-        <li><a href="#recap">Recap</a></li>
-        <li><a href="#vulnerability">Vulnerability</a></li>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#root-cause-analysis-rca">Root Cause Analysis (RCA)</a></li>
       </ul>
     </li>
     <li><a href="#exploitation">Exploitation</a></li>
@@ -592,9 +690,9 @@
         <li>
           <ul>
             <li><a href="#mitigations">Mitigations</a></li>
-            <li><a href="#references">References</a></li>
           </ul>
         </li>
+        <li><a href="#references">References</a></li>
       </ul>
     </li>
   </ul>
@@ -623,8 +721,8 @@
         if (active.length == 1 && active.eq(0).attr('href') == '#' + id) return true;
 
         active.each(function (i, e) {
-           
-            $(e).removeClass('active').siblings('ul').hide();
+          
+            $(e).removeClass('active');
           
         });
         $toc.find('a[href="#' + id + '"]').addClass('active')
@@ -635,8 +733,6 @@
 
       $window.on('scroll', onScroll);
       $(document).ready(function () {
-         
-          $toc.find('a').parent('li').find('ul').hide();
         
         onScroll();
       });
@@ -645,31 +741,24 @@
 </script>
 
       </div>
-    </div>
-    
-    <div class="min-w-0 min-h-0 max-w-prose">
-      <div id="cve-2021-4034-pwnkit---linux-privilege-escalation" class="anchor"></div>
-<h3 class="relative group">CVE-2021-4034 (PWNKIT - Linux Privilege Escalation) 
+      </div>
+      
+      <div class="min-w-0 min-h-0 max-w-prose">
+        
+
+        <p>This was a <strong>Linux Priviledge Escalation</strong> (LPE) vulnerability in polkit&rsquo;s pkexec that
+affected almost every linux distribution. Today we are going to
+look at the effects of OOB (out-of-bounds) read and write bugs and how they can
+be critical.</p>
+<div id="overview" class="anchor"></div>
+<h3 class="relative group">Overview 
     <span
         class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
         <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
-            style="text-decoration-line: none !important;" href="#cve-2021-4034-pwnkit---linux-privilege-escalation" aria-label="Anchor">#</a></span>        
+            style="text-decoration-line: none !important;" href="#overview" aria-label="Anchor">#</a></span>        
     
 </h3>
-<p>This is a local linux privilege escalation in polkit&rsquo;s pkexec that
-affects almost every linux distribution. That means that any user can
-become root when they exploit this vulnerability. Today we are going to
-look at the effects of OOB (out-of-bounds) read and write and how they can
-be critical.This was a vulnerablity that was discovered by the security company Qualys.</p>
 <hr>
-<div id="recap" class="anchor"></div>
-<h3 class="relative group">Recap 
-    <span
-        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
-        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
-            style="text-decoration-line: none !important;" href="#recap" aria-label="Anchor">#</a></span>        
-    
-</h3>
 <p><strong><em>What is an OOB vulneraility?</em></strong></p>
 <p>An out-of-bounds write <strong><em>(OOBW)</em></strong> vulnerability is when a process or a software
 writes data past the end or before the beginning of the allocated buffer in memory.
@@ -696,14 +785,15 @@ execute commands with elevated privileges much like <em>sudo</em> using the comm
 </span></span><span class="line"><span class="cl">pkexec allows an authorized user to execute a PROGRAM as another user and 
 </span></span><span class="line"><span class="cl">If that username is not specified, <span class="k">then</span> the program will be executed as 
 </span></span><span class="line"><span class="cl">the admin super user that is root.
-</span></span></code></pre></div><div id="vulnerability" class="anchor"></div>
-<h3 class="relative group">Vulnerability 
+</span></span></code></pre></div><div id="root-cause-analysis-rca" class="anchor"></div>
+<h3 class="relative group">Root Cause Analysis (RCA) 
     <span
         class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
         <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
-            style="text-decoration-line: none !important;" href="#vulnerability" aria-label="Anchor">#</a></span>        
+            style="text-decoration-line: none !important;" href="#root-cause-analysis-rca" aria-label="Anchor">#</a></span>        
     
 </h3>
+<hr>
 <p>As started earlier the vulnerability is an out-of-bounds read and write
 vulnerability and this can be seen from the source code snippet of pkexec
 that was presented by <a href="https://blog.qualys.com/vulnerabilities-threat-research/2022/01/25/pwnkit-local-privilege-escalation-vulnerability-discovered-in-polkits-pkexec-cve-2021-4034"   target="_blank">
@@ -806,6 +896,7 @@ overwrite <code>argv[1]</code> which is now <code>envp[0]</code> (our environmen
             style="text-decoration-line: none !important;" href="#exploitation" aria-label="Anchor">#</a></span>        
     
 </h2>
+<hr>
 <p>How can this be exploited to gain root? According to the <strong>Qualys Security team</strong>,
 Since we control <strong>envp[0]</strong>, that is an environment variable using the OOBW
 vulnerability, we can write anything to <code>argv[1]</code> <em>(i.e envp[0])</em>. Therefore we need to
@@ -846,6 +937,7 @@ control in the <code>.so</code> file.</p>
             style="text-decoration-line: none !important;" href="#proof-of-concept" aria-label="Anchor">#</a></span>        
     
 </h2>
+<hr>
 <p>Below I have provided a snippet of my POC and the full code can
 be found at my github page <a href="https://github.com/mutur4/Hacking-Scripts/tree/main/CVE-2021-4034"   target="_blank">
     pwnkit.c</a>
@@ -904,13 +996,14 @@ when its loaded this will lead to our privilege escalation.</p>
 <li>Remove the SUID bit in the executable.</li>
 </ol>
 <div id="references" class="anchor"></div>
-<h4 class="relative group">References 
+<h3 class="relative group">References 
     <span
         class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
         <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
             style="text-decoration-line: none !important;" href="#references" aria-label="Anchor">#</a></span>        
     
-</h4>
+</h3>
+<hr>
 <ul>
 <li><input checked="" disabled="" type="checkbox"> <a href="https://www.whitesourcesoftware.com/resources/blog/polkit-pkexec-vulnerability-cve-2021-4034/"   target="_blank">
     https://www.whitesourcesoftware.com/resources/blog/polkit-pkexec-vulnerability-cve-2021-4034/</a></li>
@@ -918,26 +1011,81 @@ when its loaded this will lead to our privilege escalation.</p>
     https://www.openwall.com/lists/oss-security/2022/01/25/11</a></li>
 </ul>
 
+        </br></br>
+        
+
+      </div>
+      <script>
+        var oid = "views_posts\/pwnkit\/index.md"
+        var oid_likes = "likes_posts\/pwnkit\/index.md"
+      </script>
+      
+      
+      <script type="text/javascript" src="/js/page.min.0e49973b4ad0a382c7c6012d8bff8226316642daabc4f8a20477bd08674f3da6e2fa993bc20ad4f51e7c5bb68e6f913a207a7c4fe37ea0e7b806894afce0a64e.js" integrity="sha512-DkmXO0rQo4LHxgEti/&#43;CJjFmQtqrxPiiBHe9CGdPPabi&#43;pk7wgrU9R58W7aOb5E6IHp8T&#43;N&#43;oOe4BolK/OCmTg=="></script>
+  </section>
+  <footer class="pt-8 max-w-prose print:hidden">
+
+    
+
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    
+  
+    
+    
+    
+      
+      
+    
+    <div class="pt-8">
+      <hr class="border-dotted border-neutral-300 dark:border-neutral-600" />
+      <div class="flex justify-between pt-3">
+        <span>
+          
+            <a class="flex group mr-3" href="/posts/sig-return-oriented-programming/">
+              <span
+                class="mr-3 text-neutral-700 group-hover:text-primary-600 ltr:inline rtl:hidden dark:text-neutral dark:group-hover:text-primary-400"
+                >&larr;</span
+              >
+              <span
+                class="ml-3 text-neutral-700 group-hover:text-primary-600 ltr:hidden rtl:inline dark:text-neutral dark:group-hover:text-primary-400"
+                >&rarr;</span
+              >
+              <span class="flex flex-col">
+                <span
+                  class="mt-[0.1rem] leading-6 group-hover:underline group-hover:decoration-primary-500"
+                  >Sig-Return Oriented Programming Attack - (SROP)</span
+                >
+                <span class="mt-[0.1rem] text-xs text-neutral-500 dark:text-neutral-400">
+                  
+                    <time datetime="2022-03-06 20:12:00 &#43;0300 &#43;0300">6 March 2022</time>
+                  
+                </span>
+              </span>
+            </a>
+          
+        </span>
+        <span>
+          
+        </span>
+      </div>
     </div>
-    <script>
-      var oid = "views_posts\/pwnkit\/_index.md"
-      var oid_likes = "likes_posts\/pwnkit\/_index.md"
-    </script>
-    
-    
-    <script type="text/javascript" src="/js/page.min.0e49973b4ad0a382c7c6012d8bff8226316642daabc4f8a20477bd08674f3da6e2fa993bc20ad4f51e7c5bb68e6f913a207a7c4fe37ea0e7b806894afce0a64e.js" integrity="sha512-DkmXO0rQo4LHxgEti/&#43;CJjFmQtqrxPiiBHe9CGdPPabi&#43;pk7wgrU9R58W7aOb5E6IHp8T&#43;N&#43;oOe4BolK/OCmTg=="></script>
-  </section>
-  
-  <section class="mt-10 prose dark:prose-invert">
-    <p class="py-8 border-t">
-      <em>There's no articles to list here yet.</em>
-    </p>
-  </section>
   
 
-    
 
-  
+    
+  </footer>
+</article>
+
       <div class="pointer-events-none absolute top-[100vh] bottom-0 w-12 ltr:right-0 rtl:left-0">
   <a href="#the-top"
     class="pointer-events-auto sticky top-[calc(100vh-5.5rem)] flex h-12 w-12 mb-16 items-center justify-center rounded-full bg-neutral/50 text-xl text-neutral-700 backdrop-blur hover:text-primary-600 dark:bg-neutral-800/50 dark:text-neutral dark:hover:text-primary-400"
@@ -967,7 +1115,7 @@ when its loaded this will lead to our privilege escalation.</p>
     
     <p class="text-sm text-neutral-500 dark:text-neutral-400">
       &copy;
-      2023
+      2024
       BinaryChunk
     </p>
     
@@ -1053,9 +1201,5 @@ when its loaded this will lead to our privilege escalation.</p>
 
   </div>
 </body>
-
-<script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js"
-  data-id="https://buymeacoffee.com/binarychunk" data-description="Support me on Buy me a coffee!" data-message=""
-  data-color="#FFDD00" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
 
 </html>
