@@ -14,7 +14,7 @@
   <meta name="title" content="Linux Process Injection - (Simple ptrace injection) &middot; " />
   
   <meta name="description" content="An awesome infosec blog :)" />
-  <meta name="keywords" content="Linux Malware, Injection, " />
+  <meta name="keywords" content="Linux-Malware, Process-Injection, " />
   
   
   <link rel="canonical" href="https://mutur4.github.io/posts/process-injection/" />
@@ -100,7 +100,7 @@
     
     "dateModified": "2022-08-21T04:02:29-04:00",
     
-    "keywords": ["Linux Malware","Injection"],
+    "keywords": ["Linux-Malware","Process-Injection"],
     
     "mainEntityOfPage": "true",
     "wordCount": "1387"
@@ -118,9 +118,6 @@
   
   
   <link href="https://twitter.com/binarychunk" rel="me" />
-  
-  
-  <link href="mailto:8421gilbertrobert@gmail.com" rel="me" />
   
   
   <link href="https://linkedin.com/in/gilbert-robert-m" rel="me" />
@@ -477,33 +474,10 @@
     
     
       
-
-
-<div id="hero" class="h-[150px] md:h-[200px]"></div>
-
-
+        
+        <img class="w-full rounded-lg single_hero_round nozoom" alt="Linux Process Injection - (Simple ptrace injection)" width="1200" height="1200" src="/posts/process-injection/featured_hu58c2eb159763c615ee033ee7eebf98a4_267016_1200x0_resize_box_3.png">
+        
     
-    <div class="fixed inset-x-0 top-0 h-[800px] single_hero_background nozoom"
-    style="background-image:url(/posts/process-injection/featured_hu38339e9910a6f25afc089dbaf9952db8_258862_1200x0_resize_box_3.png);">
-    
-
-
-    <div class="absolute inset-0 bg-gradient-to-t from-neutral dark:from-neutral-800 to-transparent mix-blend-normal">
-    </div>
-    <div
-        class="absolute inset-0 opacity-60 bg-gradient-to-t from-neutral dark:from-neutral-800 to-neutral-100 dark:to-neutral-800 mix-blend-normal">
-    </div>
-</div>
-
-<div id="background-blur" class="fixed opacity-0 inset-x-0 top-0 h-full single_hero_background nozoom backdrop-blur-2xl"></div>
-<script>
-    window.addEventListener('scroll', function (e) {
-        var scroll = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
-        var background_blur = document.getElementById('background-blur');
-        background_blur.style.opacity = (scroll / 300)
-    });
-</script>
-
     
   
   
@@ -639,12 +613,12 @@
 
   </span>
   
-  <span style="margin-top:0.5rem" class="mr-2" onclick="window.open(&#34;/tags/injection/&#34;,'_self');">
+  <span style="margin-top:0.5rem" class="mr-2" onclick="window.open(&#34;/tags/process-injection/&#34;,'_self');">
     <span class="flex">
   <span
     class="rounded-md border border-primary-400 px-1 py-[1px] text-xs font-normal text-primary-700 dark:border-primary-600 dark:text-primary-400"
   >
-    Injection
+    Process-Injection
   </span>
 </span>
 
@@ -763,9 +737,8 @@
 <li>A <em>legitimate process</em> is started and arbitrary code is injected into the process for execution.</li>
 <li>Code injection into an already running live remote process possibly a daemon process. <em>(this comes with a disadvantage since we cannot inject into a process owned by another user)</em>.</li>
 </ol>
-<p>For this <a href="https://mutur4.github.io/posts/linux-malware-development/process-injection/"   target="_blank">
-    first part</a>, we will simply be introducing the core concepts of the <code>ptrace</code> syscall and how this can be used to inject shellcode for code injection.</p>
-<p>The second part of this <a href="https://mutur4.github.io/posts/linux-malware-development/injection"   target="_blank">
+<p>For this first part, we will simply be introducing the core concepts of the <code>ptrace</code> syscall and how this can be used to inject shellcode for process injection.</p>
+<p>The second part of this <a href="https://mutur4.github.io/posts/remote-process-injection/"   target="_blank">
     series</a> we will be introducing a more advanced process injection technique inspired by the Windows <strong><em>VirtualAllocEx</em></strong> and <strong><em>CreateRemoteThread</em></strong> to inject code after process enumeration.</p>
 <div id="ptrace-system-call" class="anchor"></div>
 <h3 class="relative group">Ptrace System Call 
@@ -894,7 +867,7 @@ Since this a 64-bit application we increment the iterator with 8 bytes, since wi
 </span></span><span class="line"><span class="cl">        <span class="p">}</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">        <span class="n">fprintf</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="s">&#34;* successfully injected code into the process&#34;</span><span class="p">);</span>
-</span></span></code></pre></div><p>The <code>PTRACE_CONT</code> request will resume the process from its saved stated, this will also subtract 2 bytes from the instruction pointer, therefore we add 2 bytes <em>(idk the reason)</em> to exactly point the instruction pointer to the address of our injected shellcode.The <code>PTRACE_DETACH</code> request will resume the execution of the paused process to execute the injected code. The complete code can be located at <a href="https://github.com/mutur4/Linux-Malware/blob/main/Process.Injection/noob_injection.c"   target="_blank">
+</span></span></code></pre></div><p>The <code>PTRACE_CONT</code> request will resume the process from its saved stated, this will also subtract 2 bytes from the instruction pointer, therefore we add 2 bytes <em>(idk the reason)</em> to exactly point the instruction pointer to the address of our injected shellcode.The <code>PTRACE_DETACH</code> request will resume the execution of the paused process to execute the injected code. The complete code can be located at <a href="https://github.com/mutur4/Linux-Malware/blob/main/Process.Injection/simple-ptrace-injection.c"   target="_blank">
     inject.c</a>.</p>
 <p>The injected code is executed successfully but the main disadvantage is after malicious code execution, that process will also terminate <em>(the process we injected into&hellip;)</em></p>
 <div id="conclusion" class="anchor"></div>

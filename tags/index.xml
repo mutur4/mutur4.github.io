@@ -6,7 +6,34 @@
     <description>Recent content in Tags on </description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 04 Oct 2023 13:50:30 -0400</lastBuildDate><atom:link href="https://mutur4.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 21 Feb 2024 14:50:44 -0500</lastBuildDate><atom:link href="https://mutur4.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Exploitation</title>
+      <link>https://mutur4.github.io/tags/exploitation/</link>
+      <pubDate>Wed, 21 Feb 2024 14:50:44 -0500</pubDate>
+      
+      <guid>https://mutur4.github.io/tags/exploitation/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Heap-Overflows</title>
+      <link>https://mutur4.github.io/tags/heap-overflows/</link>
+      <pubDate>Wed, 21 Feb 2024 14:50:44 -0500</pubDate>
+      
+      <guid>https://mutur4.github.io/tags/heap-overflows/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Linux-kernel</title>
+      <link>https://mutur4.github.io/tags/linux-kernel/</link>
+      <pubDate>Wed, 21 Feb 2024 14:50:44 -0500</pubDate>
+      
+      <guid>https://mutur4.github.io/tags/linux-kernel/</guid>
+      <description></description>
+    </item>
+    
     <item>
       <title>Linux Malware</title>
       <link>https://mutur4.github.io/tags/linux-malware/</link>
@@ -31,24 +58,6 @@
       <pubDate>Sat, 15 Jul 2023 06:35:51 -0400</pubDate>
       
       <guid>https://mutur4.github.io/tags/defense-evasion/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Exploitation</title>
-      <link>https://mutur4.github.io/tags/exploitation/</link>
-      <pubDate>Sun, 28 May 2023 03:55:04 -0400</pubDate>
-      
-      <guid>https://mutur4.github.io/tags/exploitation/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Linux-kernel</title>
-      <link>https://mutur4.github.io/tags/linux-kernel/</link>
-      <pubDate>Sun, 28 May 2023 03:55:04 -0400</pubDate>
-      
-      <guid>https://mutur4.github.io/tags/linux-kernel/</guid>
       <description></description>
     </item>
     
@@ -80,20 +89,29 @@
     </item>
     
     <item>
-      <title>Injection</title>
-      <link>https://mutur4.github.io/tags/injection/</link>
-      <pubDate>Sun, 21 Aug 2022 04:02:29 -0400</pubDate>
-      
-      <guid>https://mutur4.github.io/tags/injection/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>pwn</title>
       <link>https://mutur4.github.io/tags/pwn/</link>
       <pubDate>Sun, 06 Mar 2022 20:12:00 +0300</pubDate>
       
       <guid>https://mutur4.github.io/tags/pwn/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>CVE-2021-4034</title>
+      <link>https://mutur4.github.io/tags/cve-2021-4034/</link>
+      <pubDate>Tue, 01 Feb 2022 22:36:46 +0300</pubDate>
+      
+      <guid>https://mutur4.github.io/tags/cve-2021-4034/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>N-Day</title>
+      <link>https://mutur4.github.io/tags/n-day/</link>
+      <pubDate>Tue, 01 Feb 2022 22:36:46 +0300</pubDate>
+      
+      <guid>https://mutur4.github.io/tags/n-day/</guid>
       <description></description>
     </item>
     

@@ -103,7 +103,7 @@
     "keywords": ["pwn","Exploitation"],
     
     "mainEntityOfPage": "true",
-    "wordCount": "1185"
+    "wordCount": "1184"
   }]
   </script>
 
@@ -118,9 +118,6 @@
   
   
   <link href="https://twitter.com/binarychunk" rel="me" />
-  
-  
-  <link href="mailto:8421gilbertrobert@gmail.com" rel="me" />
   
   
   <link href="https://linkedin.com/in/gilbert-robert-m" rel="me" />
@@ -477,33 +474,10 @@
     
     
       
-
-
-<div id="hero" class="h-[150px] md:h-[200px]"></div>
-
-
+        
+        <img class="w-full rounded-lg single_hero_round nozoom" alt="Sig-Return Oriented Programming Attack - (SROP)" width="1200" height="1200" src="/posts/sig-return-oriented-programming/featured_hu46fd1bbdb1b6d21a60a32fe864bfa63d_4480762_1200x0_resize_box_3.png">
+        
     
-    <div class="fixed inset-x-0 top-0 h-[800px] single_hero_background nozoom"
-    style="background-image:url(/posts/sig-return-oriented-programming/featured_hu46fd1bbdb1b6d21a60a32fe864bfa63d_4480762_1200x0_resize_box_3.png);">
-    
-
-
-    <div class="absolute inset-0 bg-gradient-to-t from-neutral dark:from-neutral-800 to-transparent mix-blend-normal">
-    </div>
-    <div
-        class="absolute inset-0 opacity-60 bg-gradient-to-t from-neutral dark:from-neutral-800 to-neutral-100 dark:to-neutral-800 mix-blend-normal">
-    </div>
-</div>
-
-<div id="background-blur" class="fixed opacity-0 inset-x-0 top-0 h-full single_hero_background nozoom backdrop-blur-2xl"></div>
-<script>
-    window.addEventListener('scroll', function (e) {
-        var scroll = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
-        var background_blur = document.getElementById('background-blur');
-        background_blur.style.opacity = (scroll / 300)
-    });
-</script>
-
     
   
   
@@ -590,7 +564,7 @@
 <div class="flex flex-row flex-wrap items-center">
   
   
-  <time datetime="2022-03-06 20:12:00 &#43;0300 &#43;0300">6 March 2022</time><span class="px-2 text-primary-500">&middot;</span><span>1185 words</span><span class="px-2 text-primary-500">&middot;</span><span title="Reading time">6 mins</span>
+  <time datetime="2022-03-06 20:12:00 &#43;0300 &#43;0300">6 March 2022</time><span class="px-2 text-primary-500">&middot;</span><span>1184 words</span><span class="px-2 text-primary-500">&middot;</span><span title="Reading time">6 mins</span>
   
 
   
@@ -752,7 +726,7 @@
 
         <p>This is a yet another binary exploitation attack  that is somewhat similar to
 return-oriented-programming (ROP) and to understand how this works, we first need
-to understand how C signals work.</p>
+to understand how <code>C</code> signals work.</p>
 <div id="signals-in-c" class="anchor"></div>
 <h3 class="relative group">Signals in C 
     <span
@@ -761,7 +735,7 @@ to understand how C signals work.</p>
             style="text-decoration-line: none !important;" href="#signals-in-c" aria-label="Anchor">#</a></span>        
     
 </h3>
-<p>Each signal has a current disposition and this is used to determine
+<p>Each signal has a current disposition that is used to determine
 how a process behaves when it is delivered a signal. The following
 is used to specify the default disposition for each signal.</p>
 <pre><code>- Term : The default action is to terminate the process

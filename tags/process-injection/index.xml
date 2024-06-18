@@ -13,7 +13,16 @@
       <pubDate>Wed, 04 Oct 2023 13:50:30 -0400</pubDate>
       
       <guid>https://mutur4.github.io/posts/remote-process-injection/</guid>
-      <description>Introduction #   When it comes to Linux/Unix we aren&amp;rsquo;t provided with a bunch of sweet documented APIs as with Windows but instead are handed over a couple of system calls.</description>
+      <description>Introduction #   This blog will cover Remote Process Injection in Linux; a common evasion technique popular in the Windows Malware world.</description>
+    </item>
+    
+    <item>
+      <title>Linux Process Injection - (Simple ptrace injection)</title>
+      <link>https://mutur4.github.io/posts/process-injection/</link>
+      <pubDate>Sun, 21 Aug 2022 04:02:29 -0400</pubDate>
+      
+      <guid>https://mutur4.github.io/posts/process-injection/</guid>
+      <description>Process Injection is a defense evasion technique that is often employed within malware and entails a method of executing arbitrary code in the address space of a separate live process, therefore, allowing access to the process&amp;rsquo;s memory, system resources and possibly network resources.</description>
     </item>
     
   </channel>

