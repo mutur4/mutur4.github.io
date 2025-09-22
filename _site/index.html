@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>BinaryChunk’s Blog</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="BinaryChunk’s Blog" />
+<meta property="og:locale" content="en_US" />
+<link rel="canonical" href="http://0.0.0.0:4000/" />
+<meta property="og:url" content="http://0.0.0.0:4000/" />
+<meta property="og:site_name" content="BinaryChunk’s Blog" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="BinaryChunk’s Blog" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","headline":"BinaryChunk’s Blog","name":"BinaryChunk’s Blog","url":"http://0.0.0.0:4000/"}</script>
+<!-- End Jekyll SEO tag -->
+<link id="main-stylesheet" rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="http://0.0.0.0:4000/feed.xml" title="BinaryChunk&apos;s Blog" />
+
+<link rel="icon" href="https://github.githubassets.com/favicons/favicon.svg" type="image/svg+xml">
+<style>
+@font-face {
+  font-family: 'Open Sans';
+  src: url('//fonts.gstatic.com/s/opensans/v44/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0B4kaVIGxA.woff2')
+       format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  font-stretch: 100%;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 11pt;
+}
+</style>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper">
+    <a class="site-title" rel="author" href="/">BinaryChunk&#39;s Blog</a>
+      <nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon"></span>
+        </label>
+
+        <div class="nav-items">
+  <a class="nav-item" href="/ctfs/">CTFs</a>
+</div>
+
+      </nav>
+  </div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <div class="home">
+
+
+
+  <ul class="post-list"><li>
+        <span class="post-meta">Feb 21, 2024</span>
+        <h3>
+          <a class="post-link" href="/2024/02/21/linux-kernel-heap-overflow.html">
+            Linux Kernel: Weaponizing an AAW &amp; Heap Ovf (Blunder Driver Challenge)
+          </a>
+        </h3><p>This blog will be about exploiting a Linux Kernel Driver by chaining a <strong>Heap Overflow</strong> bug with a ‘sandboxed’ <strong>Arbitrary Address Write (AAW)</strong> for <strong>Local Priviledge Escalation</strong> by overwriting <strong>core_pattern</strong> with most mitigations enabled.</p>
+
+</li><li>
+        <span class="post-meta">Oct 4, 2023</span>
+        <h3>
+          <a class="post-link" href="/2023/10/04/Linux-Remote-Process-Injection.html">
+            Linux Remote Process Injection: (Injecting into a Firefox Browser Process)
+          </a>
+        </h3><p>This blog will cover <strong>Remote Process Injection</strong> in Linux; a common evasion technique popular in the Windows Malware world. The aim will be to write an injector that injects into another remote process and for the purpose of this blog, the chosen victim process will be <strong>Firefox</strong>.</p>
+
+</li><li>
+        <span class="post-meta">Jul 15, 2023</span>
+        <h3>
+          <a class="post-link" href="/2023/07/15/linux-malware-defense-evasion.html">
+            Linux Malware: Defense Evasion Techniques
+          </a>
+        </h3><p>This post will cover some different detection evasion techniques that can be employed to custom agents in a compromised Linux host. A malware author needs to have good OPSEC making sure that their agent remains stealthy leaving little to no IOCs — this is obviously on top of using a secure and stealthy <strong>Red Team Infrastructure</strong>.</p>
+
+</li><li>
+        <span class="post-meta">May 28, 2023</span>
+        <h3>
+          <a class="post-link" href="/2023/05/28/Linux-Kernel-Stack-Exploitation.html">
+            Linux Kernel: Introduction to Kernel Stack Overflows
+          </a>
+        </h3><p>In the <code class="language-plaintext highlighter-rouge">Linux Kernel 'ring (0)'</code> a stack is also allocated for local variables defined in functions. These functions are mainly implemented for device drivers that are defined in different <strong>Loadable Kernel Modules</strong> (LKMs). The same stack is also vulnerable to stack overflow attacks that aim at overwriting the return address saved on the stack — this post will cover exploiting these vulnerabilities.</p>
+
+</li><li>
+        <span class="post-meta">Aug 21, 2022</span>
+        <h3>
+          <a class="post-link" href="/2022/08/21/Linux-Process-Injection.html">
+            Linux: Local Process Injection
+          </a>
+        </h3><p><strong>Process Injection</strong> is a defense evasion technique that is often employed within malware and entails a method of executing <em>arbitrary code</em> in the address space of a separate live process, therefore, allowing access to the process’s memory, system resources and possibly network resources.</p>
+
+</li><li>
+        <span class="post-meta">Mar 6, 2022</span>
+        <h3>
+          <a class="post-link" href="/2022/03/06/signreturn-oriented-programming.html">
+            Sig-Return Oriented Programming Attack (SROP)
+          </a>
+        </h3><p>This post covers yet another Binary Exploitation attack that is somewhat similar to return-oriented-programming (ROP) to understand how this works, we first need to understand Linux signals.</p>
+
+</li><li>
+        <span class="post-meta">Feb 1, 2022</span>
+        <h3>
+          <a class="post-link" href="/2022/02/01/Pwnkit-CVE-2021-4034.html">
+            Pwnkit: Linux Priviledge Escalation (CVE-2021-4034)
+          </a>
+        </h3><p>This was a <strong>Linux Priviledge Escalation</strong> vulnerability in polkit’s pkexec that affected almost every Linux distro running the vulnerable version(s). This post covers the RCA of the vulnerability and how this was weaponized for a Local Priviledge Escalation attack.</p>
+
+</li></ul>
+
+    </div>
+
+      </div>
+    </main><link id="fa-stylesheet" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css">
+
+<footer class="site-footer h-card">
+  <data class="u-url" value="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+      </div>
+      <div class="footer-col">
+        <p></p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li>
+    <a rel="me" href="https://x.com/BinaryChunk" target="_blank" title="BinaryChunk on X">
+      <span class="grey fa-brands fa-x-twitter fa-lg"></span>
+    </a>
+  </li><li>
+    <a rel="me" href="https://github.com/mutur4" target="_blank" title="BinaryChunk on Github">
+      <span class="grey fa-brands fa-github fa-lg"></span>
+    </a>
+  </li>
+</ul>
+</div>
+
+  </div>
+
+</footer>
+
+</body>
+
+</html>

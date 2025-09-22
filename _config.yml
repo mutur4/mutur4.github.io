@@ -1,0 +1,30 @@
+title: BinaryChunk's Blog
+url: "https://mutur4.github.io"
+
+remote_theme: "jekyll/minima@1722fcf"
+
+plugins:
+  - jekyll-remote-theme
+  - jekyll-seo-tag
+
+
+collections:
+  ctfs:
+    output: true
+    permalink: /ctfs/:path/
+
+minima:
+  show_excerpts: true
+  hide_site_feed_link: true
+  skin: classic
+  
+  nav_pages:
+    - ctfs.md
+
+  social_links:
+    - title: "BinaryChunk on X"
+      icon: x-twitter
+      url: https://x.com/BinaryChunk
+    - title: "BinaryChunk on Github"
+      icon: github
+      url: "https://github.com/mutur4"

