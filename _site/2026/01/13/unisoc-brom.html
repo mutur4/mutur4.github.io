@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Understanding the Unisoc BROM Protocol | BinaryChunk’s Blog</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Understanding the Unisoc BROM Protocol" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="This blog post will explore the common BROM protocol (FDL Mode) used to flash firmware on devices running on unisoc chipsets. BROM mode is a universal low-level pre-boot state that is mostly used to program or write firmware on a device by the OEM." />
+<meta property="og:description" content="This blog post will explore the common BROM protocol (FDL Mode) used to flash firmware on devices running on unisoc chipsets. BROM mode is a universal low-level pre-boot state that is mostly used to program or write firmware on a device by the OEM." />
+<link rel="canonical" href="https://mutur4.github.io/2026/01/13/unisoc-brom.html" />
+<meta property="og:url" content="https://mutur4.github.io/2026/01/13/unisoc-brom.html" />
+<meta property="og:site_name" content="BinaryChunk’s Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-01-13T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Understanding the Unisoc BROM Protocol" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-01-13T00:00:00+00:00","datePublished":"2026-01-13T00:00:00+00:00","description":"This blog post will explore the common BROM protocol (FDL Mode) used to flash firmware on devices running on unisoc chipsets. BROM mode is a universal low-level pre-boot state that is mostly used to program or write firmware on a device by the OEM.","headline":"Understanding the Unisoc BROM Protocol","mainEntityOfPage":{"@type":"WebPage","@id":"https://mutur4.github.io/2026/01/13/unisoc-brom.html"},"url":"https://mutur4.github.io/2026/01/13/unisoc-brom.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link id="main-stylesheet" rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://mutur4.github.io/feed.xml" title="BinaryChunk&apos;s Blog" />
+
+<link rel="icon" href="https://github.githubassets.com/favicons/favicon.svg" type="image/svg+xml">
+<style>
+@font-face {
+  font-family: 'Open Sans';
+  src: url('//fonts.gstatic.com/s/opensans/v44/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0B4kaVIGxA.woff2')
+       format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  font-stretch: 100%;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 11pt;
+}
+</style>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper">
+    <a class="site-title" rel="author" href="/">BinaryChunk&#39;s Blog</a>
+      <nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon"></span>
+        </label>
+
+        <div class="nav-items">
+  <a class="nav-item" href="/ctfs/">CTFs</a>
+</div>
+
+      </nav>
+  </div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Understanding the Unisoc BROM Protocol</h1>
+    <div class="post-meta">
+      <time class="dt-published" datetime="2026-01-13T00:00:00+00:00" itemprop="datePublished">
+        Jan 13, 2026
+      </time>
+    </div>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>This blog post will explore the common BROM protocol (FDL Mode) used to flash firmware on devices running on unisoc chipsets. BROM mode is a universal low-level pre-boot state that is mostly used to program or write firmware on a device by the OEM.</p>
+
+<p>The BROM Mode is present on different devices running on different chipsets but the communication protocol differs with each chipset. For example — consider the following known chipsets and their respective protocols:</p>
+
+<ul>
+  <li><strong>Mediatek</strong>: This chipset’s BROM implements a simple protocol that is compatible with a Download Agent (DA) – there is no known name for this protocol.</li>
+  <li><strong>Qualcomm</strong>: This chipset’s BROM implements the Firehose and Sahara Protocol <sup><a href="https://alephsecurity.com/vulns/aleph-2017028">1</a></sup></li>
+</ul>
+
+<p>Please consider mentioning about the other protocol that is used by Unisoc</p>
+
+<p><strong>What is this BROM protocol?</strong></p>
+
+<p>When writing firmware to an android device — for this case a device running on the unisoc chipset — the device will first be booted to BROM. This can be done via the devices button combination for example (vol+/vol-) or via shorting a test-point on the device’s PCB.</p>
+
+<p>A flashing tool for example — SPD Flash Tool <sup><a href="https://spdflashtool.com">2</a></sup> connected to the device via USB will then talk to the boot ROM <sup><a href="https://en.wikipedia.org/wiki/Boot_ROM">3</a></sup> via Unisoc’s <strong>BROM protocol</strong> to write the firmware files to the device. These files include kernel and tz images, bootloader images, bootlogo files etc…</p>
+
+<h4 id="background"><strong>Background</strong></h4>
+
+<p>The main reason that lead to this research is little to no documentation in this area as compared to other chipsets. The post by Luxferre <sup><a href="https://archive.luxferre.top/chronovirus/2021/12/18/Opus-Spreadtrum">4</a></sup> was an inspiration to dig more into the protocol on a modern android device. Subsequently, Vulnerability Research around the Unisoc bootloader <sup><a href="https://www.nccgroup.com/research-blog/there-s-another-hole-in-your-soc-unisoc-rom-vulnerabilities/">5</a></sup> <sup><a href="https://github.com/TomKing062/CVE-2022-38694_unlock_bootloader">6</a></sup>, unknown BROM exploits coupled in commercial android flashing tools <sup><a href="https://z3x-team.com/products/pandora">7</a></sup> and the fact that BROM code is read-only, made this an interesting area of research.</p>
+
+<h4 id="the-protocol"><strong>The Protocol</strong></h4>
+
+<p>An android device that was initially powered off can be booted to brom mode via the method(s) mentioned above — this depends with the OEM’s implementation. During a device boot, the boot ROM handles the hardware power-on sequence and since this is not a normal power-on sequence, the device will enter BROM mode opening <code class="language-plaintext highlighter-rouge">UART0</code> on the usb port for serial communication.</p>
+
+<p>On a Linux machine, the USB port opens with VID <code class="language-plaintext highlighter-rouge">0x1782</code> and PID <code class="language-plaintext highlighter-rouge">0x4d00</code> values and on a Windows Machine, you should see the following COM port from the device manager.</p>
+
+<p><img src="https://raw.githubusercontent.com/mutur4/Blog-Images/refs/heads/main/com-port.png" alt="The image that shows a COM port on Windows" /></p>
+
+<h5 id="data-frame"><strong>Data Frame</strong></h5>
+
+<p>The communication mechanism implemented by the protocol is a <strong>command/response</strong> mechanism that follows the following three steps:</p>
+<ol>
+  <li>A command packet is sent to the device via <code class="language-plaintext highlighter-rouge">UART0</code>.</li>
+  <li>The device processes and executes the command.</li>
+  <li>A response packet is returned via the same channel.</li>
+</ol>
+
+<p>A command and response packet is packed into the following data frame as the standard format:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>7e [command|response pckt] [CRC-2] 7e
+</code></pre></div></div>
+
+<p>The data frame consists of <code class="language-plaintext highlighter-rouge">0x7e</code> used to mark the start and end of the frame. Therefore, when this value is present in the body of the data frame (command, response or CRC) its escaped with <code class="language-plaintext highlighter-rouge">0x7d 0x5e</code> and since <code class="language-plaintext highlighter-rouge">0x7d</code> is used as an escaping parameter its also escaped with <code class="language-plaintext highlighter-rouge">0x7d 0x5d</code>.</p>
+
+<p>The CRC is a 2-byte value calculated against the command/response packet for detecting any bit errors during data transfer.</p>
+
+<p>The process of packing a command packet into the data frame is as follows — this is performed when sending a response or when talking to the protocol:</p>
+<ul>
+  <li>Construct the command packet.</li>
+  <li>Calculate the CRC parity bit.</li>
+  <li>Transcode or escape <code class="language-plaintext highlighter-rouge">0x7E</code> and <code class="language-plaintext highlighter-rouge">0x7D</code> with the values described above.</li>
+  <li>Add the header and tail to the data frame.</li>
+</ul>
+
+<p>When the device receives the command — the data frame is unpacked as follows:</p>
+<ul>
+  <li>The head and tail is removed from the packet.</li>
+  <li>The escaped characters are decoded back to their previous values.</li>
+  <li>A CRC check is performed and a response is returned.</li>
+</ul>
+
+<h6 id="crc"><strong>CRC</strong></h6>
+
+<p>This is the verification algorithm that is used to detect for any corruption during the serial communication. There are two CRC types:</p>
+
+<ul>
+  <li><strong>BROM-CRC</strong>: This is used when talking directly to the boot ROM.</li>
+  <li><strong>FDL-CRC</strong>: This is used when talking to the firmware downloaders — described in great detail below.</li>
+</ul>
+
+<p>The following Python code snippet shows how these two variants can be calculated:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">binascii</span>
+
+<span class="k">def</span> <span class="nf">brom_crc</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">):</span> <span class="c1">#used in boot mode
+</span>    <span class="n">crc</span> <span class="o">=</span> <span class="mh">0x0</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ii</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">_len</span><span class="p">:</span>
+            <span class="n">crc</span> <span class="o">+=</span> <span class="n">data</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">crc</span> <span class="o">+=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="mh">0x8</span><span class="p">)</span> <span class="o">|</span> <span class="n">data</span><span class="p">[</span><span class="n">ii</span> <span class="o">+</span> <span class="mh">0x1</span><span class="p">]</span>
+
+    <span class="n">crc</span> <span class="o">=</span> <span class="p">(</span><span class="n">crc</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">crc</span> <span class="o">&amp;</span> <span class="mh">0xffff</span><span class="p">)</span>
+    <span class="n">crc</span> <span class="o">+=</span> <span class="p">(</span><span class="n">crc</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span><span class="p">)</span>
+    <span class="k">return</span> <span class="o">~</span><span class="n">crc</span> <span class="o">&amp;</span> <span class="mh">0xffff</span>
+
+<span class="k">def</span> <span class="nf">fdl_crc</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">):</span> <span class="c1">#used in FDL1/FDL2 mode
+</span>    <span class="k">return</span> <span class="n">binascii</span><span class="p">.</span><span class="n">crc_hqx</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+</code></pre></div></div>
+<h6 id="command--response-packet"><strong>Command &amp; Response Packet</strong></h6>
+
+<p>The command packet contains the instruction or the command to be executed by the device and any other additional data sent with the command. The following is a sample data frame that sends a <strong>Power Off</strong> command to the device.</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">[7e 00 17 00 00 ff e8 7e]</code></li>
+</ul>
+
+<p>The breakdown of the above commands is as follows:</p>
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">0x7e</code>: This is obvious the head and tail of the data frame.</li>
+  <li><code class="language-plaintext highlighter-rouge">00 17</code>: This is the <code class="language-plaintext highlighter-rouge">BSL_CMD_POWER_OFF|0x17</code> command. A 2-byte value that instructs the device what to do.</li>
+  <li><code class="language-plaintext highlighter-rouge">00 00</code>: This is the data — since this command does not have any data (this value is NULL).</li>
+  <li><code class="language-plaintext highlighter-rouge">ff e8</code>: The CRC calculation performed against the command packet <code class="language-plaintext highlighter-rouge">00 17 00 00</code></li>
+</ol>
+
+<p>The following is a reponse received from the device in relation to the above command:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">[7e 00 80 00 00 ff d7 7e]</code></li>
+</ul>
+
+<p>The breakdown of the above response data frame is as follows:</p>
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">00 80</code>: This is the <code class="language-plaintext highlighter-rouge">BSL_REP_ACK|0x80</code> response to indicate command execution was a success.</li>
+  <li><code class="language-plaintext highlighter-rouge">00 00</code>: Since there is no data this value is <code class="language-plaintext highlighter-rouge">NULL</code></li>
+  <li><code class="language-plaintext highlighter-rouge">ff d7</code>: This is CRC value of the response packet.</li>
+</ol>
+
+<p>The command and response packet signature skeleton is basically as follows:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">7e [2-byte type] [data length] [data N-bytes] [CRC] 7e</code></li>
+</ul>
+
+<p>For the above examples, the data was NULL. When writing a file to RAM, we need to include the following values to the command:</p>
+<ul>
+  <li><strong>Data Length</strong>: This is a 2-byte unsigned short and big endian value that specifies the length of the data included in the packet.</li>
+  <li><strong>Data</strong>: This is the actual data that can be included in a command or response. For example,  the file being written to the device.</li>
+</ul>
+
+<p>The list of supported commands and responses can be found in my github - <a href="https://github.com/mutur4/Unisoc-Exploitation/blob/main/unisoc-commands">here</a></p>
+
+<h5 id="firmware-downloaders-fdl1fdl2"><strong>Firmware Downloaders (FDL1/FDL2)</strong></h5>
+
+<p>When the device is in BROM Mode, because of size limitations — the BROM code lives in a small space in the device’s ROM — not alot can be performed since it can’t handle complex tasks like formating partitions or intializing flash memory. The bootROM therefore expects a set of <strong>signed</strong> binary files called firmware downloaders.</p>
+
+<p>These files are signed by the OEM using their own private keys — see the Android secure boot <sup><a href="https://source.android.com/docs/security/features/verifiedboot">8</a></sup> to prevent execution of malicious files. There are two of these files, the first file FDL-1 is downloaded to the device’s RAM at a specific address and before execution, signature verification is performed by the boot ROM to check for the authenticity of the binary file.</p>
+
+<p>The following is a sample data frame used to upload FDL-1 to RAM: <code class="language-plaintext highlighter-rouge">[7e 00 01 00 08 00 00 50 00 00 00 cf d4 0c b1 7e]</code></p>
+<ul>
+  <li><strong>command</strong>: <code class="language-plaintext highlighter-rouge">BSL_CMD_START_DATA|0x1</code></li>
+  <li><strong>Data Length</strong>: <code class="language-plaintext highlighter-rouge">0x0008</code></li>
+  <li><strong>Data</strong>: <code class="language-plaintext highlighter-rouge">0x00005000</code> + <code class="language-plaintext highlighter-rouge">0x0000cfd4</code></li>
+</ul>
+
+<p>The above command is preparing the Boot ROM to receive <code class="language-plaintext highlighter-rouge">0xcfd4</code> bytes of data in the RAM address <code class="language-plaintext highlighter-rouge">0x5000</code>. These addresses are different and are based on the chip model. The next command uploads chunks of the executable each of size <code class="language-plaintext highlighter-rouge">0x210</code> because of the RAM’s limitations: <code class="language-plaintext highlighter-rouge">[7e 00 02 02 10 41 41 41 41 ... 5c 5c 7e]</code></p>
+<ul>
+  <li><strong>command</strong>: <code class="language-plaintext highlighter-rouge">BSL_CMD_MIDST_DATA|0x2</code></li>
+  <li><strong>Data Length</strong>: <code class="language-plaintext highlighter-rouge">0x210</code></li>
+  <li><strong>Data</strong>: <code class="language-plaintext highlighter-rouge">0x414141..N</code></li>
+  <li><strong>CRC</strong>: <code class="language-plaintext highlighter-rouge">0x5c5c</code></li>
+</ul>
+
+<p>The above command uploads our binary to its address, the <code class="language-plaintext highlighter-rouge">BSL_CMD_END_DATA|0x3</code> is used to indicate end of data transfer and now its ready for execution: <code class="language-plaintext highlighter-rouge">[7e 00 04 00 00 dc c0 7e]</code></p>
+<ul>
+  <li><strong>command</strong>: <code class="language-plaintext highlighter-rouge">BSL_CMD_EXEC_DATA|0x4</code></li>
+  <li><strong>Data</strong>: <code class="language-plaintext highlighter-rouge">NULL</code></li>
+</ul>
+
+<p>The above command executes the binary in its uploaded address. When the binary is executed and verified, BROM passes execution to it and it acts as the <strong>primary bootloader</strong> used to set memory requirements for the second file FDL-2. This executable is somewhat similar to <strong>EDL programmers</strong> in Qualcomm and the earlier mentioned <strong>Download Agents (DAs)</strong> in MTK devices.</p>
+
+<blockquote>
+  <p><em><strong>NOTE</strong>:It is at this point that the CRC calculation changes since we are now communicating with a new preloader</em></p>
+</blockquote>
+
+<p>A handshake is first sent to the preloader and this is a single <code class="language-plaintext highlighter-rouge">0x7e</code> — this is a special command that does not follow the packet format and its used to check the baudrate. When the correct UART baudrate <code class="language-plaintext highlighter-rouge">115200</code> is correct on both side of the communication, FDL-1 responds with the following data <code class="language-plaintext highlighter-rouge">Spreadtrum Boot Block Version on 1.1</code>, this signals a successful connection and communication can now proceed from here.</p>
+
+<p>Since the boot ROM and RAM limit download sizes, FDL-1 is downloaded first being smaller in size and FDL-2 follows. The main function of FDL-2 is to setup the flash memory of the device acting like the second bootloader.This can now allow for operations like writing to the flash memory and/or formatting partitions.</p>
+
+<p>FDL-1 takes the same command as the boot ROM <code class="language-plaintext highlighter-rouge">BSL_CMD_START_DATA|0x1</code> and <code class="language-plaintext highlighter-rouge">BSL_CMD_MIDST_DATA|0x2</code> to prepare for the download of FDL-2 at a specific memory address. The following data frames describe this action.</p>
+
+<p><code class="language-plaintext highlighter-rouge">[7e 00 01 00 08 9e ff fe 00 00 0f fa d4 68 12 7e]</code>: This command prepares FDL-1 to receive <code class="language-plaintext highlighter-rouge">0xffad4</code> bytes of data in the memory address <code class="language-plaintext highlighter-rouge">0x9efffe00</code> — this address was specific to the DUT others might be different. This binary is also signed and therefore execution happens only after verification.</p>
+
+<p>When FDL-2 is executed via <code class="language-plaintext highlighter-rouge">BSL_CMD_EXEC_DATA|0x3</code> and context is switched to this preloader, the device responds with <code class="language-plaintext highlighter-rouge">BSL_REP_INCOMPATIBLE_PARTITION|0x96</code> — this is a weird command for a response.This preloader can now accept commands like:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">BSL_CMD_READ_FLASH|0x6</code>: This command can be used to read partitions from the flash memory.</li>
+  <li><code class="language-plaintext highlighter-rouge">BSL_CMD_ERASE_FLASH|0xA</code>: This command takes an flash memory address to erase — used to erase partitions.</li>
+  <li><code class="language-plaintext highlighter-rouge">BSL_CMD_READ_FLASH_INFO</code>: A command used to get the flash size and block size.</li>
+</ul>
+
+<p>The list of all other possible commands are provided in the resource mentioned earlier above. This <a href="https://github.com/mutur4/Unisoc-Exploitation/blob/main/flashtool.py">here</a> is a simple script written in Python that can be used to interact with a unisoc BROM.</p>
+
+<h4 id="attack-surface"><strong>Attack Surface</strong></h4>
+
+<p>There is a wide attack surface in this area that can be a possible VR area for example memory corruption in the BROM code/preloaders and/or signature verification bypasses — <code class="language-plaintext highlighter-rouge">CVE-2022-38694</code> is a classic example of an AAW that was discovered by the NCC group <sup><a href="https://www.nccgroup.com/research-blog/there-s-another-hole-in-your-soc-unisoc-rom-vulnerabilities/">8</a></sup> that allows an attacker to overwrite a function pointer in the BootROM allowing for code execution with BROM priviledges.</p>
+
+<p>Since the BROM code is read-only , the bug cannot be fixed via OTA making these bugs critical but only exploitable with physical access to the device. The above CVE has been used to bypass signature verification allowing attackers to load custom ROMs and root android devices. It has also be used by commercial flashing tools to bypass signature (FDL) verification providing custom loaders that are used for attacks like FRP Bypasses and the bypass of MDM solutions.</p>
+
+<hr />
+
+<p>The next post will be the analysis of <code class="language-plaintext highlighter-rouge">CVE-2022-38694</code> to create a POC that bypasses signature verification to write a custom OS to a vulnerable android device and also write our own firmware downloaders (FDLs).</p>
+
+  </div>
+
+  <a class="u-url" href="/2026/01/13/unisoc-brom.html" hidden></a>
+</article>
+
+      </div>
+    </main><link id="fa-stylesheet" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css">
+
+<footer class="site-footer h-card">
+  <data class="u-url" value="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+      </div>
+      <div class="footer-col">
+        <p></p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li>
+    <a rel="me" href="https://x.com/BinaryChunk" target="_blank" title="BinaryChunk on X">
+      <span class="grey fa-brands fa-x-twitter fa-lg"></span>
+    </a>
+  </li><li>
+    <a rel="me" href="https://github.com/mutur4" target="_blank" title="BinaryChunk on Github">
+      <span class="grey fa-brands fa-github fa-lg"></span>
+    </a>
+  </li>
+</ul>
+</div>
+
+  </div>
+
+</footer>
+
+</body>
+
+</html>
