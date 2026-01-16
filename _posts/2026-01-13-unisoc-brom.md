@@ -10,7 +10,6 @@ The BROM Mode is present on different devices running on different chipsets but 
 - __Mediatek__: This chipset's BROM implements a simple protocol that is compatible with a Download Agent (DA) -- there is no known name for this protocol. 
 - __Qualcomm__: This chipset's BROM implements the Firehose and Sahara Protocol <sup>[1](https://alephsecurity.com/vulns/aleph-2017028)</sup>
 
-Please consider mentioning about the other protocol that is used by Unisoc
 
 **What is this BROM protocol?**
 
