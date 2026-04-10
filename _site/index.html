@@ -60,20 +60,28 @@ body {
 
 
   <ul class="post-list"><li>
+        <span class="post-meta">Mar 19, 2026</span>
+        <h3>
+          <a class="post-link" href="/2026/03/19/cve-2022-38694.html">
+            CVE-2022-38694: Unisoc BootROM Arbitrary Address Write (AAW)
+          </a>
+        </h3><p>This was an <strong>Arbitrary Address Write</strong> (AAW) vulnerability discovered by the NCC group <sup><a href="https://https://www.nccgroup.com/research-blog/there-s-another-hole-in-your-soc-unisoc-rom-vulnerabilities">1</a></sup> in the Unisoc BootROM where an attacker with physical access to a vulnerable device can exploit the bug to overwrite a function pointer in the address space of the BootROM or a return address stored on the stack to execute their own code with BootROM priviledges.</p>
+
+</li><li>
         <span class="post-meta">Jan 13, 2026</span>
         <h3>
           <a class="post-link" href="/2026/01/13/unisoc-brom.html">
             Understanding the Unisoc BROM Protocol
           </a>
-        </h3><p>This blog post will explore the common BROM protocol (FDL Mode) used to flash firmware on devices running on unisoc chipsets. BROM mode is a universal low-level pre-boot state that is mostly used to program or write firmware on a device by the OEM.</p>
+        </h3><p>This blog post will explore the Unisoc BROM protocol (Download Mode) used to flash firmware on devices running on unisoc chipsets. BROM mode is a universal low-level pre-boot state that is mostly used to program or write firmware on a device by the OEM.</p>
 
 </li><li>
         <span class="post-meta">Feb 21, 2024</span>
         <h3>
           <a class="post-link" href="/2024/02/21/linux-kernel-heap-overflow.html">
-            Linux Kernel: Weaponizing an AAW &amp; Heap Ovf (Blunder Driver Challenge)
+            Linux Kernel: Exploiting an AAW &amp; Heap Ovf (Blunder Driver)
           </a>
-        </h3><p>This blog will be about exploiting a Linux Kernel Driver by chaining a <strong>Heap Overflow</strong> bug with a ‘sandboxed’ <strong>Arbitrary Address Write (AAW)</strong> for <strong>Local Priviledge Escalation</strong> by overwriting <strong>core_pattern</strong> with most mitigations enabled.</p>
+        </h3><p>This blog post will cover the exploitation of vulnerable a Linux Kernel Driver by chaining a <strong>Heap Overflow</strong> bug with a ‘sandboxed’ <strong>Arbitrary Address Write (AAW)</strong> for <strong>Local Priviledge Escalation</strong> to root by overwriting <strong>core_pattern</strong> with most mitigations enabled.</p>
 
 </li><li>
         <span class="post-meta">Oct 4, 2023</span>
@@ -81,7 +89,7 @@ body {
           <a class="post-link" href="/2023/10/04/Linux-Remote-Process-Injection.html">
             Linux Remote Process Injection: (Injecting into a Firefox Browser Process)
           </a>
-        </h3><p>This blog will cover <strong>Remote Process Injection</strong> in Linux; a common evasion technique popular in the Windows Malware world. The aim will be to write an injector that injects into another remote process and for the purpose of this blog, the chosen victim process will be <strong>Firefox</strong>.</p>
+        </h3><p>This blog will cover <strong>Remote Process Injection</strong> in Linux — a common evasion technique popular in Windows malware. The aim will be to write an injector in <code class="language-plaintext highlighter-rouge">C/C++</code> that injects into another remote process and for the purpose of this blog, the running process will be a browser process — <strong>Firefox</strong>.</p>
 
 </li><li>
         <span class="post-meta">Jul 15, 2023</span>
@@ -95,7 +103,7 @@ body {
         <span class="post-meta">May 28, 2023</span>
         <h3>
           <a class="post-link" href="/2023/05/28/Linux-Kernel-Stack-Exploitation.html">
-            Linux Kernel: Introduction to Kernel Stack Overflows
+            Introduction to Linux Kernel Stack Overflows
           </a>
         </h3><p>In the <code class="language-plaintext highlighter-rouge">Linux Kernel 'ring (0)'</code> a stack is also allocated for local variables defined in functions. These functions are mainly implemented for device drivers that are defined in different <strong>Loadable Kernel Modules</strong> (LKMs). The same stack is also vulnerable to stack overflow attacks that aim at overwriting the return address saved on the stack — this post will cover exploiting these vulnerabilities.</p>
 

@@ -3,7 +3,7 @@ layout: post
 title: "Understanding the Unisoc BROM Protocol"
 ---
 
-This blog post will explore the common BROM protocol (FDL Mode) used to flash firmware on devices running on unisoc chipsets. BROM mode is a universal low-level pre-boot state that is mostly used to program or write firmware on a device by the OEM.
+This blog post will explore the Unisoc BROM protocol (Download Mode) used to flash firmware on devices running on unisoc chipsets. BROM mode is a universal low-level pre-boot state that is mostly used to program or write firmware on a device by the OEM.
 
 The BROM Mode is present on different devices running on different chipsets but the communication protocol differs with each chipset. For example --- consider the following known chipsets and their respective protocols: 
 

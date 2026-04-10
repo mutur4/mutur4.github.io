@@ -3,21 +3,21 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
-<title>Linux Kernel: Weaponizing an AAW &amp; Heap Ovf (Blunder Driver Challenge) | BinaryChunk’s Blog</title>
+<title>Linux Kernel: Exploiting an AAW &amp; Heap Ovf (Blunder Driver) | BinaryChunk’s Blog</title>
 <meta name="generator" content="Jekyll v3.10.0" />
-<meta property="og:title" content="Linux Kernel: Weaponizing an AAW &amp; Heap Ovf (Blunder Driver Challenge)" />
+<meta property="og:title" content="Linux Kernel: Exploiting an AAW &amp; Heap Ovf (Blunder Driver)" />
 <meta property="og:locale" content="en_US" />
-<meta name="description" content="This blog will be about exploiting a Linux Kernel Driver by chaining a Heap Overflow bug with a ‘sandboxed’ Arbitrary Address Write (AAW) for Local Priviledge Escalation by overwriting core_pattern with most mitigations enabled." />
-<meta property="og:description" content="This blog will be about exploiting a Linux Kernel Driver by chaining a Heap Overflow bug with a ‘sandboxed’ Arbitrary Address Write (AAW) for Local Priviledge Escalation by overwriting core_pattern with most mitigations enabled." />
+<meta name="description" content="This blog post will cover the exploitation of vulnerable a Linux Kernel Driver by chaining a Heap Overflow bug with a ‘sandboxed’ Arbitrary Address Write (AAW) for Local Priviledge Escalation to root by overwriting core_pattern with most mitigations enabled." />
+<meta property="og:description" content="This blog post will cover the exploitation of vulnerable a Linux Kernel Driver by chaining a Heap Overflow bug with a ‘sandboxed’ Arbitrary Address Write (AAW) for Local Priviledge Escalation to root by overwriting core_pattern with most mitigations enabled." />
 <link rel="canonical" href="https://mutur4.github.io/2024/02/21/linux-kernel-heap-overflow.html" />
 <meta property="og:url" content="https://mutur4.github.io/2024/02/21/linux-kernel-heap-overflow.html" />
 <meta property="og:site_name" content="BinaryChunk’s Blog" />
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2024-02-21T00:00:00+00:00" />
 <meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="Linux Kernel: Weaponizing an AAW &amp; Heap Ovf (Blunder Driver Challenge)" />
+<meta property="twitter:title" content="Linux Kernel: Exploiting an AAW &amp; Heap Ovf (Blunder Driver)" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-02-21T00:00:00+00:00","datePublished":"2024-02-21T00:00:00+00:00","description":"This blog will be about exploiting a Linux Kernel Driver by chaining a Heap Overflow bug with a ‘sandboxed’ Arbitrary Address Write (AAW) for Local Priviledge Escalation by overwriting core_pattern with most mitigations enabled.","headline":"Linux Kernel: Weaponizing an AAW &amp; Heap Ovf (Blunder Driver Challenge)","mainEntityOfPage":{"@type":"WebPage","@id":"https://mutur4.github.io/2024/02/21/linux-kernel-heap-overflow.html"},"url":"https://mutur4.github.io/2024/02/21/linux-kernel-heap-overflow.html"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-02-21T00:00:00+00:00","datePublished":"2024-02-21T00:00:00+00:00","description":"This blog post will cover the exploitation of vulnerable a Linux Kernel Driver by chaining a Heap Overflow bug with a ‘sandboxed’ Arbitrary Address Write (AAW) for Local Priviledge Escalation to root by overwriting core_pattern with most mitigations enabled.","headline":"Linux Kernel: Exploiting an AAW &amp; Heap Ovf (Blunder Driver)","mainEntityOfPage":{"@type":"WebPage","@id":"https://mutur4.github.io/2024/02/21/linux-kernel-heap-overflow.html"},"url":"https://mutur4.github.io/2024/02/21/linux-kernel-heap-overflow.html"}</script>
 <!-- End Jekyll SEO tag -->
 <link id="main-stylesheet" rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://mutur4.github.io/feed.xml" title="BinaryChunk&apos;s Blog" />
 
@@ -61,7 +61,7 @@ body {
         <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
 
   <header class="post-header">
-    <h1 class="post-title p-name" itemprop="name headline">Linux Kernel: Weaponizing an AAW &amp; Heap Ovf (Blunder Driver Challenge)</h1>
+    <h1 class="post-title p-name" itemprop="name headline">Linux Kernel: Exploiting an AAW &amp; Heap Ovf (Blunder Driver)</h1>
     <div class="post-meta">
       <time class="dt-published" datetime="2024-02-21T00:00:00+00:00" itemprop="datePublished">
         Feb 21, 2024
@@ -70,11 +70,11 @@ body {
   </header>
 
   <div class="post-content e-content" itemprop="articleBody">
-    <p>This blog will be about exploiting a Linux Kernel Driver by chaining a <strong>Heap Overflow</strong> bug with a ‘sandboxed’ <strong>Arbitrary Address Write (AAW)</strong> for <strong>Local Priviledge Escalation</strong> by overwriting <strong>core_pattern</strong> with most mitigations enabled.</p>
+    <p>This blog post will cover the exploitation of vulnerable a Linux Kernel Driver by chaining a <strong>Heap Overflow</strong> bug with a ‘sandboxed’ <strong>Arbitrary Address Write (AAW)</strong> for <strong>Local Priviledge Escalation</strong> to root by overwriting <strong>core_pattern</strong> with most mitigations enabled.</p>
 
 <p>It is required that the reader is familiar with basic <strong>Linux Kernel Exploitation</strong> and the structure of the <strong>Kernel Heap</strong> but this is not required since I will try to expound on these topics to the best of my knowledge.</p>
 
-<h3 id="vulnerable-driver">Vulnerable Driver</h3>
+<h4 id="vulnerable-driver"><strong>Vulnerable Driver</strong></h4>
 
 <p>The vulnerable driver named <code class="language-plaintext highlighter-rouge">blunder</code> was part of the exploitation challenges provided by <a href="https://labs.bluefrostsecurity.de">Blue Frost Security</a> <em>(offensive+con organizers)</em>. The source code and the <code class="language-plaintext highlighter-rouge">makefile</code> were provided <a href="https://labs.bluefrostsecurity.de/blog.html/2022/10/25/bfs-ekoparty-2022-exploitation-challenges/">here</a> for compilation.</p>
 
@@ -90,7 +90,7 @@ body {
 
 <p>The kernel config and the compiled <code class="language-plaintext highlighter-rouge">bzImage</code> that were used to develop the final exploit, can be found <a href="https://github.com/mutur4">here</a></p>
 
-<h3 id="vulnerability-analysis">Vulnerability Analysis</h3>
+<h4 id="vulnerability-analysis"><strong>Vulnerability Analysis</strong></h4>
 
 <p>Since the source code of the driver is already provided, we can do some source-code review  with the aim of understanding how the driver works and to check for any present vulnerabilities <em>(mainly where the kernel processes userland data)</em>.</p>
 
@@ -105,7 +105,7 @@ body {
 <p>The following file operations play a major role in implemented the above actions:
 <img src="https://i.imgur.com/TBpJ1Dd.png" alt="blunder_fops" /></p>
 
-<h4 id="blunder_open"><em>blunder_open</em></h4>
+<h5 id="blunder_open"><strong>blunder_open()</strong></h5>
 
 <p>This function is called when a process first opens the device driver performing the following:</p>
 <ol>
@@ -135,7 +135,7 @@ body {
 <span class="p">}</span>
 </code></pre></div></div>
 
-<h4 id="blunder_mmap"><em>blunder_mmap</em></h4>
+<h5 id="blunder_mmap"><strong>blunder_mmap()</strong></h5>
 
 <p>The function is triggered when a process calls <code class="language-plaintext highlighter-rouge">mmap</code> when mapping a new Virtual Address Space. The driver implements its own <code class="language-plaintext highlighter-rouge">mmap</code> implementation that returns a physical mapping shared between the kernel and userland. When the function is called, the following actions are performed:</p>
 <ol>
@@ -198,9 +198,9 @@ body {
 <p>This leads to a sandboxed <code class="language-plaintext highlighter-rouge">AAW</code> in the shared mapping; by ‘sandboxed’ I mean the bug can only be used within the page size’d chunk range returned by <code class="language-plaintext highlighter-rouge">kmalloc</code> and shared between user and kernel land. 
 <img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTYweTJtZnJsbmgyenFmZGtnM3c4b2RrZ2cwaTNqcGd0eHY0MGd2diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/fnuSiwXMTV3zmYDf6k/giphy.gif" alt="wtf" /></p>
 
-<h3 id="heap-buffer-overflow">Heap Buffer Overflow</h3>
+<h4 id="heap-buffer-overflow"><strong>Heap Buffer Overflow</strong></h4>
 
-<p><em>So at this point the driver is vulnerable to an AAW. How can this be leveraged to control execution?</em></p>
+<p><strong>So at this point the driver is vulnerable to an AAW. How can this be leveraged to control execution?</strong></p>
 
 <p>When a process sends a message for IPC, it uses the allocated mapping <code class="language-plaintext highlighter-rouge">proc-&gt;mapping</code> to store messages of the type <code class="language-plaintext highlighter-rouge">blunder_buffer</code> and the mapping is split to fit more messages as they’re sent until that page-sized block is exhausted. This is evident from the following source code snippet that is called from <code class="language-plaintext highlighter-rouge">blunder_send_msg(struct blunder_proc *proc, struct blunder_user_message *__user arg)</code>.</p>
 
@@ -227,14 +227,14 @@ body {
 
 <p>During the allocation of this memory block via <code class="language-plaintext highlighter-rouge">kmalloc</code>, since the size is passed via <code class="language-plaintext highlighter-rouge">mmap</code>; this means that this size should be page aligned and the minimum size that can be allocated is <code class="language-plaintext highlighter-rouge">0x1000</code> bytes. There are also not any usable elastic objects &gt; <code class="language-plaintext highlighter-rouge">0x1000</code> bytes that can be sprayed on the heap to be corrupted therefore, we are gonna stick to <code class="language-plaintext highlighter-rouge">0x1000</code> bytes during allocation.</p>
 
-<h4 id="elastic-objects"><em>Elastic Objects</em></h4>
+<h5 id="elastic-objects"><strong>Elastic Objects</strong></h5>
 
 <p>An elastic kernel object or sometimes referred to as a ‘usable’ object is an object that contains a length field that can allow an attacker manipulate its value controlling its allocation on the heap.
 When the kernel accesses the data from the allocated object, the length field indicates the range of data that the kernel can read or write.</p>
 
 <p>When exploiting most Linux Kernel Heap vulnerabilities (Heap Overflows or kUAFs) an attacker would for example corrupt these objects to control execution flow <em>(overwriting function pointers)</em> or to leak kernel addresses to bypass <strong>KASLR</strong>.</p>
 
-<h4 id="slab-caches"><em>Slab Caches</em></h4>
+<h5 id="slab-caches"><strong>Slab Caches</strong></h5>
 
 <p>There are different memory allocators in the Linux Kernel but the most common is the <strong>slab allocator</strong> that sits ontop of the primary allocator the <strong>buddy allocator</strong>. The internals of these allocators is beyond the scope of this article but a detailed analysis of how these allocators work is provided at [2].</p>
 
@@ -248,7 +248,7 @@ When the kernel accesses the data from the allocated object, the length field in
 
 <p>In our driver’s case, when we allocate a page-sized object, this will endup in the <code class="language-plaintext highlighter-rouge">kmalloc-1k</code> slab cache. Since we already know how to trigger a heap ovf vulnerability, what <code class="language-plaintext highlighter-rouge">kmalloc-1k</code> elastic objects can we corrupt for exploitation? <a href="https://ptr-yudai.hatenablog.com/entry/2020/03/16/165628">This</a> article has a curative list of elastic objects and how they can be abused for exploitation.</p>
 
-<h4 id="msg_msg-objects"><em>msg_msg objects</em></h4>
+<h5 id="msg_msg-objects"><strong>msg_msg objects</strong></h5>
 
 <p>These are objects used to send and receive messages from a <strong>system V Message Queue</strong> for the purpose of Inter-Process Communication. A process is able to write to the message queue to send a message and another process is able to read from the message queue to receive a message using the <code class="language-plaintext highlighter-rouge">msgsnd</code> and <code class="language-plaintext highlighter-rouge">msgrcv</code> system calls respectively. The manpages of these system calls describe their usages in detail.</p>
 
@@ -256,11 +256,11 @@ When the kernel accesses the data from the allocated object, the length field in
 
 <p>One important thing to note is that to be able to leak address from the heap to bypass <code class="language-plaintext highlighter-rouge">USER_HARDENED_COPY</code> the kernel should be compiled with the <code class="language-plaintext highlighter-rouge">CONFIG_CHECKPOINT_RESTORE</code> configuration enabled.</p>
 
-<h4 id="shm_file_data"><em>shm_file_data</em></h4>
+<h5 id="shm_file_data"><strong>shm_file_data</strong></h5>
 
 <p>When the above <code class="language-plaintext highlighter-rouge">msg_msg</code> object’s message size is greater than the page size <code class="language-plaintext highlighter-rouge">0x1000</code> bytes, the message is split and allocated a new chunk via <code class="language-plaintext highlighter-rouge">kmalloc</code>. When using <code class="language-plaintext highlighter-rouge">msg_msg</code> objects to leak addresses,we will have to make sure the split message is allocated in the <code class="language-plaintext highlighter-rouge">kmalloc-32</code> cache near a <code class="language-plaintext highlighter-rouge">shm_file_data</code> elastic object to leak its struct member addresses.</p>
 
-<h3 id="heap-grooming-fengshui">Heap (Grooming) Fengshui</h3>
+<h4 id="heap-grooming-fengshui"><strong>Heap (Grooming) Fengshui</strong></h4>
 
 <p><strong>Heap Grooming</strong> is art especially when exploiting heap-based vulnerabilities. The aim at this point is to be able to manipulate the slab allocator to allocate a <code class="language-plaintext highlighter-rouge">msg_msg</code> object right after our <code class="language-plaintext highlighter-rouge">proc-&gt;alloc-&gt;mapping</code> in the same slab for us to trigger the heap ovf and corrupt the object.</p>
 
@@ -276,16 +276,16 @@ When the kernel accesses the data from the allocated object, the length field in
   <p><strong>NOTE</strong>: I like to somewhat wrap my vulnerable objects between elastic objects during sprays, idk but it somehow increases the chances of having an elastic object allocated right after the vulnerable/victim object.</p>
 </blockquote>
 
-<h3 id="weaponization">Weaponization</h3>
+<h4 id="weaponization"><strong>Weaponization</strong></h4>
 
-<h4 id="leaking-addresses"><em><strong>Leaking addresses</strong></em></h4>
+<h5 id="leaking-addresses"><strong>Leaking addresses</strong></h5>
 <p>When the allocation of the elastic target and victim objects align, the <code class="language-plaintext highlighter-rouge">AAW</code> can be used to modify the split <code class="language-plaintext highlighter-rouge">blunder_buffer</code> object’s buffer size, to introduce a heap overflow that can be used to overwrite <code class="language-plaintext highlighter-rouge">msg_msg-&gt;m_ts</code> value to a bigger value that should allow us read passed its (split) message segment in the <code class="language-plaintext highlighter-rouge">kmalloc-32</code> cache to leak kernel addresses.</p>
 
 <p><img src="https://i.imgur.com/5blcq5J.png" alt="attack_flow" /></p>
 
 <p>The leaked ddress is the address of <code class="language-plaintext highlighter-rouge">INIT_IPC_NS</code> that resides in the kernel data area <em>(not affected by FG-KASLR)</em>, this can then be used to calculate the kernel base address to bypass <code class="language-plaintext highlighter-rouge">KASLR</code>.</p>
 
-<h4 id="controlling-execution-flow"><em><strong>Controlling Execution flow</strong></em></h4>
+<h5 id="controlling-execution-flow"><strong>Controlling Execution Flow</strong></h5>
 
 <p>There are different techniques that can be used when attacking the kernel to control execution and return back to userland as <code class="language-plaintext highlighter-rouge">root</code>. Since we have an <code class="language-plaintext highlighter-rouge">AAW</code> and the <code class="language-plaintext highlighter-rouge">blunder_buffer</code> objects are connected via a doubly linked list, the idea was to overwrite the <code class="language-plaintext highlighter-rouge">*next</code> pointer with a kernel address that we want to corrupt introducing a <strong>Kernel Arbitrary Address Write</strong>.</p>
 
@@ -319,7 +319,7 @@ When the kernel accesses the data from the allocated object, the length field in
 
 <p><img src="https://i.imgur.com/qJpMfsO.png" alt="image" /></p>
 
-<h4 id="overwriting-core_pattern"><em>overwriting core_pattern</em></h4>
+<h5 id="overwriting-core_pattern"><strong>Overwriting core_pattern</strong></h5>
 
 <p>When a process receives a signal for example a segmentation fault, each of these signals has a current disposition that is used to determine how a function behaves when its delivered a signal.</p>
 
@@ -354,25 +354,21 @@ When the kernel accesses the data from the allocated object, the length field in
   <p>When generating a core file, make sure that <code class="language-plaintext highlighter-rouge">ulimit -c unlimited</code> is set.</p>
 </blockquote>
 
-<p>The following is the result of running the file exploit.</p>
+<p>The following is the result of running the final exploit.</p>
 
 <p><img src="https://i.imgur.com/pmVgqjm.png" alt="file_exploit" /></p>
 
-<p>The final exploit and all the configuration files used for building the kernel are provided <a href="https://github.com/mutur4/Blunder-Kernel-Driver">here</a></p>
+<p>The final exploit and all the configuration files used for building the kernel are provided — <a href="https://github.com/mutur4/Blunder-Kernel-Driver">here</a></p>
 
-<h3 id="conclusion">Conclusion</h3>
+<h4 id="conclusion"><strong>Conclusion</strong></h4>
 
 <p>This article was about exploiting a heap overflow vulnerability to bypasss <code class="language-plaintext highlighter-rouge">FG-KASLR</code> and using an Arbitrary Address Write to overwrite <code class="language-plaintext highlighter-rouge">core_pattern</code> for LPE with a less-hardened old kernel used for exploitation.</p>
 
 <p>The next article will cover the exploitation of these vulnerabilities in a more hardened kernel using the <code class="language-plaintext highlighter-rouge">cross-cache</code> attack. This is because on modern Kernels most elastic objects are allocated in dedicated caches this is <code class="language-plaintext highlighter-rouge">kmalloc-cg-1k</code> instead of <code class="language-plaintext highlighter-rouge">kmalloc-1k</code> making traditional heap-overflow exploitation techniques a bit difficult.</p>
 
-<blockquote>
-  <p><strong>NOTE</strong>: The above ‘dedicated cache’ was actually a feature rather than a mitigation</p>
-</blockquote>
+<p>The above ‘dedicated cache’ was actually a feature rather than a mitigation. Until next time adios! <code class="language-plaintext highlighter-rouge">_exit(0)</code></p>
 
-<p>Until next time adios! <code class="language-plaintext highlighter-rouge">_exit(0)</code></p>
-
-<h3 id="references">References</h3>
+<h4 id="references"><strong>References</strong></h4>
 
 <ul>
   <li>[1] https://blog.wohin.me/posts/paper-eloise/</li>

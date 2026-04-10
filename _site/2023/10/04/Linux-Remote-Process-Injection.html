@@ -7,8 +7,8 @@
 <meta name="generator" content="Jekyll v3.10.0" />
 <meta property="og:title" content="Linux Remote Process Injection: (Injecting into a Firefox Browser Process)" />
 <meta property="og:locale" content="en_US" />
-<meta name="description" content="This blog will cover Remote Process Injection in Linux; a common evasion technique popular in the Windows Malware world. The aim will be to write an injector that injects into another remote process and for the purpose of this blog, the chosen victim process will be Firefox." />
-<meta property="og:description" content="This blog will cover Remote Process Injection in Linux; a common evasion technique popular in the Windows Malware world. The aim will be to write an injector that injects into another remote process and for the purpose of this blog, the chosen victim process will be Firefox." />
+<meta name="description" content="This blog will cover Remote Process Injection in Linux — a common evasion technique popular in Windows malware. The aim will be to write an injector in C/C++ that injects into another remote process and for the purpose of this blog, the running process will be a browser process — Firefox." />
+<meta property="og:description" content="This blog will cover Remote Process Injection in Linux — a common evasion technique popular in Windows malware. The aim will be to write an injector in C/C++ that injects into another remote process and for the purpose of this blog, the running process will be a browser process — Firefox." />
 <link rel="canonical" href="https://mutur4.github.io/2023/10/04/Linux-Remote-Process-Injection.html" />
 <meta property="og:url" content="https://mutur4.github.io/2023/10/04/Linux-Remote-Process-Injection.html" />
 <meta property="og:site_name" content="BinaryChunk’s Blog" />
@@ -17,7 +17,7 @@
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="Linux Remote Process Injection: (Injecting into a Firefox Browser Process)" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2023-10-04T00:00:00+00:00","datePublished":"2023-10-04T00:00:00+00:00","description":"This blog will cover Remote Process Injection in Linux; a common evasion technique popular in the Windows Malware world. The aim will be to write an injector that injects into another remote process and for the purpose of this blog, the chosen victim process will be Firefox.","headline":"Linux Remote Process Injection: (Injecting into a Firefox Browser Process)","mainEntityOfPage":{"@type":"WebPage","@id":"https://mutur4.github.io/2023/10/04/Linux-Remote-Process-Injection.html"},"url":"https://mutur4.github.io/2023/10/04/Linux-Remote-Process-Injection.html"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2023-10-04T00:00:00+00:00","datePublished":"2023-10-04T00:00:00+00:00","description":"This blog will cover Remote Process Injection in Linux — a common evasion technique popular in Windows malware. The aim will be to write an injector in C/C++ that injects into another remote process and for the purpose of this blog, the running process will be a browser process — Firefox.","headline":"Linux Remote Process Injection: (Injecting into a Firefox Browser Process)","mainEntityOfPage":{"@type":"WebPage","@id":"https://mutur4.github.io/2023/10/04/Linux-Remote-Process-Injection.html"},"url":"https://mutur4.github.io/2023/10/04/Linux-Remote-Process-Injection.html"}</script>
 <!-- End Jekyll SEO tag -->
 <link id="main-stylesheet" rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://mutur4.github.io/feed.xml" title="BinaryChunk&apos;s Blog" />
 
@@ -70,7 +70,7 @@ body {
   </header>
 
   <div class="post-content e-content" itemprop="articleBody">
-    <p>This blog will cover <strong>Remote Process Injection</strong> in Linux; a common evasion technique popular in the Windows Malware world. The aim will be to write an injector that injects into another remote process and for the purpose of this blog, the chosen victim process will be <strong>Firefox</strong>.</p>
+    <p>This blog will cover <strong>Remote Process Injection</strong> in Linux — a common evasion technique popular in Windows malware. The aim will be to write an injector in <code class="language-plaintext highlighter-rouge">C/C++</code> that injects into another remote process and for the purpose of this blog, the running process will be a browser process — <strong>Firefox</strong>.</p>
 
 <p>For a simple <strong>Windows Process Injection</strong> technique, a process is somewhat able to map a new memory on behalf of another remote process via <code class="language-plaintext highlighter-rouge">VirtualAllocEx</code> and has the ability to read and write into this memory region and at the same time have the ability to create a thread that will run in the context of that remote process via <code class="language-plaintext highlighter-rouge">CreateRemoteThread</code>.</p>
 

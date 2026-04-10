@@ -3,7 +3,7 @@ layout: post
 title: "Linux Remote Process Injection: (Injecting into a Firefox Browser Process)"
 ---
 
-This blog will cover **Remote Process Injection** in Linux; a common evasion technique popular in the Windows Malware world. The aim will be to write an injector that injects into another remote process and for the purpose of this blog, the chosen victim process will be **Firefox**. 
+This blog will cover **Remote Process Injection** in Linux --- a common evasion technique popular in Windows malware. The aim will be to write an injector in `C/C++` that injects into another remote process and for the purpose of this blog, the running process will be a browser process --- **Firefox**. 
 
 For a simple **Windows Process Injection** technique, a process is somewhat able to map a new memory on behalf of another remote process via `VirtualAllocEx` and has the ability to read and write into this memory region and at the same time have the ability to create a thread that will run in the context of that remote process via `CreateRemoteThread`.
 
